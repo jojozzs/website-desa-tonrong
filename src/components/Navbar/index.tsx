@@ -81,9 +81,9 @@ export default function Navbar() {
   }
 
   return (
-    <header className="bg-nav-bg shadow-sm border-b border-nav-border sticky top-0 z-50 ">
-      <nav className="max-w-full mx-auto px-6 sm:px-8 lg:px-12">
-        <div className="flex justify-between items-center h-16">
+    <header className="bg-nav-bg shadow-sm border-b border-nav-border sticky top-0 z-50 h-20 justify-center items-center ">
+      <nav className="w-full  mx-auto px-6 sm:px-8 lg:px-12 h-full flex items-center justify-between">
+        <div className="flex justify-between items-center h-16 w-full">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
             <div className="w-11 h-11 bg-gradient-to-r from-primary-orange to-primary-green rounded-lg flex items-center justify-center shadow-sm">
