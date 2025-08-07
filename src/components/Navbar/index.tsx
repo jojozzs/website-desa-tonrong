@@ -10,7 +10,7 @@ const navigation = [
   { name: 'Beranda', href: '/' },
   { 
     name: 'Profil', 
-    href: '/profil',
+    href: '#', // Tidak redirect, hanya untuk dropdown
     subMenu: [
       { name: 'Sejarah Desa', href: '/profil/sejarah' },
       { name: 'Letak Geografis', href: '/profil/geografis' },
@@ -31,7 +31,8 @@ export default function Navbar() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   const [mobileDropdownOpen, setMobileDropdownOpen] = useState<string | null>(null)
   const pathname = usePathname()
-  const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  const mobileMenuRef = useRef<HTMLDivElement>(null)
 
   const isActive = (path: string) => {
     if (path === '/') {
@@ -44,46 +45,45 @@ export default function Navbar() {
     return subMenu?.some(item => pathname.startsWith(item.href))
   }
 
-  const handleMouseEnter = (itemName: string) => {
-    if (dropdownTimeoutRef.current) {
-      clearTimeout(dropdownTimeoutRef.current)
-    }
-    setActiveDropdown(itemName)
-  }
-
-  const handleMouseLeave = () => {
-    dropdownTimeoutRef.current = setTimeout(() => {
-      setActiveDropdown(null)
-    }, 200) // 200ms delay before closing
-  }
-
-  const handleDropdownMouseEnter = () => {
-    if (dropdownTimeoutRef.current) {
-      clearTimeout(dropdownTimeoutRef.current)
-    }
-  }
-
-  const handleDropdownMouseLeave = () => {
-    dropdownTimeoutRef.current = setTimeout(() => {
-      setActiveDropdown(null)
-    }, 200)
-  }
-
   useEffect(() => {
-    return () => {
-      if (dropdownTimeoutRef.current) {
-        clearTimeout(dropdownTimeoutRef.current)
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node
+      
+      if (dropdownRef.current && !dropdownRef.current.contains(target)) {
+        setActiveDropdown(null)
+      }
+      
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(target)) {
+        setMobileMenuOpen(false)
+        setMobileDropdownOpen(null)
       }
     }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
   }, [])
+
+  const handleDropdownClick = (itemName: string) => {
+    setActiveDropdown(activeDropdown === itemName ? null : itemName)
+  }
 
   const toggleMobileDropdown = (itemName: string) => {
     setMobileDropdownOpen(mobileDropdownOpen === itemName ? null : itemName)
   }
 
+  const handleLinkClick = (href: string, hasSubMenu: boolean, itemName: string) => {
+    if (hasSubMenu) {
+      handleDropdownClick(itemName)
+    } else if (href !== '#') {
+      setActiveDropdown(null)
+    }
+  }
+
   return (
-    <header className="bg-nav-bg shadow-sm border-b border-nav-border sticky top-0 z-50 h-20 justify-center items-center ">
-      <nav className="w-full  mx-auto px-6 sm:px-8 lg:px-12 h-full flex items-center justify-between">
+    <header className="bg-nav-bg shadow-sm border-b border-nav-border sticky top-0 z-50 h-25 justify-center items-center">
+      <nav className="w-full mx-auto px-6 sm:px-8 lg:px-12 h-full flex items-center justify-between relative" ref={mobileMenuRef}>
         <div className="flex justify-between items-center h-16 w-full">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
@@ -91,45 +91,58 @@ export default function Navbar() {
               <span className="text-white font-bold text-sm">DT</span>
             </div>
             <div>
-              <h1 className="text-xl font-semibold text-text-primary">Desa Tonrong</h1>
-              <p className="text-xs text-text-muted hidden sm:block">Sistem Informasi Desa</p>
+              <h1 className="text-2xl font-semibold text-text-primary">Desa Tonrong</h1>
+              <p className="text-sm text-text-muted hidden sm:block">Sistem Informasi Desa</p>
             </div>
           </Link>
           
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex space-x-8">
+          <div className="hidden lg:flex space-x-8 text-md" ref={dropdownRef}>
             {navigation.map((item) => (
               <div 
                 key={item.name} 
                 className="relative"
-                onMouseEnter={() => item.subMenu && handleMouseEnter(item.name)}
-                onMouseLeave={() => item.subMenu && handleMouseLeave()}
               >
-                <Link
-                  href={item.href}
-                  className={`flex items-center space-x-1 font-medium transition-colors duration-200 py-2 px-1 ${
-                    isActive(item.href) || hasActiveSubMenu(item.subMenu || [])
-                      ? 'text-nav-active border-b-2 border-nav-active pb-1'
-                      : 'text-nav-default hover:text-nav-hover'
-                  }`}
-                >
-                  <span>{item.name}</span>
-                  {item.subMenu && (
+                {item.subMenu ? (
+                  <button
+                    onClick={() => handleDropdownClick(item.name)}
+                    className={`flex items-center space-x-1 font-medium transition-colors duration-200 py-2 px-1 ${
+                      hasActiveSubMenu(item.subMenu || []) || activeDropdown === item.name
+                        ? 'text-nav-active border-b-2 border-nav-active pb-1'
+                        : 'text-nav-default hover:text-nav-hover'
+                    }`}
+                  >
+                    <span>{item.name}</span>
                     <ChevronDownIcon 
                       className={`h-4 w-4 transition-transform duration-200 ${
                         activeDropdown === item.name ? 'rotate-180' : ''
                       }`} 
                     />
-                  )}
-                </Link>
+                  </button>
+                ) : (
+                  <Link
+                    href={item.href}
+                    target={item.href.startsWith('http') ? '_blank' : '_self'}
+                    rel={item.href.startsWith('http') ? 'noopener noreferrer' : ''}
+                    className={`flex items-center space-x-1 font-medium transition-colors duration-200 py-2 px-1 ${
+                      isActive(item.href)
+                        ? 'text-nav-active border-b-2 border-nav-active pb-1'
+                        : 'text-nav-default hover:text-nav-hover'
+                    }`}
+                    onClick={() => setActiveDropdown(null)}
+                  >
+                    <span>{item.name}</span>
+                    {item.href.startsWith('http') && (
+                      <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    )}
+                  </Link>
+                )}
                 
                 {/* Desktop Dropdown */}
                 {item.subMenu && activeDropdown === item.name && (
-                  <div 
-                    className="absolute left-0 mt-1 w-56 bg-dropdown-bg rounded-lg shadow-lg border border-dropdown-border py-2 z-50"
-                    onMouseEnter={handleDropdownMouseEnter}
-                    onMouseLeave={handleDropdownMouseLeave}
-                  >
+                  <div className="absolute left-0 mt-1 w-56 bg-dropdown-bg rounded-lg shadow-lg border border-dropdown-border py-2 z-50">
                     {item.subMenu.map((subItem) => (
                       <Link
                         key={subItem.name}
@@ -139,6 +152,7 @@ export default function Navbar() {
                             ? 'text-nav-active bg-dropdown-active border-l-4 border-nav-active font-medium'
                             : 'text-text-secondary hover:text-nav-hover hover:bg-dropdown-hover'
                         }`}
+                        onClick={() => setActiveDropdown(null)}
                       >
                         {subItem.name}
                       </Link>
@@ -168,22 +182,42 @@ export default function Navbar() {
         
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-nav-border bg-nav-bg">
+          <div className="lg:hidden absolute top-full left-0 right-0 border-t border-nav-border bg-nav-bg shadow-lg">
             <div className="px-2 pt-2 pb-3 space-y-1">
               {navigation.map((item) => (
                 <div key={item.name}>
                   <div className="flex items-center justify-between">
-                    <Link
-                      href={item.href}
-                      className={`flex-1 px-3 py-3 rounded-md text-base font-medium transition-colors duration-200 ${
-                        isActive(item.href) || hasActiveSubMenu(item.subMenu || [])
-                          ? 'text-nav-active bg-dropdown-active'
-                          : 'text-nav-default hover:text-nav-hover hover:bg-bg-gray-soft'
-                      }`}
-                      onClick={() => !item.subMenu && setMobileMenuOpen(false)}
-                    >
-                      {item.name}
-                    </Link>
+                    {item.subMenu ? (
+                      <button
+                        className={`flex-1 px-3 py-3 rounded-md text-base font-medium transition-colors duration-200 text-left ${
+                          hasActiveSubMenu(item.subMenu || [])
+                            ? 'text-nav-active bg-dropdown-active'
+                            : 'text-nav-default hover:text-nav-hover hover:bg-bg-gray-soft'
+                        }`}
+                        onClick={() => toggleMobileDropdown(item.name)}
+                      >
+                        {item.name}
+                      </button>
+                    ) : (
+                      <Link
+                        href={item.href}
+                        target={item.href.startsWith('http') ? '_blank' : '_self'}
+                        rel={item.href.startsWith('http') ? 'noopener noreferrer' : ''}
+                        className={`flex-1 px-3 py-3 rounded-md text-base font-medium transition-colors duration-200 ${
+                          isActive(item.href)
+                            ? 'text-nav-active bg-dropdown-active'
+                            : 'text-nav-default hover:text-nav-hover hover:bg-bg-gray-soft'
+                        }`}
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <span>{item.name}</span>
+                        {item.href.startsWith('http') && (
+                          <svg className="w-4 h-4 ml-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                        )}
+                      </Link>
+                    )}
                     
                     {item.subMenu && (
                       <button
