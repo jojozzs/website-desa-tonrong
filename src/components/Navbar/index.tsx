@@ -23,6 +23,7 @@ const navigation = [
   { name: 'Galeri', href: '/galeri' },
   { name: 'UMKM', href: '/produk-unggulan' },
   { name: 'Kontak', href: '/kontak-aspirasi' },
+  { name: 'Website Kabupaten', href:'https://youtube.com'}
 ]
 
 export default function Navbar() {
