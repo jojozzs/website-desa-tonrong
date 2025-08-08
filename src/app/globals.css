@@ -5,53 +5,53 @@
   --foreground: #171717;
 
   /* DESA TONRONG COLOR PALETTE */
-	/* Primary Colors */
-	--primary-orange: #f97316;
-	--primary-green: #22c55e;
-	
-	/* Button States */
-	--button-orange: #f97316;          /* Default orange button */
-	--button-orange-hover: #ea580c;    /* Orange button hover */
-	--button-orange-active: #c2410c;   /* Orange button active/pressed */
-	--button-green: #22c55e;           /* Default green button */
-	--button-green-hover: #16a34a;     /* Green button hover */
-	--button-green-active: #15803d;    /* Green button active/pressed */
-	
-	/* Background Colors */
-	--bg-orange-light: #fff7ed;        /* Very light orange background */
-	--bg-orange-soft: #ffedd5;         /* Light orange background */
-	--bg-green-light: #f0fdf4;         /* Very light green background */
-	--bg-green-soft: #dcfce7;          /* Light green background */
-	--bg-gray-light: #f9fafb;          /* Very light gray background */
-	--bg-gray-soft: #f3f4f6;           /* Light gray background */
-	
-	/* Text Colors */
-	--text-primary: #1f2937;           /* Primary heading text (dark) */
-	--text-secondary: #4b5563;         /* Secondary text */
-	--text-muted: #6b7280;             /* Muted/disabled text */
-	--text-light: #9ca3af;             /* Light text for placeholders */
-	
-	/* Navigation Colors */
-	--nav-active: #f97316;             /* Active navigation item */
-	--nav-hover: #ea580c;              /* Navigation hover state */
-	--nav-default: #6b7280;            /* Default navigation text */
-	--nav-bg: #ffffff;                 /* Navigation background */
-	--nav-border: #e5e7eb;             /* Navigation border */
-	
-	/* Border Colors */
-	--border-light: #e5e7eb;           /* Light border */
-	--border-medium: #d1d5db;          /* Medium border */
-	--border-dark: #9ca3af;            /* Dark border */
-	
-	/* Accent Colors */
-	--accent-orange: #fb923c;          /* Accent orange */
-	--accent-green: #4ade80;           /* Accent green */
-	
-	/* Dropdown Colors */
-	--dropdown-bg: #ffffff;            /* Dropdown background */
-	--dropdown-hover: #fff7ed;         /* Dropdown item hover */
-	--dropdown-active: #ffedd5;        /* Dropdown active item */
-	--dropdown-border: #e5e7eb;        /* Dropdown border */
+  /* Primary Colors */
+  --primary-orange: #f97316;
+  --primary-green: #22c55e;
+  
+  /* Button States */
+  --button-orange: #f97316;
+  --button-orange-hover: #ea580c;
+  --button-orange-active: #c2410c;
+  --button-green: #22c55e;
+  --button-green-hover: #16a34a;
+  --button-green-active: #15803d;
+  
+  /* Background Colors */
+  --bg-orange-light: #fff7ed;
+  --bg-orange-soft: #ffedd5;
+  --bg-green-light: #f0fdf4;
+  --bg-green-soft: #dcfce7;
+  --bg-gray-light: #f9fafb;
+  --bg-gray-soft: #f3f4f6;
+  
+  /* Text Colors */
+  --text-primary: #1f2937;
+  --text-secondary: #4b5563;
+  --text-muted: #6b7280;
+  --text-light: #9ca3af;
+  
+  /* Navigation Colors */
+  --nav-active: #f97316;
+  --nav-hover: #ea580c;
+  --nav-default: #6b7280;
+  --nav-bg: #ffffff;
+  --nav-border: #e5e7eb;
+  
+  /* Border Colors */
+  --border-light: #e5e7eb;
+  --border-medium: #d1d5db;
+  --border-dark: #9ca3af;
+  
+  /* Accent Colors */
+  --accent-orange: #fb923c;
+  --accent-green: #4ade80;
+  
+  /* Dropdown Colors */
+  --dropdown-bg: #ffffff;
+  --dropdown-hover: #fff7ed;
+  --dropdown-active: #ffedd5;
+  --dropdown-border: #e5e7eb;
 }
 
 @theme inline {
@@ -60,52 +60,52 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   /* Desa Tonrong Colors */
-	--color-primary-orange: var(--primary-orange);
-	--color-primary-green: var(--primary-green);
-	
-	/* Button States */
-	--color-button-orange: var(--button-orange);
-	--color-button-orange-hover: var(--button-orange-hover);
-	--color-button-orange-active: var(--button-orange-active);
-	--color-button-green: var(--button-green);
-	--color-button-green-hover: var(--button-green-hover);
-	--color-button-green-active: var(--button-green-active);
-	
-	/* Background Colors */
-	--color-bg-orange-light: var(--bg-orange-light);
-	--color-bg-orange-soft: var(--bg-orange-soft);
-	--color-bg-green-light: var(--bg-green-light);
-	--color-bg-green-soft: var(--bg-green-soft);
-	--color-bg-gray-light: var(--bg-gray-light);
-	--color-bg-gray-soft: var(--bg-gray-soft);
-	
-	/* Text Colors */
-	--color-text-primary: var(--text-primary);
-	--color-text-secondary: var(--text-secondary);
-	--color-text-muted: var(--text-muted);
-	--color-text-light: var(--text-light);
-	
-	/* Navigation Colors */
-	--color-nav-active: var(--nav-active);
-	--color-nav-hover: var(--nav-hover);
-	--color-nav-default: var(--nav-default);
-	--color-nav-bg: var(--nav-bg);
-	--color-nav-border: var(--nav-border);
-	
-	/* Border Colors */
-	--color-border-light: var(--border-light);
-	--color-border-medium: var(--border-medium);
-	--color-border-dark: var(--border-dark);
-	
-	/* Accent Colors */
-	--color-accent-orange: var(--accent-orange);
-	--color-accent-green: var(--accent-green);
-	
-	/* Dropdown Colors */
-	--color-dropdown-bg: var(--dropdown-bg);
-	--color-dropdown-hover: var(--dropdown-hover);
-	--color-dropdown-active: var(--dropdown-active);
-	--color-dropdown-border: var(--dropdown-border);
+  --color-primary-orange: var(--primary-orange);
+  --color-primary-green: var(--primary-green);
+  
+  /* Button States */
+  --color-button-orange: var(--button-orange);
+  --color-button-orange-hover: var(--button-orange-hover);
+  --color-button-orange-active: var(--button-orange-active);
+  --color-button-green: var(--button-green);
+  --color-button-green-hover: var(--button-green-hover);
+  --color-button-green-active: var(--button-green-active);
+  
+  /* Background Colors */
+  --color-bg-orange-light: var(--bg-orange-light);
+  --color-bg-orange-soft: var(--bg-orange-soft);
+  --color-bg-green-light: var(--bg-green-light);
+  --color-bg-green-soft: var(--bg-green-soft);
+  --color-bg-gray-light: var(--bg-gray-light);
+  --color-bg-gray-soft: var(--bg-gray-soft);
+  
+  /* Text Colors */
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-light: var(--text-light);
+  
+  /* Navigation Colors */
+  --color-nav-active: var(--nav-active);
+  --color-nav-hover: var(--nav-hover);
+  --color-nav-default: var(--nav-default);
+  --color-nav-bg: var(--nav-bg);
+  --color-nav-border: var(--nav-border);
+  
+  /* Border Colors */
+  --color-border-light: var(--border-light);
+  --color-border-medium: var(--border-medium);
+  --color-border-dark: var(--border-dark);
+  
+  /* Accent Colors */
+  --color-accent-orange: var(--accent-orange);
+  --color-accent-green: var(--accent-green);
+  
+  /* Dropdown Colors */
+  --color-dropdown-bg: var(--dropdown-bg);
+  --color-dropdown-hover: var(--dropdown-hover);
+  --color-dropdown-active: var(--dropdown-active);
+  --color-dropdown-border: var(--dropdown-border);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -119,4 +119,23 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.hero-text-animation {
+  background: linear-gradient(to right, #ffffff 20%, #f97316 40%, #f97316 60%, #ffffff 80%);
+  background-size: 200% auto;
+  color: transparent;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine-text-switch 8s ease-in-out infinite;
+}
+
+@keyframes shine-text-switch {
+  0%, 90% {
+    background-position: -200% center;
+  }
+  10%, 80% {
+    background-position: 200% center;
+  }
 }
