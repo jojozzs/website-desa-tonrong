@@ -82,7 +82,7 @@ export default function Navbar() {
   }
   
   return (
-    <header className="bg-nav-bg shadow-sm border-b border-nav-border sticky top-0 z-50 h-25 justify-center items-center">
+    <header className="bg-bg-green-soft shadow-sm border-b border-nav-border sticky top-0 z-50 h-25 justify-center items-center">
       <nav className="w-full mx-auto px-4 sm:px-2 lg:px-2 h-full flex items-center justify-between relative" ref={mobileMenuRef}>
         <div className="flex justify-between items-center h-16 w-full px-8 ">
           {/* Logo */}
