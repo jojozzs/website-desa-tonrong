@@ -5,7 +5,8 @@ export interface Admin {
     id: string;
     nama: string;
     email: string;
-    last_access: Date;
+    role: "admin";
+    last_access: Timestamp;
     profil: Profil[];
     beritaPengumuman: BeritaPengumuman[];
     galeri: Galeri[];
