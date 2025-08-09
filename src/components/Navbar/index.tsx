@@ -80,24 +80,24 @@ export default function Navbar() {
       setActiveDropdown(null)
     }
   }
-
+  
   return (
     <header className="bg-nav-bg shadow-sm border-b border-nav-border sticky top-0 z-50 h-25 justify-center items-center">
-      <nav className="w-full mx-auto px-6 sm:px-8 lg:px-12 h-full flex items-center justify-between relative" ref={mobileMenuRef}>
-        <div className="flex justify-between items-center h-16 w-full">
+      <nav className="w-full mx-auto px-4 sm:px-2 lg:px-2 h-full flex items-center justify-between relative" ref={mobileMenuRef}>
+        <div className="flex justify-between items-center h-16 w-full px-8 ">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
-            <div className="w-11 h-11 bg-gradient-to-r from-primary-orange to-primary-green rounded-lg flex items-center justify-center shadow-sm">
-              <span className="text-white font-bold text-sm">DT</span>
+            <div className="w-12 h-12 bg-gradient-to-r from-primary-orange to-primary-green rounded-lg flex items-center justify-center shadow-sm">
+              <span className="text-white font-bold text-xl">DT</span>
             </div>
             <div>
-              <h1 className="text-2xl font-semibold text-text-primary">Desa Tonrong</h1>
-              <p className="text-sm text-text-muted hidden sm:block">Sistem Informasi Desa</p>
+              <h1 className=" font-semibold text-text-primary text-2xl">Desa Tonrong</h1>
+              <p className="text-text-muted hidden sm:block text-md">Sistem Informasi Desa</p>
             </div>
           </Link>
           
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex space-x-8 text-md" ref={dropdownRef}>
+          <div className="hidden lg:flex space-x-6 text-md" ref={dropdownRef}>
             {navigation.map((item) => (
               <div 
                 key={item.name} 
@@ -106,7 +106,7 @@ export default function Navbar() {
                 {item.subMenu ? (
                   <button
                     onClick={() => handleDropdownClick(item.name)}
-                    className={`flex items-center space-x-1 font-medium transition-colors duration-200 py-2 px-1 ${
+                    className={`flex items-center space-x-1 font-bold transition-colors duration-200 py-2 px-1 ${
                       hasActiveSubMenu(item.subMenu || []) || activeDropdown === item.name
                         ? 'text-nav-active border-b-2 border-nav-active pb-1'
                         : 'text-nav-default hover:text-nav-hover'
@@ -124,7 +124,7 @@ export default function Navbar() {
                     href={item.href}
                     target={item.href.startsWith('http') ? '_blank' : '_self'}
                     rel={item.href.startsWith('http') ? 'noopener noreferrer' : ''}
-                    className={`flex items-center space-x-1 font-medium transition-colors duration-200 py-2 px-1 ${
+                    className={`flex items-center space-x-1 font-bold transition-colors duration-200 py-2 px-1 ${
                       isActive(item.href)
                         ? 'text-nav-active border-b-2 border-nav-active pb-1'
                         : 'text-nav-default hover:text-nav-hover'
@@ -142,12 +142,12 @@ export default function Navbar() {
                 
                 {/* Desktop Dropdown */}
                 {item.subMenu && activeDropdown === item.name && (
-                  <div className="absolute left-0 mt-1 w-56 bg-dropdown-bg rounded-lg shadow-lg border border-dropdown-border py-2 z-50">
+                  <div className="absolute left-1/2 -translate-x-1/2 mt-4 w-80 bg-dropdown-bg rounded-lg shadow-lg border border-dropdown-border py-2 z-50">
                     {item.subMenu.map((subItem) => (
                       <Link
                         key={subItem.name}
                         href={subItem.href}
-                        className={`block px-4 py-3 text-sm transition-colors duration-150 ${
+                        className={`block pl-4 py-3 text-md transition-colors duration-150 ${
                           pathname === subItem.href
                             ? 'text-nav-active bg-dropdown-active border-l-4 border-nav-active font-medium'
                             : 'text-text-secondary hover:text-nav-hover hover:bg-dropdown-hover'
