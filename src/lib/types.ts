@@ -1,3 +1,4 @@
+import { Timestamp } from "firebase/firestore";
 import { BeritaKategoriEnum, ProfilKategoriEnum } from "./enums";
 
 export interface Admin {
@@ -27,8 +28,8 @@ export interface Profil extends BaseImageFields {
     judul: string;
     deskripsi: string;
     kategori: ProfilKategoriEnum;
-    created_at: Date;
-    updated_at: Date;
+    created_at: Timestamp;
+    updated_at: Timestamp;
     admin_id: string;
 }
 
@@ -40,8 +41,8 @@ export interface BeritaPengumuman extends BaseImageFields {
     penulis: string;
     kategori: BeritaKategoriEnum;
     slug: string;
-    created_at: Date;
-    updated_at: Date;
+    created_at: Timestamp;
+    updated_at: Timestamp;
     admin_id: string;
 }
 
@@ -49,8 +50,8 @@ export interface Galeri extends BaseImageFields {
     id: string;
     judul: string;
     deskripsi: string;
-    created_at: Date;
-    updated_at: Date;
+    created_at: Timestamp;
+    updated_at: Timestamp;
     admin_id: string;
 }
 
@@ -61,8 +62,8 @@ export interface ProdukUnggulan extends BaseImageFields {
     nama_umkm: string;
     alamat_umkm: string;
     kontak_umkm: string;
-    created_at: Date;
-    updated_at: Date;
+    created_at: Timestamp;
+    updated_at: Timestamp;
     admin_id: string;
 }
 
@@ -72,8 +73,8 @@ export interface KontakDesa {
     nomor_telepon: string;
     nomor_whatsapp: string;
     email_desa: string;
-    created_at: Date;
-    updated_at: Date;
+    created_at: Timestamp;
+    updated_at: Timestamp;
     admin_id: string;
 }
 
@@ -84,7 +85,7 @@ export interface AspirasiForm {
     email: string;
     isi: string;
     status: 'pending' | 'done';
-    created_at: Date;
-    updated_at: Date;
+    created_at: Timestamp;
+    updated_at: Timestamp;
     admin_id?: string;
 }
