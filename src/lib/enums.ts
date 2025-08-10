@@ -6,7 +6,7 @@ export enum ProfilKategoriEnum {
 	JUMLAH_PENDUDUK_DAN_DATA_UMUM = 'jumlah-penduduk-dan-data-umum'
 }
 
-export enum BeritaKategoriEnum {
+export enum BeritaPengumumanKategoriEnum {
     BERITA = 'berita',
 	PENGUMUMAN = 'pengumuman'
 }
