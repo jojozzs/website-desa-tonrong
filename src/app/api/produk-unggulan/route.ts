@@ -1,308 +1,332 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, serverTimestamp, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
-import cloudinary from '@/lib/cloudinary';
-import { 
-    createSuccessResponse, 
-    createErrorResponse, 
-    validateRequiredFields, 
-    validateFileUpload,
-    parseFormData,
-    handleApiError,
-    validateAdmin,
-    UPLOAD_LIMITS,
-    FIRESTORE_COLLECTIONS
-} from '@/lib/api-utils';
-import { AdminLogHelpers } from '@/lib/admin-log';
-import { ProdukUnggulan } from '@/lib/types';
-import { CloudinaryUploadResult } from '@/lib/cloudinary-types';
+import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/lib/firebase";
+import { collection as webCollection, getDocs, query, orderBy, DocumentReference as WebDocumentReference, Timestamp as WebTimestamp } from "firebase/firestore";
+import cloudinary from "@/lib/cloudinary";
+import { CloudinaryUploadResult } from "@/lib/cloudinary-types";
+import { adminAuth, adminDb } from "@/lib/firebaseAdmin";
+import { FieldValue, DocumentReference as AdminDocumentReference, Timestamp as AdminTimestamp, QuerySnapshot, DocumentData } from "firebase-admin/firestore";
 
-// GET - Fetch all produk unggulan
-export async function GET() {
-    try {
-        const q = query(
-            collection(db, FIRESTORE_COLLECTIONS.PRODUK_UNGGULAN), 
-            orderBy('created_at', 'desc')
-        );
-        const querySnapshot = await getDocs(q);
-        
-        const produkUnggulan: ProdukUnggulan[] = querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-            created_at: doc.data().created_at?.toDate(),
-            updated_at: doc.data().updated_at?.toDate(),
-        } as ProdukUnggulan));
+export const runtime = "nodejs";
 
-        return NextResponse.json(createSuccessResponse(produkUnggulan));
-    } catch (error) {
-        await handleApiError(error, 'fetch produk unggulan');
-        const { response, status } = createErrorResponse('Failed to fetch produk unggulan');
-        return NextResponse.json(response, { status });
+/* ============== Types & utils ============== */
+type ErrorWithOptionalMessage = { message?: unknown };
+const toErrorMessage = (err: unknown): string => {
+    if (err instanceof Error) return err.message;
+    if (typeof err === "object" && err !== null && "message" in err) {
+        const msg = (err as ErrorWithOptionalMessage).message;
+        if (typeof msg === "string") return msg;
+    }
+    return "";
+};
+
+interface ProdukDocAdmin {
+    judul: string;
+    deskripsi: string;
+    nama_umkm: string;
+    alamat_umkm: string;
+    kontak_umkm: string;
+    slug: string;
+    admin_id?: AdminDocumentReference;
+    gambar_url: string;
+    gambar_id: string;
+    gambar_size: number;
+    gambar_type: string;
+    gambar_width?: number;
+    gambar_height?: number;
+    created_at?: AdminTimestamp;
+    updated_at?: AdminTimestamp;
+}
+
+interface ProdukDocWeb {
+    judul: string;
+    deskripsi: string;
+    nama_umkm: string;
+    alamat_umkm: string;
+    kontak_umkm: string;
+    slug: string;
+    admin_id?: WebDocumentReference;
+    gambar_url: string;
+    gambar_id: string;
+    gambar_size: number;
+    gambar_type: string;
+    gambar_width?: number;
+    gambar_height?: number;
+    created_at?: WebTimestamp;
+    updated_at?: WebTimestamp;
+}
+
+async function verifyAdmin(req: NextRequest): Promise<string> {
+    const authHeader = req.headers.get("authorization") || "";
+    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+    if (!token) throw new Error("NO_TOKEN");
+    const decoded = await adminAuth.verifyIdToken(token);
+    const uid = decoded.uid;
+    const adminSnap = await adminDb.doc(`admin/${uid}`).get();
+    if (!adminSnap.exists || adminSnap.get("role") !== "admin") {
+        throw new Error("NOT_ADMIN");
+    }
+    return uid;
+}
+
+async function uploadToCloudinary(file: File): Promise<CloudinaryUploadResult> {
+    const buf = Buffer.from(await file.arrayBuffer());
+    return new Promise<CloudinaryUploadResult>((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+            {
+                resource_type: "image",
+                folder: process.env.CLOUDINARY_BASE_FOLDER
+                    ? `${process.env.CLOUDINARY_BASE_FOLDER}/produk-unggulan`
+                    : "produk-unggulan",
+                transformation: [{ width: 800, height: 600, crop: "fill" }],
+            },
+            (err, out) => (err ? reject(err) : resolve(out as unknown as CloudinaryUploadResult))
+        )
+        .end(buf);
+    });
+}
+
+const slugify = (text: string): string =>
+    text
+        .toLowerCase()
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .replace(/-+/g, "-");
+
+async function slugExists(slug: string): Promise<boolean> {
+    const snap: QuerySnapshot<DocumentData> = await adminDb
+        .collection("produk-unggulan")
+        .where("slug", "==", slug)
+        .limit(1)
+        .get();
+    return !snap.empty;
+}
+
+async function slugExistsForOther(slug: string, excludeId: string): Promise<boolean> {
+    const snap = await adminDb
+        .collection("produk-unggulan")
+        .where("slug", "==", slug)
+        .limit(1)
+        .get();
+    if (snap.empty) return false;
+    const doc = snap.docs[0];
+    return doc.id !== excludeId;
+}
+
+async function ensureUniqueSlug(base: string, excludeId?: string): Promise<string> {
+    let candidate = base || "item";
+    let i = 1;
+    while (true) {
+        const exists = excludeId
+            ? await slugExistsForOther(candidate, excludeId)
+            : await slugExists(candidate);
+        if (!exists) return candidate;
+        i += 1;
+        candidate = `${base}-${i}`;
+        // optional: break safety
+        if (i > 100) throw new Error("Slug generation exceeded 100 attempts");
     }
 }
 
-// POST - Create new produk unggulan
-export async function POST(request: NextRequest) {
+/* ============== GET: list / by id / by slug ============== */
+export async function GET(request: NextRequest) {
     try {
-        // Validate admin authorization
-        const adminError = await validateAdmin(request);
-        if (adminError) {
-            const { response, status } = createErrorResponse(adminError, 401);
-            return NextResponse.json(response, { status });
+        const { searchParams } = new URL(request.url);
+        const id = searchParams.get("id");
+        const slug = searchParams.get("slug");
+
+        if (id) {
+            const snap = await adminDb.doc(`produk-unggulan/${id}`).get();
+            if (!snap.exists) return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
+            const raw = snap.data() as ProdukDocAdmin;
+            const data = {
+                ...raw,
+                id: snap.id,
+                created_at: typeof raw.created_at?.toDate === "function" ? raw.created_at.toDate() : null,
+                updated_at: typeof raw.updated_at?.toDate === "function" ? raw.updated_at.toDate() : null,
+                admin_uid: raw.admin_id?.id ?? null,
+            };
+            return NextResponse.json({ success: true, data });
         }
 
-        const formData = await request.formData();
-        const data = parseFormData(formData);
-
-        // Validate required fields
-        const requiredFields = ['judul', 'deskripsi', 'nama_umkm', 'alamat_umkm', 'kontak_umkm', 'admin_id', 'admin_name'];
-        const validationError = await validateRequiredFields(data as Record<string, unknown>, requiredFields);
-        if (validationError) {
-            const { response, status } = createErrorResponse(validationError, 400);
-            return NextResponse.json(response, { status });
+        if (slug) {
+            const q = await adminDb.collection("produk-unggulan").where("slug", "==", slug).limit(1).get();
+            if (q.empty) return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
+            const d = q.docs[0];
+            const raw = d.data() as ProdukDocAdmin;
+            const data = {
+                ...raw,
+                id: d.id,
+                created_at: typeof raw.created_at?.toDate === "function" ? raw.created_at.toDate() : null,
+                updated_at: typeof raw.updated_at?.toDate === "function" ? raw.updated_at.toDate() : null,
+                admin_uid: raw.admin_id?.id ?? null,
+            };
+            return NextResponse.json({ success: true, data });
         }
 
-        // Validate file upload
-        const gambar = data.gambar as File;
-        const fileError = await validateFileUpload(
-            gambar,
-            UPLOAD_LIMITS.ALLOWED_IMAGE_TYPES,
-            UPLOAD_LIMITS.IMAGE_MAX_SIZE
-        );
-        if (fileError) {
-            const { response, status } = createErrorResponse(fileError, 400);
-            return NextResponse.json(response, { status });
-        }
+        const ref = webCollection(db, "produk-unggulan");
+        const qList = query(ref, orderBy("created_at", "desc"));
+        const snapshot = await getDocs(qList);
 
-        // Upload to Cloudinary
-        const buffer = Buffer.from(await gambar.arrayBuffer());
-        
-        const uploadResult = await new Promise<CloudinaryUploadResult>((resolve, reject) => {
-            cloudinary.uploader.upload_stream(
-                {
-                    resource_type: 'image',
-                    folder: 'produk-unggulan',
-                },
-                (error, result) => {
-                    if (error) reject(error);
-                    else if (result) resolve({ ...result, folder: 'produk-unggulan' });
-                }
-            ).end(buffer);
+        const list = snapshot.docs.map((d) => {
+            const raw = d.data() as ProdukDocWeb;
+            return {
+                id: d.id,
+                ...raw,
+                created_at: typeof raw.created_at?.toDate === "function" ? raw.created_at.toDate() : null,
+                updated_at: typeof raw.updated_at?.toDate === "function" ? raw.updated_at.toDate() : null,
+                admin_uid: raw.admin_id?.id ?? null,
+            };
         });
 
-        // Create produk unggulan document
-        const produkUnggulanData = {
-            judul: data.judul as string,
-            deskripsi: data.deskripsi as string,
-            nama_umkm: data.nama_umkm as string,
-            alamat_umkm: data.alamat_umkm as string,
-            kontak_umkm: data.kontak_umkm as string,
-            gambar_url: uploadResult.secure_url,
-            gambar_id: uploadResult.public_id,
-            gambar_size: uploadResult.bytes,
-            gambar_type: uploadResult.format,
-            gambar_width: uploadResult.width,
-            gambar_height: uploadResult.height,
-            admin_id: data.admin_id as string,
-            created_at: serverTimestamp(),
-            updated_at: serverTimestamp(),
-        };
-
-        const docRef = await addDoc(collection(db, FIRESTORE_COLLECTIONS.PRODUK_UNGGULAN), produkUnggulanData);
-
-        // Log admin activity
-        await AdminLogHelpers.createProdukUnggulan(
-            data.admin_id as string,
-            data.admin_name as string,
-            docRef.id,
-            data.judul as string
+        return NextResponse.json({ success: true, data: list });
+    } catch (error: unknown) {
+        console.error("Error fetching produk-unggulan:", error);
+        return NextResponse.json(
+            { success: false, error: toErrorMessage(error) || "Failed to fetch produk unggulan" },
+            { status: 500 }
         );
-
-        return NextResponse.json(createSuccessResponse({ 
-            id: docRef.id, 
-            ...produkUnggulanData 
-        }, 'Produk unggulan berhasil dibuat'));
-
-    } catch (error) {
-        await handleApiError(error, 'create produk unggulan');
-        const { response, status } = createErrorResponse('Failed to create produk unggulan');
-        return NextResponse.json(response, { status });
     }
 }
 
-// PUT - Update produk unggulan
-export async function PUT(request: NextRequest) {
+/* ============== POST ============== */
+export async function POST(request: NextRequest) {
     try {
-        // Validate admin authorization
-        const adminError = await validateAdmin(request);
-        if (adminError) {
-            const { response, status } = createErrorResponse(adminError, 401);
-            return NextResponse.json(response, { status });
-        }
-
+        const uid = await verifyAdmin(request);
         const formData = await request.formData();
-        const data = parseFormData(formData);
 
-        // Validate required fields
-        const requiredFields = ['id', 'judul', 'deskripsi', 'nama_umkm', 'alamat_umkm', 'kontak_umkm', 'admin_id', 'admin_name'];
-        const validationError = await validateRequiredFields(data as Record<string, unknown>, requiredFields);
-        if (validationError) {
-            const { response, status } = createErrorResponse(validationError, 400);
-            return NextResponse.json(response, { status });
+        const judul = String(formData.get("judul") || "");
+        const deskripsi = String(formData.get("deskripsi") || "");
+        const nama_umkm = String(formData.get("nama_umkm") || "");
+        const alamat_umkm = String(formData.get("alamat_umkm") || "");
+        const kontak_umkm = String(formData.get("kontak_umkm") || "");
+        const slugRaw = (formData.get("slug") as string | null) ?? null; // ← opsional kirim slug
+        const gambar = formData.get("gambar") as File | null;
+
+        if (!judul || !deskripsi || !nama_umkm || !alamat_umkm || !kontak_umkm) {
+            return NextResponse.json({ success: false, error: "Missing required text fields" }, { status: 400 });
         }
 
-        const produkId = data.id as string;
-        const docRef = doc(db, FIRESTORE_COLLECTIONS.PRODUK_UNGGULAN, produkId);
-
-        // Check if document exists
-        const docSnap = await getDoc(docRef);
-        if (!docSnap.exists()) {
-            const { response, status } = createErrorResponse('Produk unggulan tidak ditemukan', 404);
-            return NextResponse.json(response, { status });
+        if (!(gambar instanceof File) || gambar.size === 0) {
+            return NextResponse.json({ success: false, error: "Missing or invalid image file" }, { status: 400 });
         }
 
-        const existingData = docSnap.data();
-        let updateData: Record<string, unknown> = {
-            judul: data.judul as string,
-            deskripsi: data.deskripsi as string,
-            nama_umkm: data.nama_umkm as string,
-            alamat_umkm: data.alamat_umkm as string,
-            kontak_umkm: data.kontak_umkm as string,
-            updated_at: serverTimestamp(),
+        const base = slugify(slugRaw && slugRaw.length > 0 ? slugRaw : judul);
+        const slug = await ensureUniqueSlug(base);
+
+        const up = await uploadToCloudinary(gambar);
+        const adminRef = adminDb.doc(`admin/${uid}`);
+
+        const payload: ProdukDocAdmin = {
+            judul,
+            deskripsi,
+            nama_umkm,
+            alamat_umkm,
+            kontak_umkm,
+            slug,
+            admin_id: adminRef,
+            gambar_url: up.secure_url,
+            gambar_id: up.public_id,
+            gambar_size: up.bytes,
+            gambar_type: up.format,
+            gambar_width: up.width,
+            gambar_height: up.height,
+            created_at: FieldValue.serverTimestamp() as unknown as AdminTimestamp,
+        updated_at: FieldValue.serverTimestamp() as unknown as AdminTimestamp,
         };
 
-        // Handle image update if new file is provided
-        const gambar = data.gambar as File;
-        if (gambar && gambar.size > 0) {
-            // Validate new file
-            const fileError = await validateFileUpload(
-                gambar,
-                UPLOAD_LIMITS.ALLOWED_IMAGE_TYPES,
-                UPLOAD_LIMITS.IMAGE_MAX_SIZE
-            );
-            if (fileError) {
-                const { response, status } = createErrorResponse(fileError, 400);
-                return NextResponse.json(response, { status });
-            }
-
-            // Delete old image from Cloudinary
-            if (existingData.gambar_id) {
-                try {
-                    await cloudinary.uploader.destroy(existingData.gambar_id);
-                } catch (error) {
-                    console.warn('Failed to delete old image from Cloudinary:', error);
-                }
-            }
-
-            // Upload new image
-            const buffer = Buffer.from(await gambar.arrayBuffer());
-            
-            const uploadResult = await new Promise<CloudinaryUploadResult>((resolve, reject) => {
-                cloudinary.uploader.upload_stream(
-                    {
-                        resource_type: 'image',
-                        folder: 'produk-unggulan',
-                    },
-                    (error, result) => {
-                        if (error) reject(error);
-                        else if (result) resolve({ ...result, folder: 'produk-unggulan' });
-                    }
-                ).end(buffer);
-            });
-
-            // Update image fields
-            updateData = {
-                ...updateData,
-                gambar_url: uploadResult.secure_url,
-                gambar_id: uploadResult.public_id,
-                gambar_size: uploadResult.bytes,
-                gambar_type: uploadResult.format,
-                gambar_width: uploadResult.width,
-                gambar_height: uploadResult.height,
-            };
-        }
-
-        await updateDoc(docRef, updateData);
-
-        // Log admin activity
-        await AdminLogHelpers.updateProdukUnggulan(
-            data.admin_id as string,
-            data.admin_name as string,
-            produkId,
-            data.judul as string
+        const docRef = await adminDb.collection("produk-unggulan").add(payload);
+        return NextResponse.json({ success: true, data: { id: docRef.id, ...payload } }, { status: 201 });
+    } catch (error: unknown) {
+        const msg = toErrorMessage(error);
+        const status = msg === "NO_TOKEN" ? 401 : msg === "NOT_ADMIN" ? 403 : 500;
+        console.error("Error creating produk-unggulan:", error);
+        return NextResponse.json(
+            { success: false, error: msg || "Failed to create produk unggulan" },
+            { status }
         );
-
-        return NextResponse.json(createSuccessResponse({ 
-            id: produkId, 
-            ...updateData 
-        }, 'Produk unggulan berhasil diperbarui'));
-
-    } catch (error) {
-        await handleApiError(error, 'update produk unggulan');
-        const { response, status } = createErrorResponse('Failed to update produk unggulan');
-        return NextResponse.json(response, { status });
     }
 }
 
-// DELETE - Delete produk unggulan
+/* ============== PATCH ============== */
+export async function PATCH(request: NextRequest) {
+    try {
+        await verifyAdmin(request);
+        const formData = await request.formData();
+
+        const id = String(formData.get("id") || "");
+        if (!id) {
+            return NextResponse.json({ success: false, error: "ID is required" }, { status: 400 });
+        }
+
+        const judul = (formData.get("judul") as string) ?? null;
+        const deskripsi = (formData.get("deskripsi") as string) ?? null;
+        const nama_umkm = (formData.get("nama_umkm") as string) ?? null;
+        const alamat_umkm = (formData.get("alamat_umkm") as string) ?? null;
+        const kontak_umkm = (formData.get("kontak_umkm") as string) ?? null;
+        const slugRaw = (formData.get("slug") as string) ?? null;
+        const gambar = (formData.get("gambar") as File) ?? null;
+
+        const existing = await adminDb.doc(`produk-unggulan/${id}`).get();
+        if (!existing.exists) {
+            return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
+        }
+        const oldData = existing.data() as ProdukDocAdmin;
+
+        const updateData: Partial<ProdukDocAdmin> & { updated_at: AdminTimestamp } = {
+            updated_at: FieldValue.serverTimestamp() as unknown as AdminTimestamp,
+        };
+        if (judul !== null) updateData.judul = judul;
+        if (deskripsi !== null) updateData.deskripsi = deskripsi;
+        if (nama_umkm !== null) updateData.nama_umkm = nama_umkm;
+        if (alamat_umkm !== null) updateData.alamat_umkm = alamat_umkm;
+        if (kontak_umkm !== null) updateData.kontak_umkm = kontak_umkm;
+
+        if (slugRaw !== null || judul !== null) {
+            const base = slugify(slugRaw && slugRaw.length > 0 ? slugRaw : (judul ?? oldData.judul));
+            const newSlug = await ensureUniqueSlug(base, id);
+            if (newSlug !== oldData.slug) updateData.slug = newSlug;
+        }
+
+        if (gambar && gambar.size > 0) {
+            const up = await uploadToCloudinary(gambar);
+            updateData.gambar_url = up.secure_url;
+            updateData.gambar_id = up.public_id;
+            updateData.gambar_size = up.bytes;
+            updateData.gambar_type = up.format;
+            updateData.gambar_width = up.width;
+            updateData.gambar_height = up.height;
+        }
+
+        await adminDb.doc(`produk-unggulan/${id}`).update(updateData);
+        return NextResponse.json({ success: true, message: "Produk unggulan updated successfully" });
+    } catch (error: unknown) {
+        const msg = toErrorMessage(error);
+        const status = msg === "NO_TOKEN" ? 401 : msg === "NOT_ADMIN" ? 403 : 500;
+        console.error("Error patching produk-unggulan:", error);
+        return NextResponse.json(
+            { success: false, error: msg || "Failed to patch produk unggulan" },
+            { status }
+        );
+    }
+}
+
+/* ============== DELETE ============== */
 export async function DELETE(request: NextRequest) {
     try {
-        // Validate admin authorization
-        const adminError = await validateAdmin(request);
-        if (adminError) {
-            const { response, status } = createErrorResponse(adminError, 401);
-            return NextResponse.json(response, { status });
-        }
-
+        await verifyAdmin(request);
         const { searchParams } = new URL(request.url);
-        const id = searchParams.get('id');
-        const admin_id = searchParams.get('admin_id');
-        const admin_name = searchParams.get('admin_name');
-
-        if (!id || !admin_id || !admin_name) {
-            const { response, status } = createErrorResponse('ID, admin_id, and admin_name are required', 400);
-            return NextResponse.json(response, { status });
+        const id = searchParams.get("id");
+        if (!id) {
+            return NextResponse.json({ success: false, error: "ID is required" }, { status: 400 });
         }
-
-        const docRef = doc(db, FIRESTORE_COLLECTIONS.PRODUK_UNGGULAN, id);
-
-        // Check if document exists and get data before deletion
-        const docSnap = await getDoc(docRef);
-        if (!docSnap.exists()) {
-            const { response, status } = createErrorResponse('Produk unggulan tidak ditemukan', 404);
-            return NextResponse.json(response, { status });
-        }
-
-        const data = docSnap.data();
-        
-        // Delete image from Cloudinary
-        if (data.gambar_id) {
-            try {
-                await cloudinary.uploader.destroy(data.gambar_id);
-            } catch (error) {
-                console.warn('Failed to delete image from Cloudinary:', error);
-            }
-        }
-
-        // Delete document
-        await deleteDoc(docRef);
-
-        // Log admin activity
-        await AdminLogHelpers.deleteProdukUnggulan(
-            admin_id,
-            admin_name,
-            id,
-            data.judul
-        );
-
-        return NextResponse.json(createSuccessResponse(
-            { id }, 
-            'Produk unggulan berhasil dihapus'
-        ));
-
-    } catch (error) {
-        await handleApiError(error, 'delete produk unggulan');
-        const { response, status } = createErrorResponse('Failed to delete produk unggulan');
-        return NextResponse.json(response, { status });
+        await adminDb.doc(`produk-unggulan/${id}`).delete();
+        return NextResponse.json({ success: true, message: "Produk unggulan deleted successfully" });
+    } catch (error: unknown) {
+        const msg = toErrorMessage(error);
+        const status = msg === "NO_TOKEN" ? 401 : msg === "NOT_ADMIN" ? 403 : 500;
+        console.error("Error deleting produk-unggulan:", error);
+        return NextResponse.json({ success: false, error: msg || "Failed to delete produk unggulan" },{ status });
     }
 }
