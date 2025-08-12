@@ -1,9 +1,13 @@
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+import Guard from "@/components/Dashboard/Guard";
+import Sidebar from "@/components/Dashboard/Sidebar";
+
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
     return (
-        <div>
-            <main className="bg-[#344532] min-h-screen flex flex-col items-center justify-center p-4 text-center font-bold text-2xl">
-                {children}
-            </main>
-        </div>
+        <Guard>
+            <div style={{display:"flex",minHeight:"100vh"}}>
+                <Sidebar />
+                <div style={{flex:1,padding:16}}>{children}</div>
+            </div>
+        </Guard>
     );
 }
