@@ -35,8 +35,8 @@ export interface Profil extends BaseImageFields {
 }
 
 export interface ProfilWithContent extends Profil {
-  konten?: string 
-  data_tambahan?: {
+    konten?: string 
+    data_tambahan?: {
     visi?: string
     misi?: string[]
     
