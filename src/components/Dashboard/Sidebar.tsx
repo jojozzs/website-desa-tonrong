@@ -1,9 +1,8 @@
 "use client";
-
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logoutAdmin } from "@/lib/auth";
-import { JSX, useState } from "react";
+import { JSX, useState, useEffect } from "react";
 
 interface NavItem {
     href: string;
@@ -78,6 +77,37 @@ const NAV_ITEMS: ReadonlyArray<NavItem> = [
     }
 ] as const;
 
+function SidebarSkeleton(): JSX.Element {
+    return (
+        <aside className="fixed left-0 top-0 z-40 w-64 h-screen bg-white shadow-lg border-r border-gray-200">
+            <div className="flex flex-col h-full">
+                {/* Logo/Header Skeleton */}
+                <div className="flex items-center justify-center h-16 py-10 px-4 border-b border-gray-200 bg-gray-100">
+                    <div className="flex items-center space-x-2">
+                        <div className="w-8 h-8 bg-gray-200 rounded-lg animate-pulse"></div>
+                        <div className="w-24 h-5 bg-gray-200 rounded animate-pulse"></div>
+                    </div>
+                </div>
+
+                {/* Navigation Skeleton */}
+                <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+                    {Array.from({ length: 7 }).map((_, index) => (
+                        <div key={index} className="flex items-center px-4 py-3 rounded-lg">
+                            <div className="w-5 h-5 mr-3 bg-gray-200 rounded animate-pulse"></div>
+                            <div className="h-4 bg-gray-200 rounded animate-pulse flex-1"></div>
+                        </div>
+                    ))}
+                </nav>
+
+                {/* Logout Button Skeleton */}
+                <div className="p-4 border-t border-gray-200">
+                    <div className="w-full h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+                </div>
+            </div>
+        </aside>
+    );
+}
+
 function LogoutModal({
     onCancel,
     onConfirm,
@@ -128,6 +158,15 @@ export default function Sidebar(): JSX.Element {
     const pathname = usePathname();
     const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
     const [showLogoutModal, setShowLogoutModal] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setIsLoading(false);
+        }, 1000);
+
+        return () => clearTimeout(timer);
+    }, []);
 
     async function handleLogout(): Promise<void> {
         try {
@@ -159,6 +198,10 @@ export default function Sidebar(): JSX.Element {
         }
         return pathname.startsWith(href);
     };
+
+    if (isLoading) {
+        return <SidebarSkeleton />;
+    }
 
     return (
         <>
