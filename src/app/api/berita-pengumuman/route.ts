@@ -97,6 +97,7 @@ export async function GET(request: NextRequest) {
         const id = searchParams.get("id");
         const kategoriParam = searchParams.get("kategori");
 
+        // --- GET by id (Admin SDK) ---
         if (id) {
             const snap = await adminDb.doc(`berita-pengumuman/${id}`).get();
             if (!snap.exists) {
@@ -106,36 +107,63 @@ export async function GET(request: NextRequest) {
             const data = {
                 ...raw,
                 id: snap.id,
-                tanggal: typeof (raw.tanggal as AdminTimestamp | undefined)?.toDate === "function"
-                    ? (raw.tanggal as AdminTimestamp).toDate()
-                    : (raw.tanggal as Date | null) ?? null,
+                tanggal:
+                    typeof (raw.tanggal as AdminTimestamp | undefined)?.toDate === "function"
+                        ? (raw.tanggal as AdminTimestamp).toDate()
+                        : ((raw.tanggal as Date) ?? null),
                 created_at: typeof raw.created_at?.toDate === "function" ? raw.created_at.toDate() : null,
                 updated_at: typeof raw.updated_at?.toDate === "function" ? raw.updated_at.toDate() : null,
-                admin_uid: raw.admin_id?.id ?? null,
+                admin_uid: raw.admin_id?.id ?? null
             };
             return NextResponse.json({ success: true, data });
         }
 
+        // --- GET list (Web SDK) ---
         const ref = webCollection(db, "berita-pengumuman");
-        let q = query(ref, orderBy("tanggal", "desc"));
+
         if (isKategori(kategoriParam)) {
-            q = query(ref, where("kategori", "==", kategoriParam), orderBy("tanggal", "desc"));
+            const q = query(ref, where("kategori", "==", kategoriParam));
+            const snapshot = await getDocs(q);
+
+            const list = snapshot.docs
+                .map((d) => {
+                    const raw = d.data() as BeritaDocWeb;
+                    return {
+                        id: d.id,
+                        ...raw,
+                        tanggal: typeof raw.tanggal?.toDate === "function" ? raw.tanggal.toDate() : null,
+                        created_at: typeof raw.created_at?.toDate === "function" ? raw.created_at.toDate() : null,
+                        updated_at: typeof raw.updated_at?.toDate === "function" ? raw.updated_at.toDate() : null,
+                        admin_uid: raw.admin_id?.id ?? null
+                    };
+                })
+                .sort((a, b) => {
+                    const ta = a.tanggal ? a.tanggal.getTime() : 0;
+                    const tb = b.tanggal ? b.tanggal.getTime() : 0;
+                    return tb - ta;
+                });
+
+            return NextResponse.json({ success: true, data: list });
         }
 
-        const snapshot = await getDocs(q);
-        const list = snapshot.docs.map((d) => {
-            const raw = d.data() as BeritaDocWeb;
-            return {
-                id: d.id,
-                ...raw,
-                tanggal: typeof raw.tanggal?.toDate === "function" ? raw.tanggal.toDate() : null,
-                created_at: typeof raw.created_at?.toDate === "function" ? raw.created_at.toDate() : null,
-                updated_at: typeof raw.updated_at?.toDate === "function" ? raw.updated_at.toDate() : null,
-                admin_uid: raw.admin_id?.id ?? null,
-            };
-        });
+        {
+            const q = query(ref, orderBy("tanggal", "desc"));
+            const snapshot = await getDocs(q);
 
-        return NextResponse.json({ success: true, data: list });
+            const list = snapshot.docs.map((d) => {
+                const raw = d.data() as BeritaDocWeb;
+                return {
+                    id: d.id,
+                    ...raw,
+                    tanggal: typeof raw.tanggal?.toDate === "function" ? raw.tanggal.toDate() : null,
+                    created_at: typeof raw.created_at?.toDate === "function" ? raw.created_at.toDate() : null,
+                    updated_at: typeof raw.updated_at?.toDate === "function" ? raw.updated_at.toDate() : null,
+                    admin_uid: raw.admin_id?.id ?? null
+                };
+            });
+
+            return NextResponse.json({ success: true, data: list });
+        }
     } catch (error: unknown) {
         console.error("Error fetching berita-pengumuman:", error);
         return NextResponse.json(
