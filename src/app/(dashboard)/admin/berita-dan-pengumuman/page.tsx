@@ -3,7 +3,7 @@ import Link from "next/link";
 import { JSX, useCallback, useEffect, useState } from "react";
 import { requireIdToken } from "@/lib/client-auth";
 import { BeritaPengumumanKategoriEnum } from "@/lib/enums";
-import { Newspaper, Megaphone, Plus, Filter, Calendar, User, Edit3, Trash2, AlertCircle, Search,FileText } from "lucide-react";
+import { Newspaper, Megaphone, Plus, Calendar, User, Edit3, Trash2, AlertCircle, Search, FileText } from "lucide-react";
 import Image from "next/image";
 
 type Kategori = BeritaPengumumanKategoriEnum | "";
@@ -92,36 +92,55 @@ export default function BeritaListPage(): JSX.Element {
             : "bg-orange-100 text-orange-800 border-orange-200";
     }
 
-    const filteredRows = rows.filter(row =>
-        row.judul.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        row.penulis.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        row.kategori.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredRows = rows.filter(row => {
+        const matchesSearch = row.judul.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            row.penulis.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            row.kategori.toLowerCase().includes(searchTerm.toLowerCase());
+        
+        return matchesSearch;
+    });
 
     const beritaCount = rows.filter(r => r.kategori === BeritaPengumumanKategoriEnum.BERITA).length;
     const pengumumanCount = rows.filter(r => r.kategori === BeritaPengumumanKategoriEnum.PENGUMUMAN).length;
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50 p-6">
+            <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
                 <div className="max-w-6xl mx-auto">
                     <div className="animate-pulse">
-                        <div className="h-8 bg-gray-200 rounded w-64 mb-2"></div>
-                        <div className="h-5 bg-gray-200 rounded w-96 mb-8"></div>
+                        {/* Header skeleton */}
+                        <div className="mb-6 sm:mb-8">
+                            <div className="h-8 sm:h-14 bg-gray-200 rounded w-48 sm:w-64 mb-2"></div>
+                            <div className="h-4 sm:h-12 bg-gray-200 rounded w-64 sm:w-96"></div>
+                        </div>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        {/* Stats skeleton */}
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
                             {[1, 2, 3].map(i => (
-                                <div key={i} className="bg-white rounded-lg shadow-sm border border-green-100 p-6">
-                                    <div className="h-6 bg-gray-200 rounded w-full mb-2"></div>
-                                    <div className="h-8 bg-gray-200 rounded w-16"></div>
+                                <div key={i} className="bg-white rounded-xl shadow-sm border p-4 sm:p-6">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex-1">
+                                            <div className="h-4 bg-gray-200 rounded w-20 mb-2"></div>
+                                            <div className="h-6 sm:h-8 bg-gray-200 rounded w-12"></div>
+                                        </div>
+                                        <div className="h-10 w-10 sm:h-12 sm:w-12 bg-gray-200 rounded-full"></div>
+                                    </div>
                                 </div>
                             ))}
                         </div>
 
-                        <div className="bg-white rounded-lg shadow-sm border border-green-100 p-6">
+                        {/* Content skeleton */}
+                        <div className="bg-white rounded-xl shadow-sm border p-4 sm:p-6">
                             <div className="space-y-4">
                                 {[1, 2, 3, 4].map(i => (
-                                    <div key={i} className="h-16 bg-gray-200 rounded"></div>
+                                    <div key={i} className="flex items-start gap-4">
+                                        <div className="h-12 w-12 sm:h-16 sm:w-16 bg-gray-200 rounded-lg"></div>
+                                        <div className="flex-1">
+                                            <div className="h-5 bg-gray-200 rounded w-3/4 mb-2"></div>
+                                            <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                                            <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                                        </div>
+                                    </div>
                                 ))}
                             </div>
                         </div>
@@ -132,99 +151,124 @@ export default function BeritaListPage(): JSX.Element {
     }
 
     return (
-        <div className="min-h-screen pb-9">
+        <div className="min-h-screen bg-gray-50">
             {/* Header */}
-            <div className="xl:sticky top-0 z-40 xl:backdrop-blur-xl xl:shadow-lg shadow-indigo-500/5">
-                <div className="max-w-6xl mx-auto py-6">
-                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-                        <div>
-                            <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center">
-                                <FileText className="w-8 h-8 text-green-600 mr-3" />
-                                <h1 className="text-3xl font-bold text-gray-900 mb-2">Berita & Pengumuman</h1>
-                            </h1>
-                            <p className="text-gray-600">Kelola berita dan pengumuman Desa Tonrong</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Stats Cards */}
-            <div className="max-w-6xl mx-auto mt-9">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div className="bg-white rounded-lg shadow-sm border border-blue-100 p-6">
+            <div className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+                <div className="max-w-6xl mx-auto p-4 sm:p-6">
+                    <div className="flex flex-col gap-4">
                         <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm font-medium text-blue-600 mb-1">Total Berita</p>
-                                <p className="text-2xl font-bold text-blue-800">{beritaCount}</p>
+                            <div className="flex items-center gap-3">
+                                <FileText className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
+                                <div>
+                                    <h1 className="text-lg sm:text-2xl lg:text-3xl font-bold text-gray-900">
+                                        <span className="hidden sm:inline">Berita & Pengumuman</span>
+                                        <span className="sm:hidden">Berita</span>
+                                    </h1>
+                                    <p className="text-xs sm:text-sm text-gray-600 hidden sm:block">Kelola berita dan pengumuman Desa Tonrong</p>
+                                </div>
                             </div>
-                            <div className="p-3 bg-blue-100 rounded-full">
-                                <Newspaper className="w-6 h-6 text-blue-600" />
-                            </div>
+                            
+                            {/* Add Button - Always visible */}
+                            <Link 
+                                href="/admin/berita-dan-pengumuman/tambah"
+                                className="inline-flex items-center px-3 sm:px-6 py-2 sm:py-2.5 bg-green-700 hover:bg-green-600 text-white font-medium rounded-lg hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200"
+                            >
+                                <Plus className="w-4 h-4 sm:w-5 sm:h-5 sm:mr-2" />
+                                <span className="hidden sm:inline">Tambah Baru</span>
+                            </Link>
                         </div>
-                    </div>
 
-                    <div className="bg-white rounded-lg shadow-sm border border-orange-100 p-6">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm font-medium text-orange-600 mb-1">Total Pengumuman</p>
-                                <p className="text-2xl font-bold text-orange-800">{pengumumanCount}</p>
-                            </div>
-                            <div className="p-3 bg-orange-100 rounded-full">
-                                <Megaphone className="w-6 h-6 text-orange-600" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-lg shadow-sm border border-green-100 p-6">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm font-medium text-green-600 mb-1">Total Semua</p>
-                                <p className="text-2xl font-bold text-green-800">{rows.length}</p>
-                            </div>
-                            <div className="p-3 bg-green-100 rounded-full">
-                                <FileText className="w-6 h-6 text-green-600" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Actions & Filters */}
-                <div className="bg-white rounded-lg shadow-sm border border-green-100 p-6 mb-6">
-                    <div className="flex flex-col lg:flex-row gap-4 justify-between items-start lg:items-center">
-                        {/* Add Button */}
-                        <Link 
-                            href="/admin/berita-dan-pengumuman/tambah"
-                            className="inline-flex items-center px-6 py-3 bg-green-700 hover:bg-green-600 text-white font-medium rounded-lg hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 cursor-pointer"
-                        >
-                            <Plus className="w-5 h-5 mr-2" />
-                            Tambah Baru
-                        </Link>
-
-                        <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
+                        {/* Search and Filter - Simplified */}
+                        <div className="flex flex-col sm:flex-row gap-3">
                             {/* Search */}
-                            <div className="relative">
+                            <div className="relative flex-1">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                                 <input
                                     type="text"
                                     placeholder="Cari berita / pengumuman..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="pl-10 pr-3 py-2.5 w-full sm:w-64 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-700"
+                                    className="pl-10 pr-3 py-2.5 w-full border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-700"
                                 />
                             </div>
 
-                            {/* Category Filter */}
-                            <div className="relative">
-                                <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                                <select
-                                    value={filter}
-                                    onChange={(e) => setFilter(e.currentTarget.value as Kategori)}
-                                    className="pl-10 pr-8 py-2.5 w-full sm:w-48 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white appearance-none text-gray-700"
+                            {/* Simple Filter Tabs - Mobile Friendly */}
+                            <div className="flex bg-gray-100 rounded-lg p-1">
+                                <button
+                                    onClick={() => setFilter("")}
+                                    className={`px-3 sm:px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
+                                        filter === "" 
+                                            ? "bg-white text-green-700 shadow-sm" 
+                                            : "text-gray-600 hover:text-gray-800"
+                                    }`}
                                 >
-                                    <option value="">Semua Kategori</option>
-                                    <option value={BeritaPengumumanKategoriEnum.BERITA}>Berita</option>
-                                    <option value={BeritaPengumumanKategoriEnum.PENGUMUMAN}>Pengumuman</option>
-                                </select>
+                                    Semua
+                                </button>
+                                <button
+                                    onClick={() => setFilter(BeritaPengumumanKategoriEnum.BERITA)}
+                                    className={`px-3 sm:px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
+                                        filter === BeritaPengumumanKategoriEnum.BERITA 
+                                            ? "bg-white text-blue-700 shadow-sm" 
+                                            : "text-gray-600 hover:text-gray-800"
+                                    }`}
+                                >
+                                    Berita
+                                </button>
+                                <button
+                                    onClick={() => setFilter(BeritaPengumumanKategoriEnum.PENGUMUMAN)}
+                                    className={`px-2 sm:px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
+                                        filter === BeritaPengumumanKategoriEnum.PENGUMUMAN 
+                                            ? "bg-white text-orange-700 shadow-sm" 
+                                            : "text-gray-600 hover:text-gray-800"
+                                    }`}
+                                >
+                                    <span className="hidden sm:inline">Pengumuman</span>
+                                    <span className="sm:hidden">Pengumuman</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="max-w-6xl mx-auto p-4 sm:p-6">
+                {/* Stats Cards */}
+                <div className="grid grid-cols-3 gap-3 sm:gap-6 mb-6 sm:mb-8">
+                    <div className="bg-white rounded-xl shadow-sm border border-blue-100 p-3 sm:p-6">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                            <div className="mb-2 sm:mb-0">
+                                <p className="text-xs sm:text-sm font-medium text-blue-600 mb-1">Berita</p>
+                                <p className="text-lg sm:text-2xl font-bold text-blue-800">{beritaCount}</p>
+                            </div>
+                            <div className="hidden sm:block p-2 sm:p-3 bg-blue-100 rounded-full">
+                                <Newspaper className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-xl shadow-sm border border-orange-100 p-3 sm:p-6">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                            <div className="mb-2 sm:mb-0">
+                                <p className="text-xs sm:text-sm font-medium text-orange-600 mb-1">
+                                    <span className="hidden sm:inline">Pengumuman</span>
+                                    <span className="sm:hidden">Pengumuman</span>
+                                </p>
+                                <p className="text-lg sm:text-2xl font-bold text-orange-800">{pengumumanCount}</p>
+                            </div>
+                            <div className="hidden sm:block p-2 sm:p-3 bg-orange-100 rounded-full">
+                                <Megaphone className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-xl shadow-sm border border-green-100 p-3 sm:p-6">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                            <div className="mb-2 sm:mb-0">
+                                <p className="text-xs sm:text-sm font-medium text-green-600 mb-1">Total</p>
+                                <p className="text-lg sm:text-2xl font-bold text-green-800">{rows.length}</p>
+                            </div>
+                            <div className="hidden sm:block p-2 sm:p-3 bg-green-100 rounded-full">
+                                <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
                             </div>
                         </div>
                     </div>
@@ -232,14 +276,14 @@ export default function BeritaListPage(): JSX.Element {
 
                 {/* Content */}
                 {filteredRows.length === 0 ? (
-                    <div className="bg-white rounded-lg shadow-sm border border-orange-100 p-12 text-center">
-                        <div className="text-orange-600 mb-4">
-                            <FileText className="h-16 w-16 mx-auto opacity-50" />
+                    <div className="bg-white rounded-xl shadow-sm border border-orange-100 p-8 sm:p-12 text-center">
+                        <div className="text-orange-600 mb-4 sm:mb-6">
+                            <FileText className="h-12 w-12 sm:h-16 sm:w-16 mx-auto opacity-50" />
                         </div>
-                        <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                        <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2 sm:mb-3">
                             {searchTerm ? "Tidak Ada Hasil Pencarian" : "Belum Ada Data"}
                         </h3>
-                        <p className="text-gray-600 mb-6">
+                        <p className="text-gray-600 mb-6 sm:mb-8 text-sm sm:text-base">
                             {searchTerm 
                                 ? `Tidak ditemukan berita atau pengumuman dengan kata kunci "${searchTerm}"`
                                 : "Belum ada berita atau pengumuman yang dibuat. Mulai dengan menambahkan yang pertama."
@@ -248,15 +292,15 @@ export default function BeritaListPage(): JSX.Element {
                         {!searchTerm && (
                             <Link 
                                 href="/admin/berita-dan-pengumuman/tambah"
-                                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-600 to-orange-600 text-white font-medium rounded-lg hover:shadow-lg transition-all duration-200"
+                                className="inline-flex items-center px-6 sm:px-8 py-3 sm:py-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg hover:shadow-lg transition-all duration-200"
                             >
-                                <Plus className="w-5 h-5 mr-2" />
+                                <Plus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                                 Tambah Berita/Pengumuman
                             </Link>
                         )}
                     </div>
                 ) : (
-                    <div className="bg-white rounded-lg shadow-sm border border-green-100 overflow-hidden">
+                    <div className="bg-white rounded-xl shadow-sm border border-green-100 overflow-hidden">
                         {/* Desktop Table View */}
                         <div className="hidden lg:block">
                             <table className="w-full">
@@ -290,8 +334,9 @@ export default function BeritaListPage(): JSX.Element {
                                                                 src={r.gambar_url} 
                                                                 alt=""
                                                                 className="w-full h-full object-cover"
-                                                                width={1920}
-                                                                height={1080}
+                                                                width={48}
+                                                                height={48}
+                                                                unoptimized
                                                             />
                                                         </div>
                                                     )}
@@ -338,7 +383,7 @@ export default function BeritaListPage(): JSX.Element {
                                                     <button 
                                                         type="button" 
                                                         onClick={() => setDeleteConfirm(r.id)}
-                                                        className="p-2 text-red-600 hover:text-red-800 hover:bg-red-100 rounded-lg transition-colors duration-150 cursor-pointer"
+                                                        className="p-2 text-red-600 hover:text-red-800 hover:bg-red-100 rounded-lg transition-colors duration-150"
                                                         title="Hapus"
                                                     >
                                                         <Trash2 className="w-4 h-4" />
@@ -351,65 +396,78 @@ export default function BeritaListPage(): JSX.Element {
                             </table>
                         </div>
 
-                        {/* Mobile Card View */}
+                        {/* Mobile & Tablet Card View - Redesigned */}
                         <div className="lg:hidden divide-y divide-gray-200">
                             {filteredRows.map((r) => (
-                                <div key={r.id} className="p-6">
-                                    <div className="flex items-start space-x-4">
+                                <div key={r.id} className="p-4 hover:bg-gray-50 transition-colors">
+                                    <div className="flex items-start gap-3">
                                         {r.gambar_url && (
-                                            <div className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-gray-100">
+                                            <div className="flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 rounded-lg overflow-hidden bg-gray-100">
                                                 <Image 
                                                     src={r.gambar_url} 
                                                     alt=""
                                                     className="w-full h-full object-cover"
-                                                    width={1920}
-                                                    height={1080}
+                                                    width={64}
+                                                    height={64}
+                                                    unoptimized
                                                 />
                                             </div>
                                         )}
+                                        
                                         <div className="flex-1 min-w-0">
-                                            <div className="flex items-start justify-between mb-2">
-                                                <h3 className="font-semibold text-gray-900 flex-1 pr-2">
-                                                    {r.judul}
-                                                </h3>
+                                            {/* Category badge at top */}
+                                            <div className="flex items-center justify-between mb-2">
                                                 <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getCategoryColor(r.kategori)}`}>
                                                     {getCategoryIcon(r.kategori)}
                                                     <span className="ml-1">{r.kategori}</span>
                                                 </span>
                                             </div>
                                             
-                                            <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                                            {/* Title */}
+                                            <h3 className="font-semibold text-gray-900 text-sm sm:text-base line-clamp-2 mb-2">
+                                                {r.judul}
+                                            </h3>
+                                            
+                                            {/* Description */}
+                                            <p className="text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">
                                                 {r.deskripsi}
                                             </p>
 
+                                            {/* Meta info */}
                                             <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
-                                                <div className="flex items-center">
-                                                    <Calendar className="w-3 h-3 mr-1" />
-                                                    {formatDate(r.tanggal)}
-                                                </div>
-                                                <div className="flex items-center">
-                                                    <User className="w-3 h-3 mr-1" />
-                                                    {r.penulis}
+                                                <div className="flex items-center gap-3">
+                                                    <div className="flex items-center gap-1">
+                                                        <Calendar className="w-3 h-3" />
+                                                        <span>{formatDate(r.tanggal)}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1">
+                                                        <User className="w-3 h-3" />
+                                                        <span className="truncate max-w-20">{r.penulis}</span>
+                                                    </div>
                                                 </div>
                                             </div>
 
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-xs text-gray-500">
-                                                    Slug: {r.slug}
+                                            {/* Actions Row */}
+                                            <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                                                <span className="text-xs text-gray-500 truncate flex-1 pr-2">
+                                                    {r.slug}
                                                 </span>
-                                                <div className="flex items-center space-x-2">
+                                                
+                                                <div className="flex items-center gap-2">
                                                     <Link 
                                                         href={`/admin/berita-dan-pengumuman/edit/${r.id}`}
-                                                        className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition-colors duration-150"
+                                                        className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
                                                     >
-                                                        <Edit3 className="w-4 h-4" />
+                                                        <Edit3 className="w-3 h-3 mr-1" />
+                                                        Edit
                                                     </Link>
                                                     <button 
                                                         type="button" 
                                                         onClick={() => setDeleteConfirm(r.id)}
-                                                        className="p-2 text-red-600 hover:text-red-800 hover:bg-red-100 rounded-lg transition-colors duration-150"
+                                                        className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
                                                     >
-                                                        <Trash2 className="w-4 h-4" />
+                                                        <Trash2 className="w-3 h-3 mr-1" />
+                                                        Hapus
                                                     </button>
                                                 </div>
                                             </div>
@@ -461,10 +519,12 @@ export default function BeritaListPage(): JSX.Element {
                     <h3 className="font-semibold text-amber-800 mb-2">💡 Tips Pengelolaan</h3>
                     <ul className="text-sm text-amber-700 space-y-1">
                         <li>• Gunakan kategori &quot;Berita&quot; untuk informasi umum dan artikel</li>
-                        <li>• Gunakan kategori &quot;Pengumuman&quot; untuk informasi penting dan mendesak</li>
+                        <li className="hidden sm:list-item">• Gunakan kategori &quot;Pengumuman&quot; untuk informasi penting dan mendesak</li>
+                        <li className="sm:hidden">• Gunakan &quot;Pengumuman&quot; untuk info penting</li>
                         <li>• Pastikan judul dan deskripsi jelas dan menarik</li>
-                        <li>• Upload gambar yang relevan untuk meningkatkan keterbacaan</li>
-                        <li>• Periksa slug URL agar mudah diakses dan SEO friendly</li>
+                        <li className="hidden sm:list-item">• Upload gambar yang relevan untuk meningkatkan keterbacaan</li>
+                        <li className="hidden sm:list-item">• Periksa slug URL agar mudah diakses dan SEO friendly</li>
+                        <li className="sm:hidden">• Upload gambar relevan dan periksa slug URL</li>
                     </ul>
                 </div>
             </div>
