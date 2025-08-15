@@ -1,12 +1,21 @@
+import { ReactNode } from "react";
 import Guard from "@/components/Dashboard/Guard";
 import Sidebar from "@/components/Dashboard/Sidebar";
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+interface AdminLayoutProps {
+    children: ReactNode;
+}
+
+export default function AdminLayout({ children }: AdminLayoutProps) {
     return (
         <Guard>
-            <div style={{display:"flex",minHeight:"100vh"}}>
+            <div className="min-h-screen bg-green-50">
                 <Sidebar />
-                <div style={{flex:1,padding:16}}>{children}</div>
+                <main className="ml-64 p-6 lg:p-8">
+                    <div className="max-w-7xl mx-auto">
+                        {children}
+                    </div>
+                </main>
             </div>
         </Guard>
     );
