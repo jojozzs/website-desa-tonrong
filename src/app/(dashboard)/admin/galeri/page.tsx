@@ -136,21 +136,21 @@ export default function GaleriListPage(): JSX.Element {
     }
 
     return (
-        <div className="min-h-screen px-6">
-            <div className="max-w-7xl mx-auto">
-                {/* Header */}
-                <div className="xl:sticky top-0 z-40 xl:backdrop-blur-xl xl:shadow-lg shadow-indigo-500/5">
-                    <div className="max-w-7xl mx-auto py-6">
-                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-                            <div>
-                                <h1 className="text-3xl font-bold text-gray-900 mb-2">Galeri</h1>
-                                <p className="text-gray-600">Kelola galeri DKP Makassar</p>
-                            </div>
+        <div className="min-h-screen">
+            {/* Header */}
+            <div className="xl:sticky top-0 z-40 xl:backdrop-blur-xl xl:shadow-lg shadow-indigo-500/5">
+                <div className="max-w-6xl mx-auto py-6">
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                        <div>
+                            <h1 className="text-3xl font-bold text-gray-900 mb-2">Galeri</h1>
+                            <p className="text-gray-600">Kelola galeri Desa Tonrong</p>
                         </div>
                     </div>
                 </div>
+            </div>
 
                 {/* Controls */}
+            <div className="max-w-6xl mx-auto">
                 <div className="bg-white rounded-xl shadow-sm border p-6 mb-6">
                     <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
                         {/* Stats */}
@@ -244,7 +244,7 @@ export default function GaleriListPage(): JSX.Element {
                                 {searchTerm && (
                                     <button
                                         onClick={() => setSearchTerm("")}
-                                        className="text-blue-600 hover:text-blue-700 font-medium"
+                                        className="text-green-600 hover:text-green-700 font-medium cursor-pointer"
                                     >
                                         Hapus pencarian
                                     </button>
@@ -254,8 +254,8 @@ export default function GaleriListPage(): JSX.Element {
                             <>
                                 {/* Search Results Info */}
                                 {searchTerm && (
-                                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                                        <p className="text-blue-800">
+                                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6">
+                                        <p className="text-orange-800">
                                             Menampilkan <span className="font-semibold">{filteredRows.length}</span> dari {rows.length} galeri
                                             untuk pencarian &quot;<span className="font-semibold">{searchTerm}</span>&quot;
                                         </p>
@@ -283,70 +283,66 @@ export default function GaleriListPage(): JSX.Element {
                                                         />
                                                     </div>
                                                     
-                                                    {/* Content */}
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="flex items-start justify-between gap-4">
-                                                            <div className="flex-1">
-                                                                <h3 className="font-semibold text-gray-900 text-lg mb-2 line-clamp-1">
-                                                                    {row.judul}
-                                                                </h3>
-                                                                <p className="text-gray-600 mb-3 line-clamp-2 leading-relaxed">
-                                                                    {row.deskripsi}
-                                                                </p>
-                                                                
-                                                                {/* Meta Info */}
-                                                                <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-                                                                    <div className="flex items-center gap-1">
-                                                                        <HardDrive className="h-4 w-4" />
-                                                                        <span>{formatFileSize(row.gambar_size)}</span>
-                                                                    </div>
-                                                                    <div className="flex items-center gap-1">
-                                                                        <FileText className="h-4 w-4" />
-                                                                        <span>{row.gambar_type}</span>
-                                                                    </div>
-                                                                    {row.gambar_width && row.gambar_height && (
-                                                                        <div className="flex items-center gap-1">
-                                                                            <ImageIcon className="h-4 w-4" />
-                                                                            <span>{row.gambar_width} × {row.gambar_height}</span>
-                                                                        </div>
-                                                                    )}
-                                                                    <div className="flex items-center gap-1">
-                                                                        <Calendar className="h-4 w-4" />
-                                                                        <span>{formatDate(row.created_at)}</span>
-                                                                    </div>
-                                                                </div>
+                                                    {/* Content - Fixed width container */}
+                                                    <div className="flex-1 min-w-0 pr-4">
+                                                        <h3 className="font-semibold text-gray-900 text-lg mb-2 line-clamp-1">
+                                                            {row.judul}
+                                                        </h3>
+                                                        <p className="text-gray-600 mb-3 line-clamp-2 leading-relaxed break-words">
+                                                            {row.deskripsi}
+                                                        </p>
+                                                        
+                                                        {/* Meta Info */}
+                                                        <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                                                            <div className="flex items-center gap-1">
+                                                                <HardDrive className="h-4 w-4" />
+                                                                <span>{formatFileSize(row.gambar_size)}</span>
                                                             </div>
-                                                            
-                                                            {/* Actions */}
-                                                            <div className="flex items-center gap-2 flex-shrink-0">
-                                                                <a 
-                                                                    href={row.gambar_url} 
-                                                                    target="_blank" 
-                                                                    rel="noreferrer"
-                                                                    className="inline-flex items-center justify-center w-9 h-9 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
-                                                                    title="Lihat gambar"
-                                                                >
-                                                                    <Eye className="h-4 w-4" />
-                                                                </a>
-                                                                
-                                                                <Link 
-                                                                    href={`/admin/galeri/edit/${row.id}`}
-                                                                    className="inline-flex items-center justify-center w-9 h-9 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
-                                                                    title="Edit galeri"
-                                                                >
-                                                                    <Edit className="h-4 w-4" />
-                                                                </Link>
-
-                                                                <button 
-                                                                    type="button" 
-                                                                    onClick={() => { void handleDelete(row.id); }}
-                                                                    className="inline-flex items-center justify-center w-9 h-9 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors cursor-pointer"
-                                                                    title="Hapus galeri"
-                                                                >
-                                                                    <Trash2 className="h-4 w-4" />
-                                                                </button>
+                                                            <div className="flex items-center gap-1">
+                                                                <FileText className="h-4 w-4" />
+                                                                <span>{row.gambar_type}</span>
+                                                            </div>
+                                                            {row.gambar_width && row.gambar_height && (
+                                                                <div className="flex items-center gap-1">
+                                                                    <ImageIcon className="h-4 w-4" />
+                                                                    <span>{row.gambar_width} × {row.gambar_height}</span>
+                                                                </div>
+                                                            )}
+                                                            <div className="flex items-center gap-1">
+                                                                <Calendar className="h-4 w-4" />
+                                                                <span>{formatDate(row.created_at)}</span>
                                                             </div>
                                                         </div>
+                                                    </div>
+                                                    
+                                                    {/* Actions - Always positioned at the right */}
+                                                    <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
+                                                        <a 
+                                                            href={row.gambar_url} 
+                                                            target="_blank" 
+                                                            rel="noreferrer"
+                                                            className="inline-flex items-center justify-center w-9 h-9 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
+                                                            title="Lihat gambar"
+                                                        >
+                                                            <Eye className="h-4 w-4" />
+                                                        </a>
+                                                        
+                                                        <Link 
+                                                            href={`/admin/galeri/edit/${row.id}`}
+                                                            className="inline-flex items-center justify-center w-9 h-9 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+                                                            title="Edit galeri"
+                                                        >
+                                                            <Edit className="h-4 w-4" />
+                                                        </Link>
+
+                                                        <button 
+                                                            type="button" 
+                                                            onClick={() => { void handleDelete(row.id); }}
+                                                            className="inline-flex items-center justify-center w-9 h-9 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors cursor-pointer"
+                                                            title="Hapus galeri"
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </div>
