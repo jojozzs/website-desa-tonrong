@@ -11,8 +11,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <Guard>
             <div className="min-h-screen bg-green-50">
                 <Sidebar />
-                <main className="ml-64 p-6 lg:p-8">
-                    <div className="max-w-7xl mx-auto">
+                <main className="ml-64">
+                    <div>
                         {children}
                     </div>
                 </main>
