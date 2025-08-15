@@ -169,7 +169,7 @@ export default function GaleriTambahPage(): JSX.Element {
                                                 <button
                                                     type="button"
                                                     onClick={removeImage}
-                                                    className="absolute top-2 right-2 w-8 h-8 bg-red-600 text-white rounded-full flex items-center justify-center hover:bg-red-700 transition-colors"
+                                                    className="absolute top-2 right-2 w-8 h-8 bg-red-600 text-white rounded-full flex items-center justify-center hover:bg-red-700 transition-colors cursor-pointer"
                                                 >
                                                     <X className="w-4 h-4" />
                                                 </button>
