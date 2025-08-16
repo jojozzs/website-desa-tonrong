@@ -63,7 +63,7 @@ export default function BeritaListItem({ item }: BeritaListItemProps) {
                 ? 'bg-green-600/90' 
                 : 'bg-orange-600/90'
             }`}>
-              <span className="mr-1">{isBerita ? '📄' : '📢'}</span>
+              <span className="mr-1">{isBerita ? '📰' : '📢'}</span>
               {isBerita ? 'Berita' : 'Pengumuman'}
             </span>
           </div>
@@ -119,7 +119,7 @@ export default function BeritaListItem({ item }: BeritaListItemProps) {
                   ? 'bg-green-100 text-green-800' 
                   : 'bg-orange-100 text-orange-800'
               }`}>
-                <span className="mr-1">{isBerita ? '📄' : '📢'}</span>
+                <span className="mr-1">{isBerita ? '📰' : '📢'}</span>
                 {isBerita ? 'Berita' : 'Pengumuman'}
               </span>
 
