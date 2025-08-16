@@ -6,6 +6,7 @@ import { CloudinaryUploadResult } from "@/lib/cloudinary-types";
 import { adminAuth, adminDb } from "@/lib/firebaseAdmin";
 import { FieldValue, DocumentReference as AdminDocumentReference, Timestamp as AdminTimestamp } from "firebase-admin/firestore";
 import { BeritaPengumumanKategoriEnum } from "@/lib/enums";
+import type { OutputData } from "@editorjs/editorjs";
 
 export const runtime = "nodejs";
 
@@ -36,6 +37,7 @@ interface BeritaDocAdmin {
     gambar_height?: number;
     created_at?: AdminTimestamp;
     updated_at?: AdminTimestamp;
+    konten: OutputData;
 }
 
 interface BeritaDocWeb {
@@ -54,6 +56,7 @@ interface BeritaDocWeb {
     gambar_height?: number;
     created_at?: WebTimestamp;
     updated_at?: WebTimestamp;
+    konten: OutputData;
 }
 
 async function verifyAdmin(req: NextRequest): Promise<string> {
@@ -107,6 +110,7 @@ export async function GET(request: NextRequest) {
             const data = {
                 ...raw,
                 id: snap.id,
+                konten: raw.konten ?? null,
                 tanggal:
                     typeof (raw.tanggal as AdminTimestamp | undefined)?.toDate === "function"
                         ? (raw.tanggal as AdminTimestamp).toDate()
@@ -186,8 +190,15 @@ export async function POST(request: NextRequest) {
         const slug = String(formData.get("slug") || "");
         const gambar = formData.get("gambar") as File | null;
 
-        if (!judul || !deskripsi || !tanggalStr || !penulis || !kategori || !slug || !gambar) {
+        const kontenRaw = formData.get("konten") as string;
+        const konten: OutputData = JSON.parse(kontenRaw);
+
+        if (!judul || !tanggalStr || !penulis || !kategori || !slug || !gambar) {
             return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
+        }
+
+        if (!konten || !Array.isArray(konten.blocks)) {
+            return NextResponse.json({ success: false, error: "Invalid konten format" }, { status: 400 });
         }
 
         const tanggal = new Date(tanggalStr);
@@ -212,6 +223,7 @@ export async function POST(request: NextRequest) {
             gambar_type: up.format,
             gambar_width: up.width,
             gambar_height: up.height,
+            konten,
             created_at: FieldValue.serverTimestamp() as unknown as AdminTimestamp,
             updated_at: FieldValue.serverTimestamp() as unknown as AdminTimestamp,
         };
@@ -246,6 +258,7 @@ export async function PATCH(request: NextRequest) {
         const kategori = (formData.get("kategori") as string) as BeritaPengumumanKategoriEnum | null;
         const slug = (formData.get("slug") as string) ?? null;
         const gambar = (formData.get("gambar") as File) ?? null;
+        const kontenRaw = formData.get("konten") as string | null;
 
         const updateData: Partial<BeritaDocAdmin> & { updated_at: AdminTimestamp } = {
             updated_at: FieldValue.serverTimestamp() as unknown as AdminTimestamp,
@@ -261,6 +274,19 @@ export async function PATCH(request: NextRequest) {
                 return NextResponse.json({ success: false, error: "Invalid 'tanggal' format" }, { status: 400 });
             }
             updateData.tanggal = t;
+        }
+
+        if (kontenRaw) {
+            try {
+                const parsed = JSON.parse(kontenRaw);
+                if (parsed && Array.isArray(parsed.blocks)) {
+                    updateData.konten = parsed;
+                } else {
+                    return NextResponse.json({ success: false, error: "Invalid konten format" }, { status: 400 });
+                }
+            } catch {
+                return NextResponse.json({ success: false, error: "Failed to parse konten" }, { status: 400 });
+            }
         }
 
         if (gambar && gambar.size > 0) {
