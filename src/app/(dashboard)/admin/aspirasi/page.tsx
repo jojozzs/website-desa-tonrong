@@ -2,6 +2,8 @@
 import { JSX, useCallback, useEffect, useState } from "react";
 import { requireIdToken } from "@/lib/client-auth";
 import { MessageSquare, Filter, Clock, CheckCircle, AlertCircle, Trash2, RefreshCw, Mail, User, Calendar, FileText, Search, X, MoreVertical } from "lucide-react";
+import { AdminLogHelpers } from "@/lib/admin-log";
+import { useAdminData } from "@/hooks/useAdminData";
 
 type StatusType = "pending" | "done";
 
@@ -33,6 +35,8 @@ export default function AspirasiPage(): JSX.Element {
     const [showMobileFilters, setShowMobileFilters] = useState<boolean>(false);
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
     const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+
+    const { admin, loading: loadingAdmin } = useAdminData();
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -88,6 +92,20 @@ export default function AspirasiPage(): JSX.Element {
                 headers: { Authorization: `Bearer ${token}` },
                 body: fd
             });
+
+            if (!admin) {
+                setError("Gagal mencatat log. Data admin tidak ditemukan.");
+                // setSubmitting(false);
+                return;
+            }
+
+            await AdminLogHelpers.updateAspirasi(
+                admin.uid,
+                admin.nama,
+                id,
+                status,
+            );
+
             await load();
         } finally {
             setProcessingIds(prev => {
@@ -108,6 +126,19 @@ export default function AspirasiPage(): JSX.Element {
                 method: "DELETE",
                 headers: { Authorization: `Bearer ${token}` }
             });
+
+            if (!admin) {
+                setError("Gagal mencatat log. Data admin tidak ditemukan.");
+                // setSubmitting(false);
+                return;
+            }
+
+            await AdminLogHelpers.deleteAspirasi(
+                admin.uid,
+                admin.nama,
+                id,
+            );
+
             await load();
         } finally {
             setProcessingIds(prev => {
@@ -164,7 +195,7 @@ export default function AspirasiPage(): JSX.Element {
     const pendingCount = rows.filter(r => r.status === "pending").length;
     const doneCount = rows.filter(r => r.status === "done").length;
 
-    if (loading) {
+    if (loading || loadingAdmin) {
         return (
             <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
                 <div className="max-w-7xl mx-auto">
