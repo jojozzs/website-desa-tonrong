@@ -20,7 +20,7 @@ export interface BeritaData {
   gambar_height?: number
   created_at: Date | string
   updated_at: Date | string
-  admin_uid: string | null  
+  admin_uid: string | null
   konten: OutputData
 }
 
@@ -43,7 +43,12 @@ export function useBeritaData(kategori?: BeritaPengumumanKategoriEnum) {
       const result = await response.json()
       
       if (result.success) {
-        setData(result.data || [])
+        const sortedData = (result.data || []).sort((a: BeritaData, b: BeritaData) => {
+          const dateA = new Date(a.created_at).getTime()
+          const dateB = new Date(b.created_at).getTime()
+          return dateB - dateA 
+        })
+        setData(sortedData)
       } else {
         throw new Error(result.error || 'Gagal memuat data berita')
       }
