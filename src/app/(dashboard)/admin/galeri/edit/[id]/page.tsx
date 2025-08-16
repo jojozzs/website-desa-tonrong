@@ -5,6 +5,8 @@ import { requireIdToken } from "@/lib/client-auth";
 import { ArrowLeft, Upload, X, Image as ImageIcon, FileText, Type, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { AdminLogHelpers } from "@/lib/admin-log";
+import { useAdminData } from "@/hooks/useAdminData";
 
 type GaleriDetail = {
     id: string;
@@ -39,6 +41,8 @@ export default function GaleriEditPage(): JSX.Element {
     const [loading, setLoading] = useState<boolean>(true);
     const [submitting, setSubmitting] = useState<boolean>(false);
     const [error, setError] = useState<string>("");
+
+    const { admin, loading: loadingAdmin } = useAdminData();
 
     useEffect(() => {
         let active = true;
@@ -81,11 +85,26 @@ export default function GaleriEditPage(): JSX.Element {
                 headers: { Authorization: `Bearer ${token}` },
                 body: fd
             });
+
             if (!r.ok) {
                 setError("Gagal memperbarui galeri.");
                 setSubmitting(false);
                 return;
             }
+
+            if (!admin) {
+                setError("Gagal mencatat log. Data admin tidak ditemukan.");
+                setSubmitting(false);
+                return;
+            }
+
+            await AdminLogHelpers.updateGaleri(
+                admin.uid,
+                admin.nama,
+                id,
+                judul,
+            );
+
             router.replace("/admin/galeri");
         } catch {
             setError("Gagal memperbarui galeri.");
@@ -131,7 +150,7 @@ export default function GaleriEditPage(): JSX.Element {
     }
 
     // Loading state
-    if (loading) {
+    if (loading || loadingAdmin) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50 p-6">
                 <div className="max-w-2xl mx-auto">
