@@ -60,7 +60,7 @@ export default function BeritaListItem({ item }: BeritaListItemProps) {
           <div className="absolute top-2 left-2 sm:hidden">
             <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white backdrop-blur-sm ${
               isBerita 
-                ? 'bg-blue-600/90' 
+                ? 'bg-green-600/90' 
                 : 'bg-orange-600/90'
             }`}>
               <span className="mr-1">{isBerita ? '📄' : '📢'}</span>
@@ -84,7 +84,7 @@ export default function BeritaListItem({ item }: BeritaListItemProps) {
           </div>
 
           {/* Title */}
-          <h3 className="text-base sm:text-lg font-semibold text-gray-800 group-hover:text-blue-600 transition-colors line-clamp-2 mb-2">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-800 group-hover:text-green-600 transition-colors line-clamp-2 mb-2">
             {item.judul}
           </h3>
 
@@ -116,7 +116,7 @@ export default function BeritaListItem({ item }: BeritaListItemProps) {
               {/* Category Badge untuk desktop */}
               <span className={`hidden sm:inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                 isBerita 
-                  ? 'bg-blue-100 text-blue-800' 
+                  ? 'bg-green-100 text-green-800' 
                   : 'bg-orange-100 text-orange-800'
               }`}>
                 <span className="mr-1">{isBerita ? '📄' : '📢'}</span>
