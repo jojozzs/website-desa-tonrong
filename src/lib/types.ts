@@ -1,5 +1,6 @@
 import { Timestamp } from "firebase/firestore";
 import { BeritaPengumumanKategoriEnum, ProfilKategoriEnum } from "./enums";
+import { OutputData } from "@editorjs/editorjs";
 
 export interface Admin {
     id: string;
@@ -117,6 +118,7 @@ export interface BeritaPengumuman extends BaseImageFields {
     id: string;
     judul: string;
     deskripsi: string;
+    konten?: OutputData;
     tanggal: Date;
     penulis: string;
     kategori: BeritaPengumumanKategoriEnum;
@@ -139,6 +141,7 @@ export interface ProdukUnggulan extends BaseImageFields {
     id: string;
     judul: string;
     deskripsi: string;
+    konten?: OutputData;
     nama_umkm: string;
     alamat_umkm: string;
     kontak_umkm: string;
