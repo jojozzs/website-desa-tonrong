@@ -75,11 +75,6 @@ export interface ProfilWithContent extends Profil {
 			nama?: string
 		} | string>
 		
-		tugas_fungsi?: Array<{
-			jabatan: string
-			deskripsi: string
-		}>
-
 		demografi?: {
 			total_penduduk?: number
 			total_kk?: number
@@ -94,9 +89,9 @@ export interface ProfilWithContent extends Profil {
 		}>
 
 		kelompok_umur?: Array<{
-		kelompok: string
-		jumlah: number
-		persen: number
+            kelompok: string
+            jumlah: number
+            persen: number
 		}>
 
 		agama?: Record<string, {

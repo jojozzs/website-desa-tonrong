@@ -1,8 +1,6 @@
 // components/MainPage/SambutanKades.tsx
 'use client'
 
-import { PhoneIcon, EnvelopeIcon } from '@heroicons/react/24/outline'
-
 export default function SambutanKades() {
   return (
     <section className="w-full ">
@@ -23,17 +21,15 @@ export default function SambutanKades() {
             </div>
 
             {/* Main Message */}
-            <div className="space-y-4 text-justify">
+            <div className="space-y-4 text-justify mb-21">
               <p className="text-lg text-text-secondary leading-relaxed">
-                Selamat datang di website resmi Desa Tonrong. Melalui platform digital ini, 
-                kami berkomitmen untuk memberikan pelayanan terbaik dan informasi yang transparan 
-                kepada seluruh masyarakat desa.
+                Puji syukur kita panjatkan kehadirat Allah SWT atas segala rahmat-Nya. 
+                Website ini hadir sebagai media informasi dan komunikasi antara pemerintah desa dan masyarakat. 
               </p>
               
               <p className="text-lg text-text-secondary leading-relaxed">
-                Desa Tonrong terus berbenah menuju era digitalisasi dengan tetap menjunjung 
-                tinggi nilai-nilai kearifan lokal dan gotong royong. Bersama-sama, mari kita 
-                membangun desa yang maju, sejahtera, dan berkelanjutan untuk generasi mendatang.
+                Kami berharap informasi yang disajikan dapat bermanfaat, 
+                serta membuka ruang aspirasi demi kemajuan Desa Tonrong Rijang.
               </p>
 
             </div>
@@ -42,8 +38,7 @@ export default function SambutanKades() {
             <div className="bg-white rounded-2xl p-4 border-l-4 border-primary-orange shadow-sm">
               <h4 className="font-bold text-text-primary mb-3 text-lg">Visi Kami:</h4>
               <p className="text-text-secondary leading-relaxed text-justify">
-                "Mewujudkan Desa Tonrong yang mandiri, sejahtera, dan berkeadilan 
-                berbasis teknologi dengan tetap melestarikan nilai-nilai budaya lokal."
+                "Mewujudkan Desa Tonrong Rijang yang Maju, Mandiri, dan Sejahtera Berbasis Pertanian dan Kebersamaan."
               </p>
             </div>
 
@@ -55,7 +50,7 @@ export default function SambutanKades() {
             {/* Main Photo */}
             <div className="relative overflow-hidden rounded-2xl shadow-xl">
               <img 
-                src="profile.png" 
+                src="kades.jpeg" 
                 alt="H. Ahmad Syahrul, S.Pd - Kepala Desa Tonrong"
                 className="w-full h-[500px] lg:h-[430px] object-cover object-center group-hover:scale-105 transition-transform duration-500"
               />
@@ -66,8 +61,8 @@ export default function SambutanKades() {
               {/* Name Caption */}
               <div className="absolute bottom-6 left-6 right-6">
                 <div className="bg-white/95 backdrop-blur-sm rounded-lg p-4">
-                  <h4 className="font-bold text-text-primary mb-1">H. Ahmad Syahrul, S.Pd</h4>
-                  <p className="text-text-secondary text-sm">Kepala Desa Tonrong</p>
+                  <h4 className="font-bold text-text-primary mb-1">Haedar</h4>
+                  <p className="text-text-secondary text-sm">Kepala Desa Tonrong Rijang</p>
                   <div className="flex items-center mt-2">
                     <div className="w-2 h-2 bg-primary-green rounded-full mr-2"></div>
                     <span className="text-xs text-text-muted">Periode 2019 - 2025</span>

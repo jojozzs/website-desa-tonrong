@@ -21,10 +21,7 @@ export default function Home() {
                 <section className="scroll-mt-48 w-full px-6 md:px-8 lg:px-20 xl:px-40 py-16 bg-bg-green-light text-black">
                     <div className="max-w-7xl mx-auto">
                         <h2 className="text-3xl lg:text-4xl font-bold text-text-primary mb-4 text-center">Profil Desa Tonrong</h2>
-                        <div className="w-40 h-1 bg-black mx-auto mb-4"></div>
-                        <p className="text-lg text-text-secondary max-w-2xl mx-auto text-center py-6 mb-6">
-                            Mengenal lebih dekat Desa Tonrong, potensi, dan keunikan yang dimiliki
-                        </p>
+                        <div className="w-40 h-1 bg-black mx-auto mb-10"></div>
                         <ProfilDesa/>
                     </div>
                 </section>
@@ -32,10 +29,7 @@ export default function Home() {
                 <section className="scroll-mt-48 w-full px-6 md:px-8 lg:px-20 xl:px-40 py-16 bg-bg-gray-light text-black">
                     <div className="max-w-7xl mx-auto">
                         <h2 className="text-3xl lg:text-4xl font-bold text-text-primary mb-4 text-center">Sambutan Kepala Desa</h2>
-                        <div className="w-40 h-1 bg-black mx-auto mb-4"></div>
-                        <p className="text-lg text-text-secondary max-w-2xl mx-auto text-center py-6 mb-6">
-                            Pesan dan visi dari pimpinan desa untuk kemajuan bersama
-                        </p>
+                        <div className="w-40 h-1 bg-black mx-auto mb-10"></div>
                         <SambutanKades/>
                     </div>
                 </section>
@@ -47,8 +41,8 @@ export default function Home() {
                         <div className="w-40 h-1 bg-black mx-auto mb-12"></div>
                         <BeritaTerkini />
                         <div className="mt-16 text-center w-full">
-                            <Link href="/berita/berita-internal"
-                            className="block max-w-sm mx-auto px-6 py-3 border-2 border-dark-green rounded-full font-semibold hover:bg-dark-green hover:text-button-green-hover transition duration-500">
+                            <Link href="/berita"
+                            className="group inline-flex items-center px-10 py-4 bg-button-green hover:bg-button-green-hover text-white font-semibold rounded-2xl hover:shadow-lg hover:scale-105 transition-all duration-300">
                                 Selengkapnya →
                             </Link>
                         </div>

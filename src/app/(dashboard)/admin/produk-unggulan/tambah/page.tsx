@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { JSX, useState, useEffect } from "react";
 import { requireIdToken } from "@/lib/client-auth";
-import { ArrowLeft,Save, Package, FileText, Store, MapPin, Phone, Link as LinkIcon, Image as ImageIcon, AlertCircle, CheckCircle, Upload, X, Eye, Star, ShoppingBag } from "lucide-react";
+import { ArrowLeft,Save, Package, FileText, Store, MapPin, Phone, Image as ImageIcon, AlertCircle, CheckCircle, Upload, X, Eye, Star, ShoppingBag } from "lucide-react";
 import Image from "next/image";
 import EditorJs from "@/components/EditorJS";
 import type { OutputData } from "@editorjs/editorjs";
@@ -13,7 +13,6 @@ type FormState = {
     nama_umkm: string;
     alamat_umkm: string;
     kontak_umkm: string;
-    slug: string;
 };
 
 function initialForm(): FormState {
@@ -22,9 +21,28 @@ function initialForm(): FormState {
         deskripsi: "",
         nama_umkm: "",
         alamat_umkm: "",
-        kontak_umkm: "",
-        slug: ""
+        kontak_umkm: ""
     };
+}
+
+function generateSlugPreview(title: string): string {
+    if (!title.trim()) return "slug-otomatis";
+    
+    return title
+        .toLowerCase()
+        .trim()
+        .replace(/[àáâãäå]/g, 'a')
+        .replace(/[èéêë]/g, 'e')
+        .replace(/[ìíîï]/g, 'i')
+        .replace(/[òóôõöø]/g, 'o')
+        .replace(/[ùúûü]/g, 'u')
+        .replace(/[ñ]/g, 'n')
+        .replace(/[ç]/g, 'c')
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, ' ')
+        .replace(/\s/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-+|-+$/g, '') || "slug-otomatis";
 }
 
 export default function ProdukTambahPage(): JSX.Element {
@@ -37,18 +55,7 @@ export default function ProdukTambahPage(): JSX.Element {
     const [success, setSuccess] = useState<boolean>(false);
     
     const [konten, setKonten] = useState<OutputData | undefined>();
-
-    useEffect(() => {
-        if (f.judul && !f.slug) {
-            const autoSlug = f.judul
-                .toLowerCase()
-                .replace(/[^a-z0-9\s-]/g, '')
-                .replace(/\s+/g, '-')
-                .replace(/-+/g, '-')
-                .trim();
-            setF(prev => ({ ...prev, slug: autoSlug }));
-        }
-    }, [f.judul, f.slug]);
+    const slugPreview = generateSlugPreview(f.judul);
 
     useEffect(() => {
         if (gambar) {
@@ -73,7 +80,6 @@ export default function ProdukTambahPage(): JSX.Element {
             fd.append("nama_umkm", f.nama_umkm);
             fd.append("alamat_umkm", f.alamat_umkm);
             fd.append("kontak_umkm", f.kontak_umkm);
-            fd.append("slug", f.slug);
             if (gambar) fd.append("gambar", gambar);
 
             fd.append("konten", JSON.stringify(konten));
@@ -202,6 +208,13 @@ export default function ProdukTambahPage(): JSX.Element {
                                             className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 text-gray-700"
                                             placeholder="Masukkan nama produk unggulan..."
                                         />
+                                        {/* Slug Preview */}
+                                        <div className="text-xs text-gray-500 bg-gray-50 px-3 py-2 rounded-lg border">
+                                            <strong>URL akan menjadi:</strong> /produk-unggulan/<span className="text-green-600 font-mono">{slugPreview}</span>
+                                            <div className="mt-1 text-gray-400">
+                                                * URL slug akan dibuat otomatis dari judul
+                                            </div>
+                                        </div>
                                     </div>
 
                                     {/* Description */}
@@ -226,26 +239,6 @@ export default function ProdukTambahPage(): JSX.Element {
                                                 onChange={(data) => setKonten(data)}
                                             />
                                         </div>
-                                    </div>
-
-                                    {/* Slug */}
-                                    <div className="space-y-2">
-                                        <label className="block text-sm font-semibold text-gray-700">
-                                            <span className="flex items-center">
-                                                <LinkIcon className="w-4 h-4 text-indigo-600 mr-2" />
-                                                URL Slug
-                                            </span>
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={f.slug}
-                                            onChange={(e) => setF({ ...f, slug: e.currentTarget.value })}
-                                            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 text-gray-700"
-                                            placeholder="contoh: keripik-pisang-rahayu (otomatis dibuat dari nama produk)"
-                                        />
-                                        <p className="text-xs text-gray-500">
-                                            URL akan menjadi: /produk/{f.slug || "slug-otomatis"}
-                                        </p>
                                     </div>
                                 </div>
 

@@ -32,6 +32,7 @@ export default function AspirasiPage(): JSX.Element {
     const [expandedCard, setExpandedCard] = useState<string | null>(null);
     const [showMobileFilters, setShowMobileFilters] = useState<boolean>(false);
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+    const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -62,7 +63,6 @@ export default function AspirasiPage(): JSX.Element {
         void load();
     }, [load]);
 
-    // Close menu when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             const target = event.target as HTMLElement;
@@ -99,10 +99,8 @@ export default function AspirasiPage(): JSX.Element {
     }
 
     async function handleDelete(id: string): Promise<void> {
-        const ok = window.confirm("Apakah Anda yakin ingin menghapus aspirasi ini? Tindakan ini tidak dapat dibatalkan.");
-        if (!ok) return;
-        
         setProcessingIds(prev => new Set(prev).add(id));
+        setDeleteConfirm(null);
         setOpenMenuId(null);
         try {
             const token = await requireIdToken();
@@ -173,8 +171,8 @@ export default function AspirasiPage(): JSX.Element {
                     <div className="animate-pulse">
                         {/* Header skeleton */}
                         <div className="mb-6 sm:mb-8">
-                            <div className="h-8 sm:h-10 bg-gray-200 rounded w-48 sm:w-64 mb-2"></div>
-                            <div className="h-4 sm:h-5 bg-gray-200 rounded w-64 sm:w-96"></div>
+                            <div className="h-8 sm:h-14 bg-gray-200 rounded w-48 sm:w-64 mb-2"></div>
+                            <div className="h-4 sm:h-10 bg-gray-200 rounded w-64 sm:w-96"></div>
                         </div>
                         
                         {/* Stats skeleton */}
@@ -487,15 +485,11 @@ export default function AspirasiPage(): JSX.Element {
                                                         {row.status === "pending" ? "Selesai" : "Pending"}
                                                     </button>
                                                     <button 
-                                                        onClick={() => handleDelete(row.id)}
+                                                        onClick={() => setDeleteConfirm(row.id)}
                                                         disabled={processingIds.has(row.id)}
                                                         className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left disabled:opacity-50"
                                                     >
-                                                        {processingIds.has(row.id) ? (
-                                                            <RefreshCw className="w-4 h-4 animate-spin" />
-                                                        ) : (
-                                                            <Trash2 className="w-4 h-4" />
-                                                        )}
+                                                        <Trash2 className="w-4 h-4" />
                                                         Hapus
                                                     </button>
                                                 </div>
@@ -563,15 +557,11 @@ export default function AspirasiPage(): JSX.Element {
                                         
                                         <button
                                             type="button"
-                                            onClick={() => void handleDelete(row.id)}
+                                            onClick={() => setDeleteConfirm(row.id)}
                                             disabled={processingIds.has(row.id)}
                                             className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 focus:ring-2 focus:ring-red-500 font-medium text-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                                         >
-                                            {processingIds.has(row.id) ? (
-                                                <RefreshCw className="w-4 h-4 animate-spin" />
-                                            ) : (
-                                                <Trash2 className="w-4 h-4" />
-                                            )}
+                                            <Trash2 className="w-4 h-4" />
                                             Hapus
                                         </button>
                                     </div>
@@ -597,6 +587,41 @@ export default function AspirasiPage(): JSX.Element {
                             <li className="sm:hidden">• Tindaklanjuti aspirasi masyarakat dengan responsif</li>
                             <li>• Data yang dihapus tidak dapat dikembalikan</li>
                         </ul>
+                    </div>
+                )}
+
+                {/* Delete Confirmation Modal */}
+                {deleteConfirm && (
+                    <div className="fixed inset-0 bg-black/90 bg-opacity-50 flex items-center justify-center p-4 z-50">
+                        <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+                            <div className="flex items-center mb-4">
+                                <AlertCircle className="w-6 h-6 text-red-600 mr-3" />
+                                <h3 className="text-lg font-semibold text-gray-900">
+                                    Konfirmasi Hapus
+                                </h3>
+                            </div>
+                            
+                            <p className="text-gray-600 mb-6">
+                                Apakah Anda yakin ingin menghapus aspirasi ini? Tindakan ini tidak dapat dibatalkan.
+                            </p>
+
+                            <div className="flex justify-end space-x-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setDeleteConfirm(null)}
+                                    className="px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors duration-150 cursor-pointer"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => handleDelete(deleteConfirm)}
+                                    className="px-4 py-2 text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors duration-150 cursor-pointer"
+                                >
+                                    Hapus
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>

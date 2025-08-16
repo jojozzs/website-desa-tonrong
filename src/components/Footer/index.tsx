@@ -13,21 +13,18 @@ export default function Footer() {
 
   return (
     <footer className="bg-text-primary text-white">
-      <div className="container mx-auto px-6 sm:px-8 lg:px-12 pb-4 pt-14">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="container mx-auto px-6 sm:px-8 lg:px-12 pb-4 pt-12 max-w-7xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           
           {/* Section 1: Brand & Desa Info */}
           <div className="lg:col-span-1">
             <h3 className="text-lg font-semibold text-white mb-4">Tentang Desa</h3>
             
             <div className="flex items-center space-x-4 mb-6">
-              <div className="w-16 h-16 bg-gradient-to-r from-primary-orange to-primary-green rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-lg">DT</span>
-              </div>
               <div>
                 <h2 className="text-3xl font-bold text-white leading-tight">
                   Desa<br />
-                  Tonrong
+                  Tonrong Rijang
                 </h2>
               </div>
             </div>
@@ -38,7 +35,7 @@ export default function Footer() {
             
             <div className="text-sm text-gray-400">
               <p className="font-medium text-primary-orange mb-1">Pemerintah Desa Tonrong</p>
-              <p>Kecamatan Bone, Kabupaten Bone</p>
+              <p>Kecamatan Baranti, Kabupaten Sidenreng Rappang</p>
               <p>Provinsi Sulawesi Selatan</p>
             </div>
           </div>
@@ -52,17 +49,17 @@ export default function Footer() {
                 </h3>
             
                 <div className="space-y-3 text-gray-300">
-                    <div className='font-semibold'>
-                        <p className="text-sm">Jl. Raya Desa Tonrong No. 123</p>
-                        <p className="text-sm">Desa Tonrong, Kec. Bone</p>
-                        <p className="text-sm">Kab. Bone, Sulawesi Selatan</p>
-                        <p className="text-sm">Kode Pos: 92714</p>
+                    <div className='font-medium'>
+                        <p className="text-sm">Jl. Jeruk No. 3, Dusun Tonrong Rijang</p>
+                        <p className="text-sm">Desa Tonrong, Kec. Baranti</p>
+                        <p className="text-sm">Kab. Sidenreng Rappang, Sulawesi Selatan</p>
+                        <p className="text-sm">Kode Pos: 91652</p>
                     </div>
                 </div>
             </div>
 
             <div className="mt-4 pt-2 border-t border-gray-700">
-                <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                <h3 className="text-lg font-semibold text-white mt-4 mb-4 flex items-center">
                   <ClockIcon className="w-4 h-4 text-primary-green mr-2 flex-shrink-0" />
                   Jam Pelayanan
                 </h3>
@@ -76,25 +73,19 @@ export default function Footer() {
 
           {/* Section 3: Kontak */}
           <div>
-            <h3 className="text-lg font-semibold text-white mb-2 flex items-center">
+            <h3 className="text-lg font-semibold text-white mb-3 flex items-center">
               <PhoneIcon className="w-5 h-5 text-primary-green mr-2" />
               Hubungi Kami
             </h3>
             
             <div className="space-y-2 text-gray-300">
               <div>
-                <p className="font-bold mb-2">Nomor Telepon:</p>
+                <p className="font-bold mb-2 ">Nomor Telepon:</p>
                 <div className="space-y-2">
                   <p>
-                    <a href="tel:+6281234567890" className="hover:text-primary-green transition-colors flex items-center text-sm">
+                    <a href="tel:+6285299772547" className="hover:text-primary-green transition-colors flex items-center text-sm">
                       <span className="mr-2">📱</span>
-                      +62 812-3456-7890 (WhatsApp)
-                    </a>
-                  </p>
-                  <p>
-                    <a href="tel:+62411123456" className="hover:text-primary-green transition-colors flex items-center text-sm">
-                      <span className="mr-2">☎️</span>
-                      (0411) 123-456 (Kantor)
+                      085299772547
                     </a>
                   </p>
                 </div>
@@ -106,8 +97,8 @@ export default function Footer() {
                 </p>
                 <div className="space-y-1">
                   <p>
-                    <a href="mailto:info@desatonrong.id" className="hover:text-primary-orange transition-colors text-sm">
-                      info@desatonrong.id
+                    <a href="mailto:desatonrongrijang@gmail.com" className="hover:text-primary-orange transition-colors text-sm">
+                       desatonrongrijang@gmail.com
                     </a>
                   </p>
                 </div>
@@ -126,7 +117,7 @@ export default function Footer() {
             <div className="relative rounded-lg overflow-hidden shadow-lg mb-4">
               <div className="aspect-[4/3] bg-gray-600 relative">
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126748.60901665353!2d120.0!3d-4.5!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNMKwMzAnMDAuMCJTIDEyMMKwMDAnMDAuMCJF!5e0!3m2!1sen!2sid!4v1"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15924.075761204782!2d119.76999704999999!3d-3.8059839999999996!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2d944ab93675d953%3A0x584e7ba49a51ae2b!2sTonrong%20Rijang%2C%20Baranti%2C%20Sidenreng%20Rappang%20Regency%2C%20South%20Sulawesi!5e0!3m2!1sen!2sid!4v1755363757126!5m2!1sen!2sid"
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
@@ -139,7 +130,7 @@ export default function Footer() {
                 
                 {/* Map Label */}
                 <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm rounded-lg px-3 py-1 shadow-md">
-                  <p className="text-text-primary text-xs font-bold">📍 Desa Tonrong</p>
+                  <p className="text-text-primary text-xs font-bold">📍 Desa Tonrong Rijang</p>
                 </div>
               </div>
             </div>
@@ -147,7 +138,7 @@ export default function Footer() {
             {/* Location Info */}
             <div className="space-y-2 text-sm text-gray-300">
               <a 
-                href="https://maps.google.com/?q=-4.5,120.0" 
+                href="https://maps.app.goo.gl/EruJ3Jpohjr6Co1J6" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="inline-flex items-center text-primary-orange hover:text-primary-green transition-colors font-medium"
@@ -155,12 +146,6 @@ export default function Footer() {
                 <MapPinIcon className="w-4 h-4 mr-1" />
                 Buka di Google Maps
               </a>
-              
-              <div className="text-gray-400">
-                <p>• 15 km dari pusat Kota Bone</p>
-                <p>• 45 menit berkendara dari Watampone</p>
-                <p>• Akses jalan aspal kondisi baik</p>
-              </div>
             </div>
           </div>
 

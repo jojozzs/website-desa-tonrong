@@ -1,94 +1,270 @@
-"use client";
+'use client';
+import { useSemuaProfilData } from '@/components/hooks/useSemuaProfilData';
+import { ProfilKategoriEnum } from '@/lib/enums';
+import { FileText, Plus, Edit3, Check, Clock, Users, Building, MapPin, Target, History, Eye } from 'lucide-react';
+import Link from 'next/link';
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { ProfilWithContent } from "@/lib/types";
-import { ProfilKategoriEnum } from "@/lib/enums";
-import Image from "next/image";
+const kategoriList = Object.values(ProfilKategoriEnum);
 
-const CATS = Object.values(ProfilKategoriEnum);
-
-export default function ProfilList() {
-  const [kategori, setKategori] = useState<string>(CATS[0]);
-  const [items, setItems] = useState<ProfilWithContent[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  const load = async (kat: string) => {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/profil?kategori=${encodeURIComponent(kat)}`);
-      const json = await res.json();
-      if (json.success) setItems(json.data);
-    } finally {
-      setLoading(false);
+const getKategoriIcon = (kategori: ProfilKategoriEnum) => {
+    switch (kategori) {
+        case ProfilKategoriEnum.SEJARAH:
+            return History;
+        case ProfilKategoriEnum.VISI_DAN_MISI:
+            return Target;
+        case ProfilKategoriEnum.STRUKTUR_PEMERINTAHAN_DESA:
+            return Users;
+        case ProfilKategoriEnum.LETAK_GEOGRAFIS_DAN_PETA_DESA:
+            return MapPin;
+        case ProfilKategoriEnum.JUMLAH_PENDUDUK_DAN_DATA_UMUM:
+            return Building;
+        default:
+            return FileText;
     }
-  };
+};
 
-  useEffect(() => { load(kategori); }, [kategori]);
+const getKategoriColor = (kategori: ProfilKategoriEnum) => {
+    const colors: Record<ProfilKategoriEnum, string> = {
+        [ProfilKategoriEnum.SEJARAH]: 'bg-blue-100 text-blue-600 border-blue-200',
+        [ProfilKategoriEnum.VISI_DAN_MISI]: 'bg-green-100 text-green-600 border-green-200',
+        [ProfilKategoriEnum.STRUKTUR_PEMERINTAHAN_DESA]: 'bg-orange-100 text-orange-600 border-orange-200',
+        [ProfilKategoriEnum.LETAK_GEOGRAFIS_DAN_PETA_DESA]: 'bg-emerald-100 text-emerald-600 border-emerald-200',
+        [ProfilKategoriEnum.JUMLAH_PENDUDUK_DAN_DATA_UMUM]: 'bg-purple-100 text-purple-600 border-purple-200',
+    };
+    return colors[kategori] || 'bg-gray-100 text-gray-600 border-gray-200';
+};
 
-  return (
-    <div className="space-y-4 text-black">
-      <div className="flex items-center gap-3">
-        <h1 className="text-xl font-semibold">Profil List</h1>
-        <Link href="/admin/profil/tambah" className="px-3 py-1 rounded bg-emerald-600 text-white text-sm">Tambah</Link>
-      </div>
+const formatKategoriName = (kategori: string) => {
+    return kategori
+        .replace(/-/g, ' ')
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+};
 
-      <div className="flex gap-3 items-center">
-        <label className="text-sm">Kategori</label>
-        <select
-          className="border rounded px-2 py-1"
-          value={kategori}
-          onChange={(e) => setKategori(e.target.value)}
-        >
-          {CATS.map(c => <option key={c} value={c}>{c}</option>)}
-        </select>
-      </div>
+export default function AdminProfilPage() {
+    const { data, loading, error } = useSemuaProfilData();
 
-      {loading ? (
-        <div>Memuat…</div>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-[800px] w-full border">
-            <thead>
-              <tr className="bg-gray-50 text-left">
-                <th className="p-2 border">Judul</th>
-                <th className="p-2 border">Deskripsi</th>
-                <th className="p-2 border">Kategori</th>
-                <th className="p-2 border">Konten</th>
-                <th className="p-2 border">Data Tambahan</th>
-                <th className="p-2 border">Gambar</th>
-                <th className="p-2 border">Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((p) => (
-                <tr key={p.id}>
-                  <td className="p-2 border">{p.judul}</td>
-                  <td className="p-2 border">{p.deskripsi}</td>
-                  <td className="p-2 border">{p.kategori}</td>
-                  <td className="p-2 border">{p.konten ? `${p.konten.slice(0, 50)}…` : "-"}</td>
-                  <td className="p-2 border">
-                    {p.data_tambahan ? (
-                      <code className="text-xs">
-                        {JSON.stringify(p.data_tambahan).slice(0, 60)}…
-                      </code>
-                    ) : "-"}
-                  </td>
-                  <td className="p-2 border">
-                    {p.gambar_url ? <Image width={1920} height={1080} src={p.gambar_url} alt="" className="h-12 w-20 object-cover" /> : "-"}
-                  </td>
-                  <td className="p-2 border">
-                    <Link href={`/admin/profil/edit/${p.id}`} className="text-blue-600 hover:underline">Edit</Link>
-                  </td>
-                </tr>
-              ))}
-              {items.length === 0 && (
-                <tr><td colSpan={7} className="p-3 text-center text-sm text-gray-500">Belum ada data untuk kategori ini.</td></tr>
-              )}
-            </tbody>
-          </table>
+    const getProfilByKategori = (kategori: ProfilKategoriEnum) =>
+        data.find((item) => item.kategori === kategori);
+
+    const formatDate = (dateValue: string | null | { toDate?: () => Date }): string => {
+        if (!dateValue) return "-";
+        
+        if (typeof dateValue === 'object' && dateValue.toDate) {
+            return dateValue.toDate().toLocaleDateString("id-ID", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+            });
+        }
+        
+        if (typeof dateValue === 'string') {
+            return new Date(dateValue).toLocaleDateString("id-ID", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+            });
+        }
+        
+        return "-";
+    };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 p-4 lg:p-6">
+                <div className="max-w-7xl mx-auto">
+                    <div className="text-center mb-8">
+                        <div className="h-8 bg-gray-200 rounded-xl w-64 mx-auto mb-2"></div>
+                        <div className="h-4 bg-gray-200 rounded-lg w-96 mx-auto"></div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {[1, 2, 3, 4, 5].map(i => (
+                            <div key={i} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 min-h-[300px]">
+                                <div className="animate-pulse space-y-4">
+                                    <div className="h-12 w-12 bg-gray-200 rounded-xl"></div>
+                                    <div className="h-5 bg-gray-200 rounded w-32"></div>
+                                    <div className="h-4 bg-gray-200 rounded w-24"></div>
+                                    <div className="h-10 bg-gray-200 rounded-xl"></div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gray-50 p-4 lg:p-6">
+                <div className="max-w-7xl mx-auto">
+                    <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+                        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <FileText className="w-8 h-8 text-red-600" />
+                        </div>
+                        <h3 className="text-red-800 font-semibold mb-2">Gagal Memuat Data</h3>
+                        <p className="text-red-700">{error}</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    const existingCount = kategoriList.filter(kategori => getProfilByKategori(kategori)).length;
+    const totalCount = kategoriList.length;
+
+    return (
+        <div className="min-h-screen bg-gray-50 p-4 lg:p-6">
+            <div className="max-w-7xl mx-auto">
+                {/* Header */}
+                <div className="text-center mb-8">
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Manajemen Profil Desa</h1>
+                    <p className="text-gray-600">Kelola semua informasi profil desa berdasarkan kategori</p>
+                </div>
+
+                {/* Stats Overview */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-gray-600 text-sm font-medium">Total Kategori</p>
+                                <p className="text-2xl font-bold text-gray-900">{totalCount}</p>
+                            </div>
+                            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                                <FileText className="w-6 h-6 text-blue-600" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-gray-600 text-sm font-medium">Sudah Dibuat</p>
+                                <p className="text-2xl font-bold text-green-600">{existingCount}</p>
+                            </div>
+                            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                                <Check className="w-6 h-6 text-green-600" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-gray-600 text-sm font-medium">Belum Dibuat</p>
+                                <p className="text-2xl font-bold text-orange-600">{totalCount - existingCount}</p>
+                            </div>
+                            <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                                <Plus className="w-6 h-6 text-orange-600" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Profil Cards Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {kategoriList.map((kategori) => {
+                        const existing = getProfilByKategori(kategori);
+                        const IconComponent = getKategoriIcon(kategori);
+                        const colorClass = getKategoriColor(kategori);
+                        
+                        return (
+                            <div key={kategori} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 min-h-[300px] flex flex-col">
+                                {/* Status Banner */}
+                                {existing ? (
+                                    <div className="bg-green-50 border-b border-green-100 px-6 py-3">
+                                        <div className="flex items-center gap-2 text-green-700">
+                                            <Check className="w-4 h-4" />
+                                            <span className="text-sm font-medium">Profil Sudah Ada</span>
+                                            <div className="w-2 h-2 bg-green-500 rounded-full ml-auto"></div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="bg-orange-50 border-b border-orange-100 px-6 py-3">
+                                        <div className="flex items-center gap-2 text-orange-700">
+                                            <Plus className="w-4 h-4" />
+                                            <span className="text-sm font-medium">Belum Dibuat</span>
+                                            <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse ml-auto"></div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="p-6 flex-1 flex flex-col">
+                                    {/* Icon & Title */}
+                                    <div className="flex items-start gap-4 mb-4">
+                                        <div className={`w-14 h-14 rounded-xl flex items-center justify-center border ${colorClass}`}>
+                                            <IconComponent className="w-7 h-7" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <h3 className="font-bold text-gray-900 text-lg mb-1">
+                                                {formatKategoriName(kategori)}
+                                            </h3>
+                                            <p className="text-gray-600 text-sm">
+                                                {existing ? 'Siap dipublikasikan' : 'Perlu dibuat'}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Metadata - Only for existing profiles */}
+                                    {existing && (
+                                        <div className="bg-gray-50 rounded-xl p-4 mb-4">
+                                            <div className="flex items-center gap-2 text-gray-600 text-sm mb-2">
+                                                <Clock className="w-4 h-4" />
+                                                <span>Terakhir diperbarui</span>
+                                            </div>
+                                            <p className="text-gray-800 font-medium text-sm">
+                                                {formatDate(existing.updated_at || existing.created_at)}
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    {/* Spacer for cards without metadata */}
+                                    {!existing && <div className="flex-1"></div>}
+
+                                    {/* Action Buttons - Always at the bottom */}
+                                    <div className="space-y-3 mt-auto">
+                                        {existing ? (
+                                            <div className="space-y-2">
+                                                <Link href={`/admin/profil/edit/${existing.id}`} className="block">
+                                                    <button className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer">
+                                                        <span className="flex items-center justify-center gap-2">
+                                                            <Edit3 className="w-4 h-4" />
+                                                            Edit Profil
+                                                        </span>
+                                                    </button>
+                                                </Link>
+                                                
+                                                {/* Preview Button */}
+                                                <button className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200">
+                                                    <span className="flex items-center justify-center gap-2 cursor-pointer">
+                                                        <Eye className="w-4 h-4" />
+                                                        Preview
+                                                    </span>
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <Link href={`/admin/profil/tambah?kategori=${kategori}`} className="block">
+                                                <button className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer">
+                                                    <span className="flex items-center justify-center gap-2">
+                                                        <Plus className="w-4 h-4" />
+                                                        Tambah Profil
+                                                    </span>
+                                                </button>
+                                            </Link>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
         </div>
-      )}
-    </div>
-  );
+    );
 }

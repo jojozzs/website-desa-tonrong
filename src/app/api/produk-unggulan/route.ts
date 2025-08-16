@@ -58,6 +58,25 @@ interface ProdukDocWeb {
     konten: OutputData;
 }
 
+// Helper function to generate slug from title
+function generateSlug(title: string): string {
+    return title
+        .toLowerCase()
+        .trim()
+        .replace(/[àáâãäå]/g, 'a')
+        .replace(/[èéêë]/g, 'e')
+        .replace(/[ìíîï]/g, 'i')
+        .replace(/[òóôõöø]/g, 'o')
+        .replace(/[ùúûü]/g, 'u')
+        .replace(/[ñ]/g, 'n')
+        .replace(/[ç]/g, 'c')
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, ' ')
+        .replace(/\s/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-+|-+$/g, '');
+}
+
 async function verifyAdmin(req: NextRequest): Promise<string> {
     const authHeader = req.headers.get("authorization") || "";
     const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
@@ -87,15 +106,6 @@ async function uploadToCloudinary(file: File): Promise<CloudinaryUploadResult> {
         .end(buf);
     });
 }
-
-const slugify = (text: string): string =>
-    text
-        .toLowerCase()
-        .normalize("NFKD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "")
-        .replace(/-+/g, "-");
 
 async function slugExists(slug: string): Promise<boolean> {
     const snap: QuerySnapshot<DocumentData> = await adminDb
@@ -207,7 +217,6 @@ export async function POST(request: NextRequest) {
         const nama_umkm = String(formData.get("nama_umkm") || "");
         const alamat_umkm = String(formData.get("alamat_umkm") || "");
         const kontak_umkm = String(formData.get("kontak_umkm") || "");
-        const slugRaw = (formData.get("slug") as string | null) ?? null;
         const gambar = formData.get("gambar") as File | null;
 
         const kontenRaw = formData.get("konten") as string;
@@ -225,8 +234,8 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: false, error: "Invalid konten format" }, { status: 400 });
         }
 
-        const base = slugify(slugRaw && slugRaw.length > 0 ? slugRaw : judul);
-        const slug = await ensureUniqueSlug(base);
+        const baseSlug = generateSlug(judul);
+        const uniqueSlug = await ensureUniqueSlug(baseSlug);
 
         const up = await uploadToCloudinary(gambar);
         const adminRef = adminDb.doc(`admin/${uid}`);
@@ -237,7 +246,7 @@ export async function POST(request: NextRequest) {
             nama_umkm,
             alamat_umkm,
             kontak_umkm,
-            slug,
+            slug: uniqueSlug,
             admin_id: adminRef,
             gambar_url: up.secure_url,
             gambar_id: up.public_id,
@@ -279,7 +288,6 @@ export async function PATCH(request: NextRequest) {
         const nama_umkm = (formData.get("nama_umkm") as string) ?? null;
         const alamat_umkm = (formData.get("alamat_umkm") as string) ?? null;
         const kontak_umkm = (formData.get("kontak_umkm") as string) ?? null;
-        const slugRaw = (formData.get("slug") as string) ?? null;
         const gambar = (formData.get("gambar") as File) ?? null;
         const kontenRaw = formData.get("konten") as string | null;
 
@@ -287,22 +295,23 @@ export async function PATCH(request: NextRequest) {
         if (!existing.exists) {
             return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
         }
-        const oldData = existing.data() as ProdukDocAdmin;
+        // const oldData = existing.data() as ProdukDocAdmin;
 
         const updateData: Partial<ProdukDocAdmin> & { updated_at: AdminTimestamp } = {
             updated_at: FieldValue.serverTimestamp() as unknown as AdminTimestamp,
         };
-        if (judul !== null) updateData.judul = judul;
+        // if (judul !== null) updateData.judul = judul;
+        if (judul !== null) {
+            updateData.judul = judul;
+            // Auto-generate new slug when title changes
+            const baseSlug = generateSlug(judul);
+            const uniqueSlug = await ensureUniqueSlug(baseSlug, id);
+            updateData.slug = uniqueSlug;
+        }
         if (deskripsi !== null) updateData.deskripsi = deskripsi;
         if (nama_umkm !== null) updateData.nama_umkm = nama_umkm;
         if (alamat_umkm !== null) updateData.alamat_umkm = alamat_umkm;
         if (kontak_umkm !== null) updateData.kontak_umkm = kontak_umkm;
-
-        if (slugRaw !== null || judul !== null) {
-            const base = slugify(slugRaw && slugRaw.length > 0 ? slugRaw : (judul ?? oldData.judul));
-            const newSlug = await ensureUniqueSlug(base, id);
-            if (newSlug !== oldData.slug) updateData.slug = newSlug;
-        }
 
         if (gambar && gambar.size > 0) {
             const up = await uploadToCloudinary(gambar);
