@@ -6,6 +6,8 @@ import { ProdukUnggulan } from "@/lib/types";
 import { Plus, Search, Package, Edit3, Trash2, AlertCircle, Store, Tag, RefreshCw, Grid3x3, List, Calendar, Filter, X, MoreVertical } from "lucide-react";
 import Image from "next/image";
 import { OutputData } from "@editorjs/editorjs/types/data-formats/output-data";
+import { AdminLogHelpers } from "@/lib/admin-log";
+import { useAdminData } from "@/hooks/useAdminData";
 
 type ProdukRow = Omit<ProdukUnggulan, "created_at" | "updated_at"> & {
     created_at: string | null;
@@ -203,6 +205,8 @@ export default function ProdukListPage(): JSX.Element {
     const [showMobileFilters, setShowMobileFilters] = useState<boolean>(false);
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
+    const { admin, loading: loadingAdmin } = useAdminData();
+
     const load = useCallback(async () => {
         setLoading(true);
         setError("");
@@ -258,24 +262,38 @@ export default function ProdukListPage(): JSX.Element {
     }, []);
 
     async function handleDelete(id: string): Promise<void> {
-        setDeletingProduct(null);
-        setDeleteConfirm(null);
-        setOpenMenuId(null);
-        
         try {
+            const productToDelete = rows.find(product => product.id === id);
+            
             const t = await requireIdToken();
             const response = await fetch(`/api/produk-unggulan?id=${encodeURIComponent(id)}`, {
                 method: "DELETE",
                 headers: { Authorization: `Bearer ${t}` }
             });
             
-            if (response.ok) {
-                await load();
-            } else {
-                alert("Gagal menghapus produk. Silakan coba lagi.");
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Gagal menghapus produk");
             }
-        } catch {
-            alert("Gagal menghapus produk. Periksa koneksi internet Anda.");
+            
+            if (admin && productToDelete) {
+                await AdminLogHelpers.deleteProdukUnggulan(
+                    admin.uid,
+                    admin.nama,
+                    id,
+                    productToDelete.judul
+                );
+            }
+
+            setDeletingProduct(null);
+            setDeleteConfirm(null);
+            setOpenMenuId(null);
+            await load();
+        } catch (error) {
+            console.error("Error deleting product:", error);
+            alert(error instanceof Error ? error.message : "Gagal menghapus produk. Periksa koneksi internet Anda.");
+            setDeletingProduct(null);
+            setDeleteConfirm(null);
         }
     }
 
@@ -340,7 +358,7 @@ export default function ProdukListPage(): JSX.Element {
         return "";
     }
 
-    if (loading) {
+    if (loading || loadingAdmin) {
         return <ProdukSkeleton viewMode={viewMode} />;
     }
 
