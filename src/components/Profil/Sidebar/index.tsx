@@ -8,12 +8,6 @@ import { HomeIcon, DocumentTextIcon, EyeIcon, MapIcon, UsersIcon, ChartBarIcon, 
 
 const navigationItems = [
   {
-    name: 'Profil Desa',
-    href: '/profil',
-    icon: HomeIcon,
-    description: 'Gambaran umum desa'
-  },
-  {
     name: 'Sejarah Desa',
     href: '/profil/sejarah',
     icon: DocumentTextIcon,
