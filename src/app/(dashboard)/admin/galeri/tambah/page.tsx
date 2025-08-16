@@ -5,6 +5,8 @@ import { requireIdToken } from "@/lib/client-auth";
 import { ArrowLeft, Upload, X, Image as ImageIcon, FileText, Type } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { AdminLogHelpers } from "@/lib/admin-log";
+import { useAdminData } from "@/hooks/useAdminData";
 
 export default function GaleriTambahPage(): JSX.Element {
     const router = useRouter();
@@ -14,6 +16,8 @@ export default function GaleriTambahPage(): JSX.Element {
     const [previewUrl, setPreviewUrl] = useState<string>("");
     const [submitting, setSubmitting] = useState<boolean>(false);
     const [error, setError] = useState<string>("");
+
+    const { admin, loading: loadingAdmin } = useAdminData();
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>): Promise<void> {
         e.preventDefault();
@@ -31,11 +35,31 @@ export default function GaleriTambahPage(): JSX.Element {
                 headers: { Authorization: `Bearer ${token}` },
                 body: fd
             });
+
             if (!r.ok) {
                 setError("Gagal menyimpan galeri.");
                 setSubmitting(false);
                 return;
             }
+
+            const responseData = await r.json();
+            const createdId = responseData.id || responseData.data?.id || responseData.documentId || responseData.berita_id;
+
+            if (!admin) {
+                setError("Gagal mencatat log. Data admin tidak ditemukan.");
+                setSubmitting(false);
+                return;
+            }
+
+            if (createdId) {
+                await AdminLogHelpers.createGaleri(
+                    admin.uid,
+                    admin.nama,
+                    createdId,
+                    judul
+                );
+            }
+
             router.replace("/admin/galeri");
         } catch {
             setError("Gagal menyimpan galeri.");
