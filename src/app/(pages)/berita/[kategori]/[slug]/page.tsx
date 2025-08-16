@@ -1,7 +1,7 @@
 'use client'
 
 import { use } from 'react'
-import { useBeritaBySlug, useBeritaData } from '@/components/hooks/useBeritaData'
+import { useBeritaBySlug, useBeritaData } from '@/hooks/useBeritaData'
 import { LoadingState, ErrorState } from '@/components/Berita/Shared'
 import BeritaCard from '@/components/Berita/BeritaCard'
 import Breadcrumb from '@/components/Berita/Breadcrumb'

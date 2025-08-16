@@ -7,6 +7,8 @@ import { ArrowLeft,Save, Package, FileText, Store, MapPin, Phone, Image as Image
 import Image from "next/image";
 import { OutputData } from "@editorjs/editorjs";
 import EditorJs from "@/components/EditorJS";
+import { AdminLogHelpers } from "@/lib/admin-log";
+import { useAdminData } from "@/hooks/useAdminData";
 
 type ProdukDetail = Omit<ProdukUnggulan, "created_at" | "updated_at"> & {
     created_at: string | null;
@@ -70,6 +72,8 @@ export default function ProdukEditPage(): JSX.Element {
 
     const newSlugPreview = generateSlugPreview(f.judul);
     const slugWillChange = currentSlug && newSlugPreview !== currentSlug;
+
+    const { admin, loading: loadingAdmin } = useAdminData();
 
     useEffect(() => {
         let active = true;
@@ -143,6 +147,19 @@ export default function ProdukEditPage(): JSX.Element {
                 setSubmitting(false);
                 return;
             }
+
+            if (!admin) {
+                setError("Gagal mencatat log. Data admin tidak ditemukan.");
+                setSubmitting(false);
+                return;
+            }
+
+            await AdminLogHelpers.updateProdukUnggulan(
+                admin.uid,
+                admin.nama,
+                id,
+                f.judul,
+            );
             
             setSuccess(true);
             setTimeout(() => {
@@ -180,7 +197,7 @@ export default function ProdukEditPage(): JSX.Element {
         if (fileInput) fileInput.value = '';
     }
 
-    if (loading) {
+    if (loading || loadingAdmin) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50 p-6">
                 <div className="max-w-2xl mx-auto pt-20">

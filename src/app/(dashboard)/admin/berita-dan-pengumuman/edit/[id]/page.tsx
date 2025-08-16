@@ -7,6 +7,8 @@ import { ArrowLeft, Save, FileText, Calendar, User, Tag, Image as ImageIcon, New
 import Image from "next/image";
 import { OutputData } from "@editorjs/editorjs";
 import EditorJs from "@/components/EditorJS";
+import { AdminLogHelpers } from "@/lib/admin-log";
+import { useAdminData } from "@/hooks/useAdminData";
 
 type Detail = {
     id: string;
@@ -86,6 +88,8 @@ export default function BeritaEditPage(): JSX.Element {
     const newSlugPreview = generateSlugPreview(f.judul);
     const slugWillChange = currentSlug && newSlugPreview !== currentSlug;
 
+    const { admin, loading: loadingAdmin } = useAdminData();
+
     useEffect(() => {
         let active = true;
         (async () => {
@@ -134,23 +138,23 @@ export default function BeritaEditPage(): JSX.Element {
         setSubmitting(true);
         
         try {
-            const t = await requireIdToken();
-            const fd = new FormData();
-            fd.append("id", id);
-            fd.append("judul", f.judul);
-            fd.append("deskripsi", f.deskripsi);
+            const token = await requireIdToken();
+            const formData = new FormData();
+            formData.append("id", id);
+            formData.append("judul", f.judul);
+            formData.append("deskripsi", f.deskripsi);
             if (f.konten) {
-                fd.append("konten", JSON.stringify(f.konten));
+                formData.append("konten", JSON.stringify(f.konten));
             }
-            fd.append("tanggal", f.tanggal);
-            fd.append("penulis", f.penulis);
-            fd.append("kategori", f.kategori);
-            if (gambar) fd.append("gambar", gambar);
+            formData.append("tanggal", f.tanggal);
+            formData.append("penulis", f.penulis);
+            formData.append("kategori", f.kategori);
+            if (gambar) formData.append("gambar", gambar);
 
             const r = await fetch("/api/berita-pengumuman", {
                 method: "PATCH",
-                headers: { Authorization: `Bearer ${t}` },
-                body: fd
+                headers: { Authorization: `Bearer ${token}` },
+                body: formData
             });
             
             if (!r.ok) {
@@ -158,6 +162,20 @@ export default function BeritaEditPage(): JSX.Element {
                 setSubmitting(false);
                 return;
             }
+
+            if (!admin) {
+                setError("Gagal mencatat log. Data admin tidak ditemukan.");
+                setSubmitting(false);
+                return;
+            }
+
+            await AdminLogHelpers.updateBerita(
+                admin.uid,
+                admin.nama,
+                id,
+                f.judul,
+                "berita dan pengumuman"
+            );
             
             setSuccess(true);
             setTimeout(() => {
@@ -200,7 +218,7 @@ export default function BeritaEditPage(): JSX.Element {
             : <Megaphone className="w-5 h-5 text-orange-600" />;
     }
 
-    if (loading) {
+    if (loading || loadingAdmin) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50 p-6">
                 <div className="max-w-2xl mx-auto pt-20">

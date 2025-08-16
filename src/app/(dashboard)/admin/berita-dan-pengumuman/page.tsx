@@ -5,6 +5,8 @@ import { requireIdToken } from "@/lib/client-auth";
 import { BeritaPengumumanKategoriEnum } from "@/lib/enums";
 import { Newspaper, Megaphone, Plus, Calendar, User, Edit3, Trash2, AlertCircle, Search, FileText } from "lucide-react";
 import Image from "next/image";
+import { AdminLogHelpers } from "@/lib/admin-log";
+import { useAdminData } from "@/hooks/useAdminData";
 
 type Kategori = BeritaPengumumanKategoriEnum | "";
 
@@ -39,6 +41,8 @@ export default function BeritaListPage(): JSX.Element {
     const [searchTerm, setSearchTerm] = useState<string>("");
     const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
+    const { admin, loading: loadingAdmin } = useAdminData();
+
     const load = useCallback(async () => {
         setLoading(true);
         try {
@@ -62,13 +66,37 @@ export default function BeritaListPage(): JSX.Element {
     }, [load]);
 
     async function handleDelete(id: string): Promise<void> {
-        const t = await requireIdToken();
-        await fetch(`/api/berita-pengumuman?id=${encodeURIComponent(id)}`, {
-            method: "DELETE",
-            headers: { Authorization: `Bearer ${t}` }
-        });
-        setDeleteConfirm(null);
-        await load();
+        try {
+            const itemToDelete = rows.find(item => item.id === id);
+            
+            const t = await requireIdToken();
+            const response = await fetch(`/api/berita-pengumuman?id=${encodeURIComponent(id)}`, {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${t}` }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Gagal menghapus data");
+            }
+
+            if (admin && itemToDelete) {
+                await AdminLogHelpers.deleteBerita(
+                    admin.uid,
+                    admin.nama,
+                    id,
+                    itemToDelete.judul,
+                    itemToDelete.kategori === BeritaPengumumanKategoriEnum.BERITA ? "berita" : "pengumuman"
+                );
+            }
+
+            setDeleteConfirm(null);
+            await load();
+        } catch (error) {
+            console.error("Error deleting item:", error);
+            alert(error instanceof Error ? error.message : "Gagal menghapus data. Silakan coba lagi.");
+            setDeleteConfirm(null);
+        }
     }
 
     function formatDate(dateString: string | null): string {
@@ -103,7 +131,7 @@ export default function BeritaListPage(): JSX.Element {
     const beritaCount = rows.filter(r => r.kategori === BeritaPengumumanKategoriEnum.BERITA).length;
     const pengumumanCount = rows.filter(r => r.kategori === BeritaPengumumanKategoriEnum.PENGUMUMAN).length;
 
-    if (loading) {
+    if (loading || loadingAdmin) {
         return (
             <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
                 <div className="max-w-7xl mx-auto">

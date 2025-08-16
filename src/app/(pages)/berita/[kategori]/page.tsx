@@ -2,7 +2,7 @@
 
 import { use, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useBeritaData } from '@/components/hooks/useBeritaData'
+import { useBeritaData } from '@/hooks/useBeritaData'
 import { LoadingState, ErrorState } from '@/components/Berita/Shared'
 import BeritaCard from '@/components/Berita/BeritaCard'
 import BeritaListItem from '@/components/Berita/BeritaListItem'

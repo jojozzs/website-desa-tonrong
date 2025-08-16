@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useGaleriData } from '@/components/hooks/useGaleriData'
+import { useGaleriData } from '@/hooks/useGaleriData'
 import GaleriCard from '@/components/Galeri/GaleriCard'
 import ImageModal from '@/components/Galeri/ImageModal'
 import Pagination from '@/components/Berita/Pagination'

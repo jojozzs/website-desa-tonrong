@@ -2,6 +2,8 @@
 import { JSX, useEffect, useState } from "react";
 import { requireIdToken } from "@/lib/client-auth";
 import { MapPin, Phone, MessageCircle, Mail, Save, AlertCircle, CheckCircle, Clock, Info, Eye } from "lucide-react";
+import { AdminLogHelpers } from "@/lib/admin-log";
+import { useAdminData } from "@/hooks/useAdminData";
 
 type KontakDoc = {
     id: string;
@@ -28,6 +30,8 @@ export default function KontakDesaPage(): JSX.Element {
     const [saving, setSaving] = useState<boolean>(false);
     const [error, setError] = useState<string>("");
     const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
+
+    const { admin, loading: loadingAdmin } = useAdminData();
 
     useEffect(() => {
         let active = true;
@@ -76,11 +80,23 @@ export default function KontakDesaPage(): JSX.Element {
                 headers: { Authorization: `Bearer ${token}` },
                 body: fd
             });
+
             if (!r.ok) {
                 setError("Gagal menyimpan kontak.");
                 setSaving(false);
                 return;
             }
+
+            if (!admin) {
+                setError("Gagal mencatat log. Data admin tidak ditemukan.");
+                // setSubmitting(false);
+                return;
+            }
+
+            await AdminLogHelpers.updateKontak(
+                admin.uid,
+                admin.nama
+            );
             
             const jr: ApiDetailResponse = await (await fetch("/api/kontak-desa", { cache: "no-store" })).json();
             if ("success" in jr && jr.success) {
@@ -106,7 +122,7 @@ export default function KontakDesaPage(): JSX.Element {
         });
     }
 
-    if (loading) {
+    if (loading || loadingAdmin) {
         return (
             <div className="min-h-screen bg-gray-50 p-4 lg:p-6">
                 <div className="max-w-7xl mx-auto">

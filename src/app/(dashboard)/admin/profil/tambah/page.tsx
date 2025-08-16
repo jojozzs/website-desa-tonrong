@@ -5,6 +5,8 @@ import { ProfilKategoriEnum } from '@/lib/enums';
 import { ProfilWithContent } from '@/lib/types';
 import { requireIdToken } from '@/lib/client-auth';
 import { FileText, MapPin, Target, Users, Building, History, Image as ImageIcon, Save, ArrowLeft, AlertCircle,Upload,Info } from 'lucide-react';
+import { AdminLogHelpers } from "@/lib/admin-log";
+import { useAdminData } from "@/hooks/useAdminData";
 
 const getKategoriIcon = (kategori: ProfilKategoriEnum) => {
     switch (kategori) {
@@ -43,6 +45,8 @@ export default function TambahProfilPage() {
     const [dataTambahan, setDataTambahan] = useState<ProfilWithContent['data_tambahan']>({});
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+
+    const { admin } = useAdminData();
 
     if (!kategori || !(Object.values(ProfilKategoriEnum) as string[]).includes(kategori)) {
         return (
@@ -94,6 +98,30 @@ export default function TambahProfilPage() {
                     Authorization: `Bearer ${token}`,
                 },
             });
+
+            if (!res.ok) {
+                setError("Gagal menyimpan data. Silakan periksa kembali form Anda.");
+                // setSubmitting(false);
+                return;
+            }
+
+            const responseData = await res.json();
+            const createdId = responseData.id || responseData.data?.id || responseData.documentId || responseData.berita_id;
+
+            if (!admin) {
+                setError("Gagal mencatat log. Data admin tidak ditemukan.");
+                // setSubmitting(false);
+                return;
+            }
+
+            if (createdId) {
+                await AdminLogHelpers.createProfil(
+                    admin.uid,
+                    admin.nama,
+                    createdId,
+                    judul,
+                );
+            }
 
             if (res.ok) {
                 router.push('/admin/profil');
