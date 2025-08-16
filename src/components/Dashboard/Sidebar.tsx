@@ -74,6 +74,24 @@ const NAV_ITEMS: ReadonlyArray<NavItem> = [
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
             </svg>
         )
+    },
+    { 
+        href: "/admin/admin", 
+        label: "Admin",
+        icon: (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+            </svg>
+        )
+    },
+    { 
+        href: "/admin/logs", 
+        label: "Admin Logs",
+        icon: (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+        )
     }
 ] as const;
 
@@ -91,7 +109,7 @@ function SidebarSkeleton(): JSX.Element {
 
                 {/* Navigation Skeleton */}
                 <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-                    {Array.from({ length: 7 }).map((_, index) => (
+                    {Array.from({ length: 9 }).map((_, index) => (
                         <div key={index} className="flex items-center px-4 py-3 rounded-lg">
                             <div className="w-5 h-5 mr-3 bg-gray-200 rounded animate-pulse"></div>
                             <div className="h-4 bg-gray-200 rounded animate-pulse flex-1"></div>
@@ -216,7 +234,7 @@ export default function Sidebar(): JSX.Element {
                                     <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" />
                                 </svg>
                             </div>
-                            <span className="text-xl font-bold text-white">Admin Panel</span>
+                            <span className="text-xl font-bold text-white">Admin Paneldasdadas</span>
                         </div>
                     </div>
 
