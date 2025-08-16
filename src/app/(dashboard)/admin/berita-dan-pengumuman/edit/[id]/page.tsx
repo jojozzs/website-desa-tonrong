@@ -5,11 +5,14 @@ import { requireIdToken } from "@/lib/client-auth";
 import { BeritaPengumumanKategoriEnum } from "@/lib/enums";
 import { ArrowLeft, Save, FileText, Calendar, User, Tag, Link as LinkIcon, Image as ImageIcon, Newspaper, Megaphone, AlertCircle, CheckCircle, Upload, X, Eye, Edit, Loader2 } from "lucide-react";
 import Image from "next/image";
+import { OutputData } from "@editorjs/editorjs";
+import EditorJs from "@/components/EditorJS";
 
 type Detail = {
     id: string;
     judul: string;
     deskripsi: string;
+    konten?: OutputData;
     tanggal: string | null;
     penulis: string;
     kategori: BeritaPengumumanKategoriEnum;
@@ -33,6 +36,7 @@ type ApiDetailResponse = {
 type FormState = {
     judul: string;
     deskripsi: string;
+    konten?: OutputData;
     tanggal: string;
     penulis: string;
     kategori: BeritaPengumumanKategoriEnum;
@@ -75,6 +79,7 @@ export default function BeritaEditPage(): JSX.Element {
                     setF({
                         judul: data.judul,
                         deskripsi: data.deskripsi,
+                        konten: data.konten,
                         tanggal: data.tanggal ? new Date(data.tanggal).toISOString().slice(0, 10) : "",
                         penulis: data.penulis,
                         kategori: data.kategori,
@@ -124,6 +129,9 @@ export default function BeritaEditPage(): JSX.Element {
             fd.append("id", id);
             fd.append("judul", f.judul);
             fd.append("deskripsi", f.deskripsi);
+            if (f.konten) {
+                fd.append("konten", JSON.stringify(f.konten));
+            }
             fd.append("tanggal", f.tanggal);
             fd.append("penulis", f.penulis);
             fd.append("kategori", f.kategori);
@@ -279,14 +287,20 @@ export default function BeritaEditPage(): JSX.Element {
                                             Deskripsi <span className="text-red-500 ml-1">*</span>
                                         </span>
                                     </label>
-                                    <textarea
+                                    {/* <textarea
                                         value={f.deskripsi}
                                         onChange={(e) => setF({ ...f, deskripsi: e.currentTarget.value })}
                                         required
                                         rows={5}
                                         className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 resize-none text-gray-700"
                                         placeholder="Tulis deskripsi lengkap berita atau pengumuman..."
-                                    />
+                                    /> */}
+                                    <div className="text-gray-700">
+                                        <EditorJs
+                                            initialData={f.konten ?? { blocks: [] }}
+                                            onChange={(data) => setF({ ...f, konten: data })}
+                                        />
+                                    </div>
                                 </div>
 
                                 {/* Date and Author Row */}
