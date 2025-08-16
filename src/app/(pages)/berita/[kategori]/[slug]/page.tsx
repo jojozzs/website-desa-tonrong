@@ -127,10 +127,52 @@ export default function BeritaDetailPage({
               
               {/* Article Content */}
               <div className="lg:col-span-2">
-                <article className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden ">
+                <article className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                   
-                {/* Featured Image */}
-                    <div className="relative rounded-xl overflow-hidden p-6 lg:p-8">
+                  {/* Article Header */}
+                  <header className="px-6 lg:px-8 pt-6 lg:pt-8 pb-6 border-b border-gray-100">
+                    {/* Title */}
+                    <h1 className="text-2xl lg:text-3xl font-bold text-gray-800 leading-tight mb-4">
+                      {berita.judul}
+                    </h1>
+
+                    {/* Category Tag */}
+                    <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mb-4 ${
+                      isBerita 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-orange-100 text-orange-800'
+                    }`}>
+                      {isBerita ? 'Berita' : 'Pengumuman'}
+                    </div>
+
+                    {/* Meta Info */}
+                    <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+                      <span className="flex items-center">
+                        <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        {formatDate(berita.tanggal)}
+                      </span>
+                      <span>•</span>
+                      <span className="flex items-center">
+                        <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {formatTime(berita.tanggal)}
+                      </span>
+                      <span>•</span>
+                      <span className="flex items-center">
+                        <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        {berita.penulis}
+                      </span>
+                    </div>
+                  </header>
+
+                  {/* Featured Image */}
+                  <div className="px-6 lg:px-8">
+                    <div className="relative rounded-xl overflow-hidden mb-6">
                       <Image 
                         src={berita.gambar_url || '/placeholder-news.jpg'} 
                         alt={berita.judul}
@@ -140,51 +182,10 @@ export default function BeritaDetailPage({
                         priority
                       />
                     </div>
-
-                  {/* Article Header */}
-                  <header className="px-6 lg:px-8 pb-6 border-b border-gray-100">
-                    {/* Meta Info */}
-                    <div className="flex flex-wrap items-center gap-4 mb-4 text-sm text-gray-500">
-                      <span className="flex items-center">
-                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        {formatDate(berita.tanggal)}
-                      </span>
-                      <span>•</span>
-                      <span className="flex items-center">
-                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        {formatTime(berita.tanggal)}
-                      </span>
-                      <span>•</span>
-                      <span className="flex items-center">
-                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        {berita.penulis}
-                      </span>
-                    </div>
-
-                    {/* Title */}
-                    <h1 className="text-2xl lg:text-3xl font-bold text-gray-800 leading-tight mb-4">
-                      {berita.judul}
-                    </h1>
-
-                    {/* Category Tag */}
-                    <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                      isBerita 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-orange-100 text-orange-800'
-                    }`}>
-                      <span className="mr-2">{isBerita ? '📄' : '📢'}</span>
-                      {isBerita ? 'Berita Desa' : 'Pengumuman Resmi'}
-                    </div>
-                  </header>
+                  </div>
 
                   {/* Article Body */}
-                  <div className="p-6 lg:p-8">
+                  <div className="px-6 lg:px-8 pb-6 lg:pb-8">
                     {/* Lead/Excerpt dari deskripsi */}
                     {berita.deskripsi && (
                       <div className={`border-l-4 p-4 mb-6 rounded-r-lg ${
@@ -221,35 +222,6 @@ export default function BeritaDetailPage({
                         Konten tidak tersedia
                       </div>
                     )}
-
-                    {/* Info Box berdasarkan kategori */}
-                    {isBerita ? (
-                      <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg mt-6">
-                        <h3 className="font-semibold text-gray-800 mb-2 flex items-center text-sm">
-                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                          Informasi Tambahan
-                        </h3>
-                        <p className="text-gray-600 text-sm">
-                          Untuk informasi lebih lanjut mengenai berita ini, Anda dapat menghubungi 
-                          Kantor Desa Tonrong Rijang atau mengunjungi langsung balai desa.
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="bg-orange-50 border border-orange-200 p-4 rounded-lg mt-6">
-                        <h3 className="font-semibold text-orange-800 mb-2 flex items-center text-sm">
-                          <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2L13.09 8.26L22 9L17 14L18.18 22L12 19L5.82 22L7 14L2 9L10.91 8.26L12 2Z"/>
-                          </svg>
-                          Pengumuman Penting
-                        </h3>
-                        <p className="text-orange-700 text-sm">
-                          Pengumuman ini bersifat resmi dan berlaku untuk seluruh warga Desa Tonrong Rijang. 
-                          Pastikan untuk mengikuti instruksi yang diberikan.
-                        </p>
-                      </div>
-                    )}
                   </div>
                 </article>
               </div>
@@ -262,7 +234,6 @@ export default function BeritaDetailPage({
                   {filteredRelated.length > 0 && (
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                       <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                        <span className="mr-2">{isBerita ? '📄' : '📢'}</span>
                         {isBerita ? 'Berita Lainnya' : 'Pengumuman Lainnya'}
                       </h3>
                       <div className="space-y-4">
@@ -332,14 +303,14 @@ export default function BeritaDetailPage({
                       href={isBerita ? '/berita/pengumuman' : '/berita/berita'}
                       className="text-gray-600 hover:text-gray-800 font-medium"
                     >
-                      {isBerita ? '📢 Lihat Pengumuman' : '📄 Lihat Berita'}
+                      {isBerita ? 'Lihat Pengumuman' : 'Lihat Berita'}
                     </Link>
                     <span className="text-gray-300">|</span>
                     <Link 
                       href="/berita"
                       className="text-gray-600 hover:text-gray-800 font-medium"
                     >
-                      📰 Semua Berita
+                      Semua Berita
                     </Link>
                   </div>
                 </div>
