@@ -5,6 +5,8 @@ import { requireIdToken } from "@/lib/client-auth";
 import { BeritaPengumumanKategoriEnum } from "@/lib/enums";
 import { ArrowLeft, Save,  FileText,  Calendar,  User,  Tag,  Link as LinkIcon,  Image as ImageIcon,  Newspaper,  Megaphone,  AlertCircle,  CheckCircle, Upload, X, Eye } from "lucide-react";
 import Image from "next/image";
+import EditorJs from "@/components/EditorJS";
+import { OutputData } from "@editorjs/editorjs";
 
 type FormState = {
     judul: string;
@@ -34,6 +36,8 @@ export default function BeritaTambahPage(): JSX.Element {
     const [submitting, setSubmitting] = useState<boolean>(false);
     const [error, setError] = useState<string>("");
     const [success, setSuccess] = useState<boolean>(false);
+
+    const [konten, setKonten] = useState<OutputData | undefined>(undefined);
 
     useEffect(() => {
         if (f.judul && !f.slug) {
@@ -72,6 +76,8 @@ export default function BeritaTambahPage(): JSX.Element {
             fd.append("kategori", f.kategori);
             fd.append("slug", f.slug);
             if (gambar) fd.append("gambar", gambar);
+
+            fd.append("konten", JSON.stringify(konten));
 
             const r = await fetch("/api/berita-pengumuman", {
                 method: "POST",
@@ -206,14 +212,20 @@ export default function BeritaTambahPage(): JSX.Element {
                                             Deskripsi <span className="text-red-500 ml-1">*</span>
                                         </span>
                                     </label>
-                                    <textarea
+                                    {/* <textarea
                                         value={f.deskripsi}
                                         onChange={(e) => setF({ ...f, deskripsi: e.currentTarget.value })}
                                         required
                                         rows={5}
                                         className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 resize-none text-gray-700"
                                         placeholder="Tulis deskripsi lengkap berita atau pengumuman..."
-                                    />
+                                    /> */}
+                                    <div className="text-gray-700">
+                                        <EditorJs
+                                            initialData={konten ?? { blocks: [] }}
+                                            onChange={(data) => setKonten(data)}
+                                        />
+                                    </div>
                                 </div>
 
                                 {/* Date and Author Row */}
