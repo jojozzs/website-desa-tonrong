@@ -4,6 +4,8 @@ import { JSX, useState, useEffect } from "react";
 import { requireIdToken } from "@/lib/client-auth";
 import { ArrowLeft,Save, Package, FileText, Store, MapPin, Phone, Link as LinkIcon, Image as ImageIcon, AlertCircle, CheckCircle, Upload, X, Eye, Star, ShoppingBag } from "lucide-react";
 import Image from "next/image";
+import EditorJs from "@/components/EditorJS";
+import type { OutputData } from "@editorjs/editorjs";
 
 type FormState = {
     judul: string;
@@ -33,6 +35,8 @@ export default function ProdukTambahPage(): JSX.Element {
     const [submitting, setSubmitting] = useState<boolean>(false);
     const [error, setError] = useState<string>("");
     const [success, setSuccess] = useState<boolean>(false);
+    
+    const [konten, setKonten] = useState<OutputData | undefined>();
 
     useEffect(() => {
         if (f.judul && !f.slug) {
@@ -71,6 +75,8 @@ export default function ProdukTambahPage(): JSX.Element {
             fd.append("kontak_umkm", f.kontak_umkm);
             fd.append("slug", f.slug);
             if (gambar) fd.append("gambar", gambar);
+
+            fd.append("konten", JSON.stringify(konten));
 
             const r = await fetch("/api/produk-unggulan", {
                 method: "POST",
@@ -206,14 +212,20 @@ export default function ProdukTambahPage(): JSX.Element {
                                                 Deskripsi Produk <span className="text-red-500 ml-1">*</span>
                                             </span>
                                         </label>
-                                        <textarea
+                                        {/* <textarea
                                             value={f.deskripsi}
                                             onChange={(e) => setF({ ...f, deskripsi: e.currentTarget.value })}
                                             required
                                             rows={4}
                                             className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 resize-none text-gray-700"
                                             placeholder="Deskripsikan produk unggulan ini secara detail..."
-                                        />
+                                        /> */}
+                                        <div className="text-gray-700">
+                                            <EditorJs
+                                                initialData={konten ?? { blocks: [] }}
+                                                onChange={(data) => setKonten(data)}
+                                            />
+                                        </div>
                                     </div>
 
                                     {/* Slug */}

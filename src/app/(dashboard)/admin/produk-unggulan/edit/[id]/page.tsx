@@ -5,6 +5,8 @@ import { requireIdToken } from "@/lib/client-auth";
 import { ProdukUnggulan } from "@/lib/types";
 import { ArrowLeft,Save, Package, FileText, Store, MapPin, Phone, Link as LinkIcon, Image as ImageIcon, AlertCircle, CheckCircle, Upload, X, Eye, Edit, Loader2, Star, ShoppingBag } from "lucide-react";
 import Image from "next/image";
+import { OutputData } from "@editorjs/editorjs";
+import EditorJs from "@/components/EditorJS";
 
 type ProdukDetail = Omit<ProdukUnggulan, "created_at" | "updated_at"> & {
     created_at: string | null;
@@ -19,6 +21,7 @@ type ApiDetailResponse = {
 type FormState = {
     judul: string;
     deskripsi: string;
+    konten?: OutputData;
     nama_umkm: string;
     alamat_umkm: string;
     kontak_umkm: string;
@@ -61,6 +64,7 @@ export default function ProdukEditPage(): JSX.Element {
                     setF({
                         judul: data.judul,
                         deskripsi: data.deskripsi,
+                        konten: data.konten,
                         nama_umkm: data.nama_umkm,
                         alamat_umkm: data.alamat_umkm,
                         kontak_umkm: data.kontak_umkm,
@@ -110,6 +114,9 @@ export default function ProdukEditPage(): JSX.Element {
             fd.append("id", id);
             fd.append("judul", f.judul);
             fd.append("deskripsi", f.deskripsi);
+            if (f.konten) {
+                fd.append("konten", JSON.stringify(f.konten));
+            }
             fd.append("nama_umkm", f.nama_umkm);
             fd.append("alamat_umkm", f.alamat_umkm);
             fd.append("kontak_umkm", f.kontak_umkm);
@@ -267,14 +274,20 @@ export default function ProdukEditPage(): JSX.Element {
                                                 Deskripsi Produk <span className="text-red-500 ml-1">*</span>
                                             </span>
                                         </label>
-                                        <textarea
+                                        {/* <textarea
                                             value={f.deskripsi}
                                             onChange={(e) => setF({ ...f, deskripsi: e.currentTarget.value })}
                                             required
                                             rows={4}
                                             className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 resize-none text-gray-700"
                                             placeholder="Deskripsikan produk unggulan ini secara detail..."
-                                        />
+                                        /> */}
+                                        <div className="text-gray-700">
+                                            <EditorJs
+                                                initialData={f.konten ?? { blocks: [] }}
+                                                onChange={(data) => setF({ ...f, konten: data })}
+                                            />
+                                        </div>
                                     </div>
 
                                     {/* Slug */}

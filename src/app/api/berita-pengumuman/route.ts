@@ -135,6 +135,7 @@ export async function GET(request: NextRequest) {
                     return {
                         id: d.id,
                         ...raw,
+                        konten: raw.konten ?? null,
                         tanggal: typeof raw.tanggal?.toDate === "function" ? raw.tanggal.toDate() : null,
                         created_at: typeof raw.created_at?.toDate === "function" ? raw.created_at.toDate() : null,
                         updated_at: typeof raw.updated_at?.toDate === "function" ? raw.updated_at.toDate() : null,
@@ -159,6 +160,7 @@ export async function GET(request: NextRequest) {
                 return {
                     id: d.id,
                     ...raw,
+                    konten: raw.konten ?? null,
                     tanggal: typeof raw.tanggal?.toDate === "function" ? raw.tanggal.toDate() : null,
                     created_at: typeof raw.created_at?.toDate === "function" ? raw.created_at.toDate() : null,
                     updated_at: typeof raw.updated_at?.toDate === "function" ? raw.updated_at.toDate() : null,
