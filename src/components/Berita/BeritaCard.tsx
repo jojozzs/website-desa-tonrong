@@ -58,12 +58,11 @@ export default function BeritaCard({ item, compact = false }: BeritaCardProps) {
           
           {/* Category Badge */}
           <div className="absolute top-3 left-3">
-            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white backdrop-blur-sm ${
+            <span className={`inline-flex items-center px-2 py-1 rounded-full text-sm font-medium text-white backdrop-blur-sm ${
               isBerita 
                 ? 'bg-green-600/90' 
                 : 'bg-orange-600/90'
             }`}>
-              <span className="mr-1">{isBerita ? '📄' : '📢'}</span>
               {isBerita ? 'Berita' : 'Pengumuman'}
             </span>
           </div>
@@ -84,7 +83,7 @@ export default function BeritaCard({ item, compact = false }: BeritaCardProps) {
           </div>
 
           {/* Title - Fixed height with line clamp */}
-          <h3 className="text-lg font-semibold text-gray-800 mb-2 line-clamp-2 group-hover:text-green-600 transition-colors min-h-[3.5rem] flex items-start">
+          <h3 className="text-lg font-semibold text-gray-800 line-clamp-2 group-hover:text-green-600 transition-colors min-h-[2.5rem] flex items-start">
             {item.judul}
           </h3>
 
