@@ -1,5 +1,5 @@
-import ProfilOverview from '@/components/Profil/ProfilOverview'
+import { redirect } from 'next/navigation'
 
 export default function ProfilPage() {
-  return <ProfilOverview />
+  redirect('/profil/sejarah')
 }
