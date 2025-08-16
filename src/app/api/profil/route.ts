@@ -67,6 +67,106 @@ async function uploadToCloudinary(file: File): Promise<CloudinaryUploadResult> {
     });
 }
 
+function validateDataTambahan(data: unknown, kategori: ProfilKategoriEnum): boolean {
+    if (typeof data !== "object" || data === null) return false;
+
+    const d = data as Record<string, unknown>;
+
+    switch (kategori) {
+        case ProfilKategoriEnum.VISI_DAN_MISI: {
+            const visiValid = typeof d.visi === "string";
+            const misiValid =
+                Array.isArray(d.misi) &&
+                d.misi.every((m): m is string => typeof m === "string");
+            return visiValid || misiValid;
+        }
+
+        case ProfilKategoriEnum.LETAK_GEOGRAFIS_DAN_PETA_DESA: {
+            const infoWilayah = d.informasi_wilayah;
+            const koordinat = d.koordinat;
+            const batasWilayah = d.batas_wilayah;
+
+            const infoWilayahValid = typeof infoWilayah === "object" && infoWilayah !== null;
+            const koordinatValid = typeof koordinat === "object" && koordinat !== null;
+            const batasWilayahValid = typeof batasWilayah === "object" && batasWilayah !== null;
+
+            return infoWilayahValid || koordinatValid || batasWilayahValid;
+        }
+
+        case ProfilKategoriEnum.STRUKTUR_PEMERINTAHAN_DESA: {
+            const pimpinan = d.pimpinan;
+            const perangkat = d.perangkat;
+
+            const pimpinanValid =
+                Array.isArray(pimpinan) &&
+                pimpinan.every(
+                (p): p is { nama: unknown; jabatan: unknown } =>
+                    typeof p === "object" &&
+                    p !== null &&
+                    typeof (p as Record<string, unknown>).nama === "string" &&
+                    typeof (p as Record<string, unknown>).jabatan === "string"
+                );
+
+            const perangkatValid =
+                Array.isArray(perangkat) &&
+                perangkat.every(
+                (p) =>
+                    typeof p === "string" ||
+                    (typeof p === "object" &&
+                    p !== null &&
+                    typeof (p as Record<string, unknown>).jabatan === "string")
+                );
+
+            return pimpinanValid || perangkatValid;
+        }
+
+        case ProfilKategoriEnum.JUMLAH_PENDUDUK_DAN_DATA_UMUM: {
+            const demografi = d.demografi;
+            const mataPencaharian = d.mata_pencaharian;
+            const kelompokUmur = d.kelompok_umur;
+            const agama = d.agama;
+            const idm = d.idm;
+
+            const mataPencaharianValid =
+                Array.isArray(mataPencaharian) &&
+                mataPencaharian.every(
+                (item): item is { kategori: unknown; persen: unknown } =>
+                    typeof item === "object" &&
+                    item !== null &&
+                    typeof (item as Record<string, unknown>).kategori === "string" &&
+                    typeof (item as Record<string, unknown>).persen === "number"
+                );
+
+            const kelompokUmurValid =
+                Array.isArray(kelompokUmur) &&
+                kelompokUmur.every(
+                (item): item is { kelompok: unknown; jumlah: unknown } =>
+                    typeof item === "object" &&
+                    item !== null &&
+                    typeof (item as Record<string, unknown>).kelompok === "string" &&
+                    typeof (item as Record<string, unknown>).jumlah === "number"
+                );
+
+            const idmValid =
+                typeof idm === "object" &&
+                idm !== null &&
+                typeof (idm as Record<string, unknown>).nilai === "string" &&
+                typeof (idm as Record<string, unknown>).status === "string";
+
+            return (
+                typeof demografi === "object" ||
+                mataPencaharianValid ||
+                kelompokUmurValid ||
+                typeof agama === "object" ||
+                idmValid
+            );
+        }
+
+        default:
+        return true;
+    }
+}
+
 /* ============== GET: list / by id / filter kategori ============== */
 export async function GET(request: NextRequest) {
     try {
@@ -130,6 +230,9 @@ export async function POST(request: NextRequest) {
         const kategori = String(formData.get("kategori") || "");
         const gambar = formData.get("gambar") as File | null;
 
+        const konten = formData.get("konten") as string | null;
+        const data_tambahan = formData.get("data_tambahan") as string | null;
+
         if (!judul || !deskripsi || !isProfilKategori(kategori) || !(gambar instanceof File) || gambar.size === 0) {
             return NextResponse.json({ success: false, error: "Missing or invalid fields" }, { status: 400 });
         }
@@ -161,6 +264,19 @@ export async function POST(request: NextRequest) {
             updated_at: FieldValue.serverTimestamp() as unknown as AdminTimestamp,
         };
 
+        if (konten) payload.konten = konten;
+        if (data_tambahan) {
+            try {
+                const parsed = JSON.parse(data_tambahan);
+                if (!validateDataTambahan(parsed, kategori as ProfilKategoriEnum)) {
+                return NextResponse.json({ success: false, error: "Invalid data_tambahan structure" }, { status: 400 });
+                }
+                payload.data_tambahan = parsed;
+            } catch {
+                return NextResponse.json({ success: false, error: "Invalid data_tambahan format" }, { status: 400 });
+            }
+        }
+
         const docRef = await adminDb.collection("profil").add(payload);
         return NextResponse.json({ success: true, data: { id: docRef.id, ...payload } }, { status: 201 });
     } catch (error) {
@@ -184,6 +300,9 @@ export async function PATCH(request: NextRequest) {
         const deskripsi = (formData.get("deskripsi") as string) ?? null;
         const kategori = (formData.get("kategori") as string) ?? null;
         const gambar = (formData.get("gambar") as File) ?? null;
+
+        const konten = (formData.get("konten") as string) ?? null;
+        const data_tambahan = (formData.get("data_tambahan") as string) ?? null;
 
         const updateData: Partial<ProfilDocAdmin> & { updated_at: AdminTimestamp } = {
             updated_at: FieldValue.serverTimestamp() as unknown as AdminTimestamp,
@@ -218,6 +337,18 @@ export async function PATCH(request: NextRequest) {
             updateData.gambar_type = up.format;
             updateData.gambar_width = up.width;
             updateData.gambar_height = up.height;
+        }
+
+        if (konten !== null) updateData.konten = konten;
+            if (data_tambahan !== null) {
+            try {
+                updateData.data_tambahan = JSON.parse(data_tambahan);
+                if (!validateDataTambahan(updateData.data_tambahan, kategori as ProfilKategoriEnum)) {
+                    return NextResponse.json({ success: false, error: "Invalid data_tambahan structure" }, { status: 400 });
+                }
+            } catch {
+                return NextResponse.json({ success: false, error: "Invalid data_tambahan format" }, { status: 400 });
+            }
         }
 
         await adminDb.doc(`profil/${id}`).update(updateData);
