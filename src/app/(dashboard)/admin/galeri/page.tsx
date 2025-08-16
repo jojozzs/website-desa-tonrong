@@ -4,6 +4,8 @@ import { JSX, useCallback, useEffect, useState } from "react";
 import { requireIdToken } from "@/lib/client-auth";
 import { Search, Plus, Edit, Trash2, Eye, Image as ImageIcon, Calendar, FileText, HardDrive, MoreVertical, AlertCircle } from "lucide-react";
 import Image from "next/image";
+import { AdminLogHelpers } from "@/lib/admin-log";
+import { useAdminData } from "@/hooks/useAdminData";
 
 type GaleriRow = {
     id: string;
@@ -33,6 +35,8 @@ export default function GaleriListPage(): JSX.Element {
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
     const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
+    const { admin, loading: loadingAdmin } = useAdminData();
+
     const load = useCallback(async () => {
         setLoading(true);
         setError("");
@@ -58,14 +62,38 @@ export default function GaleriListPage(): JSX.Element {
     }, [load]);
 
     async function handleDelete(id: string): Promise<void> {
-        const token = await requireIdToken();
-        await fetch(`/api/galeri?id=${encodeURIComponent(id)}`, {
-            method: "DELETE",
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        setDeleteConfirm(null);
-        setOpenMenuId(null);
-        await load();
+        try {
+            const itemToDelete = rows.find(item => item.id === id);
+            
+            const token = await requireIdToken();
+            const response = await fetch(`/api/galeri?id=${encodeURIComponent(id)}`, {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Gagal menghapus galeri");
+            }
+
+            if (admin && itemToDelete) {
+                await AdminLogHelpers.deleteGaleri(
+                    admin.uid,
+                    admin.nama,
+                    id,
+                    itemToDelete.judul
+                );
+            }
+
+            // Close modals and reload data
+            setDeleteConfirm(null);
+            setOpenMenuId(null);
+            await load();
+        } catch (error) {
+            console.error("Error deleting galeri:", error);
+            alert(error instanceof Error ? error.message : "Gagal menghapus galeri. Silakan coba lagi.");
+            setDeleteConfirm(null);
+        }
     }
 
     const filteredRows = rows.filter(row =>
