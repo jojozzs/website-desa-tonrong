@@ -1,6 +1,6 @@
 'use client'
 
-import { useProfilData } from '@/components/hooks/useProfilData'
+import { useProfilData } from '@/hooks/useProfilData'
 import { LoadingState, ErrorState, EmptyState } from './Shared'
 import { ProfilKategoriEnum } from '@/lib/enums'
 

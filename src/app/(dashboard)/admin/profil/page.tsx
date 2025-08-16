@@ -1,5 +1,5 @@
 'use client';
-import { useSemuaProfilData } from '@/components/hooks/useSemuaProfilData';
+import { useSemuaProfilData } from '@/hooks/useSemuaProfilData';
 import { ProfilKategoriEnum } from '@/lib/enums';
 import { FileText, Plus, Edit3, Check, Clock, Users, Building, MapPin, Target, History, Eye } from 'lucide-react';
 import Link from 'next/link';
