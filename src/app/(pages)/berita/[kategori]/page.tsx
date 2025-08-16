@@ -72,7 +72,7 @@ export default function KategoriPage({ params }: { params: Promise<{ kategori: s
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-800 mb-2 flex items-center">
-              <span className="mr-3">{isBerita ? '📄' : '📢'}</span>
+              <span className="mr-3">{isBerita ? '📰' : '📢'}</span>
               {isBerita ? 'Berita Desa' : 'Pengumuman Resmi'}
             </h1>
             <p className="text-gray-600 flex items-center gap-2">
@@ -80,14 +80,6 @@ export default function KategoriPage({ params }: { params: Promise<{ kategori: s
                 ? 'Informasi kegiatan dan program terbaru dari desa'
                 : 'Pengumuman resmi dari pemerintah desa'
               }
-              {/* Menampilkan total count untuk kategori aktif */}
-              <span className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full ${
-                isBerita 
-                  ? 'bg-green-100 text-green-800' 
-                  : 'bg-orange-100 text-orange-800'
-              }`}>
-                {categoryCounts[kategori]} {isBerita ? 'artikel' : 'pengumuman'}
-              </span>
             </p>
           </div>
 
@@ -225,16 +217,6 @@ export default function KategoriPage({ params }: { params: Promise<{ kategori: s
 function LoadingCardsOnly({ viewMode }: { viewMode: ViewMode }) {
   return (
     <div className="space-y-6">
-      {/* Stats Loading */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="h-6 bg-gray-200 rounded animate-pulse w-48"></div>
-            <div className="h-4 bg-gray-200 rounded animate-pulse w-32"></div>
-          </div>
-          <div className="h-8 bg-gray-200 rounded-full animate-pulse w-24"></div>
-        </div>
-      </div>
 
       {/* Content Loading */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -325,7 +307,7 @@ function EmptyStateCards({
   
   return (
     <div className="text-center py-16">
-      <div className="text-6xl mb-6">{isBerita ? '📄' : '📢'}</div>
+      <div className="text-6xl mb-6">{isBerita ? '📰' : '📢'}</div>
       <h3 className="text-2xl font-bold text-gray-800 mb-4">
         Belum Ada {isBerita ? 'Berita' : 'Pengumuman'}
       </h3>
@@ -351,7 +333,7 @@ function EmptyStateCards({
             href={`/berita/${otherCategory}`}
             className="bg-green-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors"
           >
-            {isBerita ? '📢 Lihat Pengumuman' : '📄 Lihat Berita'} ({otherCategoryCount})
+            {isBerita ? '📢 Lihat Pengumuman' : '📰 Lihat Berita'} ({otherCategoryCount})
           </Link>
         )}
         <Link 
@@ -362,18 +344,6 @@ function EmptyStateCards({
         </Link>
       </div>
       
-      {/* Additional helpful info */}
-      <div className="mt-12 p-6 bg-gradient-to-br from-green-50 to-indigo-50 rounded-xl">
-        <h4 className="text-lg font-semibold text-gray-800 mb-2">
-          💡 Ingin mendapatkan notifikasi?
-        </h4>
-        <p className="text-gray-600 text-sm mb-4">
-          Daftarkan diri Anda untuk mendapatkan pemberitahuan ketika ada {isBerita ? 'berita' : 'pengumuman'} terbaru
-        </p>
-        <button className="bg-green-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors">
-          🔔 Aktifkan Notifikasi
-        </button>
-      </div>
     </div>
   )
 }
