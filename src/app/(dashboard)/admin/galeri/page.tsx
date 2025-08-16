@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { JSX, useCallback, useEffect, useState } from "react";
 import { requireIdToken } from "@/lib/client-auth";
-import { Search, Plus, Edit, Trash2, Eye, Image as ImageIcon, Calendar, FileText, HardDrive, MoreVertical } from "lucide-react";
+import { Search, Plus, Edit, Trash2, Eye, Image as ImageIcon, Calendar, FileText, HardDrive, MoreVertical, AlertCircle } from "lucide-react";
 import Image from "next/image";
 
 type GaleriRow = {
@@ -31,6 +31,7 @@ export default function GaleriListPage(): JSX.Element {
     const [error, setError] = useState<string>("");
     const [searchTerm, setSearchTerm] = useState<string>("");
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+    const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -57,13 +58,12 @@ export default function GaleriListPage(): JSX.Element {
     }, [load]);
 
     async function handleDelete(id: string): Promise<void> {
-        const ok = window.confirm("Hapus item ini?");
-        if (!ok) return;
         const token = await requireIdToken();
         await fetch(`/api/galeri?id=${encodeURIComponent(id)}`, {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` }
         });
+        setDeleteConfirm(null);
         setOpenMenuId(null);
         await load();
     }
@@ -278,6 +278,7 @@ export default function GaleriListPage(): JSX.Element {
                                                         const target = e.target as HTMLImageElement;
                                                         target.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjRjNGNEY2IiByeD0iOCIvPgo8cGF0aCBkPSJNMjggMjhIMzZWMzZIMjhWMjhaIiBmaWxsPSIjOUNBM0FGIi8+CjxwYXRoIGQ9Ik0yNCAzMkgyOFYzNkgyNFYzMloiIGZpbGw9IiM5Q0EzQUYiLz4KPHBhdGggZD0iTTM2IDMySDQwVjM2SDM2VjMyWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K";
                                                     }}
+                                                    priority
                                                 />
                                                 {/* Overlay actions for larger screens */}
                                                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 items-center justify-center gap-2 sm:flex hidden">
@@ -299,7 +300,7 @@ export default function GaleriListPage(): JSX.Element {
                                                     </Link>
                                                     <button 
                                                         type="button" 
-                                                        onClick={() => { void handleDelete(row.id); }}
+                                                        onClick={() => setDeleteConfirm(row.id)}
                                                         className="inline-flex items-center justify-center w-10 h-10 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition-colors cursor-pointer"
                                                         title="Hapus galeri"
                                                     >
@@ -352,7 +353,7 @@ export default function GaleriListPage(): JSX.Element {
                                                                     type="button" 
                                                                     onClick={(e) => {
                                                                         e.stopPropagation();
-                                                                        void handleDelete(row.id);
+                                                                        setDeleteConfirm(row.id);
                                                                     }}
                                                                     className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
                                                                 >
@@ -383,7 +384,7 @@ export default function GaleriListPage(): JSX.Element {
                                                         </Link>
                                                         <button 
                                                             type="button" 
-                                                            onClick={() => { void handleDelete(row.id); }}
+                                                            onClick={() => setDeleteConfirm(row.id)}
                                                             className="inline-flex items-center justify-center w-8 h-8 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors cursor-pointer"
                                                             title="Hapus galeri"
                                                         >
@@ -424,6 +425,41 @@ export default function GaleriListPage(): JSX.Element {
                             </>
                         )}
                     </>
+                )}
+
+                {/* Delete Confirmation Modal */}
+                {deleteConfirm && (
+                    <div className="fixed inset-0 bg-black/90 bg-opacity-50 flex items-center justify-center p-4 z-50">
+                        <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+                            <div className="flex items-center mb-4">
+                                <AlertCircle className="w-6 h-6 text-red-600 mr-3" />
+                                <h3 className="text-lg font-semibold text-gray-900">
+                                    Konfirmasi Hapus
+                                </h3>
+                            </div>
+                            
+                            <p className="text-gray-600 mb-6">
+                                Apakah Anda yakin ingin menghapus galeri ini? Tindakan ini tidak dapat dibatalkan.
+                            </p>
+
+                            <div className="flex justify-end space-x-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setDeleteConfirm(null)}
+                                    className="px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors duration-150 cursor-pointer"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => handleDelete(deleteConfirm)}
+                                    className="px-4 py-2 text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors duration-150 cursor-pointer"
+                                >
+                                    Hapus
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 )}
             </div>
         </div>

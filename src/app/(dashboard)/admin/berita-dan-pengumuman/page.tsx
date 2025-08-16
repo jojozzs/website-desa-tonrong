@@ -383,7 +383,7 @@ export default function BeritaListPage(): JSX.Element {
                                                     <button 
                                                         type="button" 
                                                         onClick={() => setDeleteConfirm(r.id)}
-                                                        className="p-2 text-red-600 hover:text-red-800 hover:bg-red-100 rounded-lg transition-colors duration-150"
+                                                        className="p-2 text-red-600 hover:text-red-800 hover:bg-red-100 rounded-lg transition-colors duration-150 cursor-pointer"
                                                         title="Hapus"
                                                     >
                                                         <Trash2 className="w-4 h-4" />
@@ -481,7 +481,7 @@ export default function BeritaListPage(): JSX.Element {
 
                 {/* Delete Confirmation Modal */}
                 {deleteConfirm && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                    <div className="fixed inset-0 bg-black/90 bg-opacity-50 flex items-center justify-center p-4 z-50">
                         <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
                             <div className="flex items-center mb-4">
                                 <AlertCircle className="w-6 h-6 text-red-600 mr-3" />
@@ -498,14 +498,14 @@ export default function BeritaListPage(): JSX.Element {
                                 <button
                                     type="button"
                                     onClick={() => setDeleteConfirm(null)}
-                                    className="px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors duration-150"
+                                    className="px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors duration-150 cursor-pointer"
                                 >
                                     Batal
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => handleDelete(deleteConfirm)}
-                                    className="px-4 py-2 text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors duration-150"
+                                    className="px-4 py-2 text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors duration-150 cursor-pointer"
                                 >
                                     Hapus
                                 </button>

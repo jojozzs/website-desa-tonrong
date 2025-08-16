@@ -1,6 +1,8 @@
 "use client";
 import { JSX, useState, useEffect } from "react";
-import { BarChart3, Camera, FileText, MessageCircle, Star, TrendingUp, Clock, CheckCircle, AlertCircle, Calendar, Users, Eye, Activity, RefreshCw } from "lucide-react";
+import { BarChart3, Camera, FileText, MessageCircle, Star, Clock, CheckCircle, AlertCircle, Users, Eye, Activity, RefreshCw, Phone } from "lucide-react";
+import { requireIdToken } from "@/lib/client-auth";
+import Link from "next/link";
 
 type StatsData = {
     galeri: number;
@@ -11,12 +13,21 @@ type StatsData = {
     aspirasiDone: number;
 };
 
-type ActivityItem = {
+type AspirasiItem = {
     id: string;
-    type: 'berita' | 'galeri' | 'profil' | 'aspirasi' | 'produk';
-    title: string;
-    timestamp: string;
-    status?: 'success' | 'info' | 'warning';
+    status: "pending" | "done";
+    judul: string;
+    nama: string;
+    email: string;
+    isi: string;
+    created_at: string | null;
+    updated_at: string | null;
+    admin_uid: string | null;
+};
+
+type ApiResponse<T> = {
+    success: boolean;
+    data: T[];
 };
 
 const SkeletonShimmer = ({ className = "" }: { className?: string }) => (
@@ -32,16 +43,6 @@ const StatsCardSkeleton = () => (
                 <SkeletonShimmer className="h-3 w-20" />
             </div>
             <SkeletonShimmer className="w-10 h-10 sm:w-12 sm:h-12 rounded-full" />
-        </div>
-    </div>
-);
-
-const ActivitySkeleton = () => (
-    <div className="flex items-start gap-3 p-3 sm:p-4 bg-gray-50 rounded-lg">
-        <SkeletonShimmer className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex-shrink-0" />
-        <div className="flex-1 min-w-0">
-            <SkeletonShimmer className="h-4 w-3/4 mb-2" />
-            <SkeletonShimmer className="h-3 w-24" />
         </div>
     </div>
 );
@@ -85,7 +86,7 @@ const AdminDashboardSkeleton = () => (
             </div>
 
             {/* Secondary Stats Skeleton */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
                 {/* Aspirasi Detail Skeleton */}
                 <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 sm:p-6">
                     <div className="flex items-center mb-4">
@@ -119,42 +120,8 @@ const AdminDashboardSkeleton = () => (
                         <SkeletonShimmer className="h-5 w-24" />
                     </div>
                     <div className="space-y-3">
-                        {[1, 2, 3, 4].map((i) => (
+                        {[1, 2, 3, 4, 5, 6].map((i) => (
                             <QuickActionSkeleton key={i} />
-                        ))}
-                    </div>
-                </div>
-
-                {/* System Info Skeleton */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 sm:p-6">
-                    <div className="flex items-center mb-4">
-                        <SkeletonShimmer className="w-5 h-5 rounded mr-2" />
-                        <SkeletonShimmer className="h-5 w-32" />
-                    </div>
-                    <div className="space-y-4">
-                        {[1, 2, 3, 4].map((i) => (
-                            <div key={i} className="flex items-center justify-between">
-                                <SkeletonShimmer className="h-4 w-20" />
-                                <SkeletonShimmer className="h-4 w-16" />
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            {/* Recent Activity Skeleton */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-100">
-                <div className="px-4 sm:px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-gray-100">
-                    <div className="flex items-center mb-1">
-                        <SkeletonShimmer className="w-5 h-5 rounded mr-2" />
-                        <SkeletonShimmer className="h-6 w-40" />
-                    </div>
-                    <SkeletonShimmer className="h-4 w-60" />
-                </div>
-                <div className="p-4 sm:p-6">
-                    <div className="space-y-4">
-                        {[1, 2, 3, 4, 5].map((i) => (
-                            <ActivitySkeleton key={i} />
                         ))}
                     </div>
                 </div>
@@ -167,7 +134,7 @@ const AdminDashboardSkeleton = () => (
                     <SkeletonShimmer className="h-5 w-32" />
                 </div>
                 <div className="space-y-2">
-                    {[1, 2, 3, 4, 5].map((i) => (
+                    {[1, 2, 3, 4].map((i) => (
                         <SkeletonShimmer key={i} className="h-4 w-full max-w-md" />
                     ))}
                 </div>
@@ -178,97 +145,77 @@ const AdminDashboardSkeleton = () => (
 
 export default function AdminPage(): JSX.Element {
     const [stats, setStats] = useState<StatsData>({
-        galeri: 24,
-        berita: 12,
-        produkUnggulan: 8,
-        aspirasi: 31,
-        aspirasiPending: 15,
-        aspirasiDone: 16
+        galeri: 0,
+        berita: 0,
+        produkUnggulan: 0,
+        aspirasi: 0,
+        aspirasiPending: 0,
+        aspirasiDone: 0
     });
-
-    const [activities, setActivities] = useState<ActivityItem[]>([
-        {
-            id: '1',
-            type: 'berita',
-            title: 'Berita "Pembangunan Jembatan Desa" berhasil dipublikasi',
-            timestamp: '2 jam yang lalu',
-            status: 'success'
-        },
-        {
-            id: '2',
-            type: 'aspirasi',
-            title: 'Aspirasi baru dari Budi Santoso tentang perbaikan jalan',
-            timestamp: '3 jam yang lalu',
-            status: 'info'
-        },
-        {
-            id: '3',
-            type: 'profil',
-            title: 'Profil desa dan visi misi telah diperbarui',
-            timestamp: '5 jam yang lalu',
-            status: 'success'
-        },
-        {
-            id: '4',
-            type: 'galeri',
-            title: '5 foto kegiatan gotong royong ditambahkan ke galeri',
-            timestamp: '1 hari yang lalu',
-            status: 'success'
-        },
-        {
-            id: '5',
-            type: 'produk',
-            title: 'Produk unggulan "Keripik Singkong" telah diverifikasi',
-            timestamp: '2 hari yang lalu',
-            status: 'success'
-        }
-    ]);
 
     const [loading, setLoading] = useState<boolean>(false);
     const [initialLoading, setInitialLoading] = useState<boolean>(true);
     const [lastUpdated, setLastUpdated] = useState<string>(new Date().toISOString());
+    const [error, setError] = useState<string>("");
+
+    const loadStats = async () => {
+        try {
+            setError("");
+            const token = await requireIdToken();
+            
+            const [galeriRes, beritaRes, produkRes, aspirasiRes] = await Promise.all([
+                fetch("/api/galeri", { cache: "no-store" }),
+                fetch("/api/berita-pengumuman", { cache: "no-store" }),
+                fetch("/api/produk-unggulan", { cache: "no-store" }),
+                fetch("/api/aspirasi", {
+                    headers: { Authorization: `Bearer ${token}` },
+                    cache: "no-store"
+                })
+            ]);
+
+            const [galeriData, beritaData, produkData, aspirasiData] = await Promise.all([
+                galeriRes.json() as Promise<ApiResponse<unknown>>,
+                beritaRes.json() as Promise<ApiResponse<unknown>>,
+                produkRes.json() as Promise<ApiResponse<unknown>>,
+                aspirasiRes.json() as Promise<ApiResponse<AspirasiItem>>
+            ]);
+
+            const aspirasiList: AspirasiItem[] = aspirasiData.success ? aspirasiData.data : [];
+            const aspirasiPending = aspirasiList.filter((item: AspirasiItem) => item.status === "pending").length;
+            const aspirasiDone = aspirasiList.filter((item: AspirasiItem) => item.status === "done").length;
+
+            setStats({
+                galeri: galeriData.success ? galeriData.data.length : 0,
+                berita: beritaData.success ? beritaData.data.length : 0,
+                produkUnggulan: produkData.success ? produkData.data.length : 0,
+                aspirasi: aspirasiList.length,
+                aspirasiPending,
+                aspirasiDone
+            });
+
+            setLastUpdated(new Date().toISOString());
+        } catch (err) {
+            console.error("Error loading stats:", err);
+            setError("Gagal memuat statistik. Silakan coba lagi.");
+        }
+    };
 
     useEffect(() => {
-        const timer = setTimeout(() => {
+        const loadData = async () => {
+            await loadStats();
             setInitialLoading(false);
-        }, 1000);
+        };
         
-        return () => clearTimeout(timer);
+        loadData();
     }, []);
 
     const refreshData = async () => {
         setLoading(true);
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        setLastUpdated(new Date().toISOString());
+        await loadStats();
         setLoading(false);
     };
 
-    function getActivityIcon(type: ActivityItem['type']): JSX.Element {
-        const iconProps = "w-4 h-4";
-        switch (type) {
-            case 'berita': return <FileText className={iconProps} />;
-            case 'galeri': return <Camera className={iconProps} />;
-            case 'profil': return <Users className={iconProps} />;
-            case 'aspirasi': return <MessageCircle className={iconProps} />;
-            case 'produk': return <Star className={iconProps} />;
-            default: return <Activity className={iconProps} />;
-        }
-    }
-
-    function getActivityColor(status: ActivityItem['status']): string {
-        switch (status) {
-            case 'success': return 'bg-green-100 text-green-800 border-green-200';
-            case 'info': return 'bg-blue-100 text-blue-800 border-blue-200';
-            case 'warning': return 'bg-orange-100 text-orange-800 border-orange-200';
-            default: return 'bg-gray-100 text-gray-800 border-gray-200';
-        }
-    }
-
-    function formatTime(timestamp: string): string {
-        return timestamp;
-    }
-
-    const completionRate = Math.round((stats.aspirasiDone / stats.aspirasi) * 100);
+    const completionRate = stats.aspirasi > 0 ? Math.round((stats.aspirasiDone / stats.aspirasi) * 100) : 0;
 
     if (initialLoading) {
         return <AdminDashboardSkeleton />;
@@ -289,12 +236,12 @@ export default function AdminPage(): JSX.Element {
                         </div>
                         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                             <span className="text-xs sm:text-sm text-gray-500">
-                                Update terakhir: {formatTime(new Date(lastUpdated).toLocaleTimeString('id-ID'))}
+                                Update terakhir: {new Date(lastUpdated).toLocaleTimeString('id-ID')}
                             </span>
                             <button
                                 onClick={refreshData}
                                 disabled={loading}
-                                className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white border border-green-200 rounded-lg hover:bg-green-50 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 disabled:opacity-50"
+                                className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white border border-green-200 rounded-lg hover:bg-green-50 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 disabled:opacity-50 cursor-pointer"
                             >
                                 <RefreshCw className={`w-4 h-4 text-green-600 ${loading ? 'animate-spin' : ''}`} />
                                 <span className="text-sm font-medium text-green-700">Refresh</span>
@@ -302,6 +249,16 @@ export default function AdminPage(): JSX.Element {
                         </div>
                     </div>
                 </div>
+
+                {/* Error Message */}
+                {error && (
+                    <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <div className="flex items-center">
+                            <AlertCircle className="w-5 h-5 text-red-600 mr-2 flex-shrink-0" />
+                            <p className="text-sm text-red-700 font-medium">{error}</p>
+                        </div>
+                    </div>
+                )}
 
                 {/* Main Stats Cards */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
@@ -312,10 +269,10 @@ export default function AdminPage(): JSX.Element {
                                 <div>
                                     <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">Galeri</p>
                                     <p className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.galeri}</p>
-                                    <p className="text-xs text-green-600 mt-1 flex items-center">
-                                        <TrendingUp className="w-3 h-3 mr-1" />
-                                        <span className="hidden sm:inline">+3 minggu ini</span>
-                                        <span className="sm:hidden">+3</span>
+                                    <p className="text-xs text-blue-600 mt-1 flex items-center">
+                                        <Eye className="w-3 h-3 mr-1" />
+                                        <span className="hidden sm:inline">foto tersimpan</span>
+                                        <span className="sm:hidden">foto</span>
                                     </p>
                                 </div>
                                 <div className="p-2 sm:p-3 bg-blue-100 rounded-full">
@@ -330,12 +287,15 @@ export default function AdminPage(): JSX.Element {
                         <div className="p-4 sm:p-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">Berita</p>
+                                    <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">
+                                        <span className="hidden sm:inline">Berita & Pengumuman</span>
+                                        <span className="sm:hidden">Berita</span>
+                                    </p>
                                     <p className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.berita}</p>
                                     <p className="text-xs text-orange-600 mt-1 flex items-center">
-                                        <Eye className="w-3 h-3 mr-1" />
-                                        <span className="hidden sm:inline">1.2k views</span>
-                                        <span className="sm:hidden">1.2k</span>
+                                        <FileText className="w-3 h-3 mr-1" />
+                                        <span className="hidden sm:inline">artikel</span>
+                                        <span className="sm:hidden">artikel</span>
                                     </p>
                                 </div>
                                 <div className="p-2 sm:p-3 bg-orange-100 rounded-full">
@@ -346,7 +306,7 @@ export default function AdminPage(): JSX.Element {
                     </div>
 
                     {/* Produk Unggulan Card */}
-                    <div className="bg-white rounded-lg shadow-sm border border-green-100 hover:shadow-md transition-shadow">
+                    <div className="bg-white rounded-lg shadow-sm border border-yellow-100 hover:shadow-md transition-shadow">
                         <div className="p-4 sm:p-6">
                             <div className="flex items-center justify-between">
                                 <div>
@@ -355,10 +315,10 @@ export default function AdminPage(): JSX.Element {
                                         <span className="sm:hidden">Produk</span>
                                     </p>
                                     <p className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.produkUnggulan}</p>
-                                    <p className="text-xs text-green-600 mt-1 flex items-center">
+                                    <p className="text-xs text-yellow-600 mt-1 flex items-center">
                                         <Star className="w-3 h-3 mr-1" />
-                                        <span className="hidden sm:inline">Terverifikasi</span>
-                                        <span className="sm:hidden">OK</span>
+                                        <span className="hidden sm:inline">produk</span>
+                                        <span className="sm:hidden">produk</span>
                                     </p>
                                 </div>
                                 <div className="p-2 sm:p-3 bg-yellow-100 rounded-full">
@@ -369,13 +329,13 @@ export default function AdminPage(): JSX.Element {
                     </div>
 
                     {/* Aspirasi Card */}
-                    <div className="bg-white rounded-lg shadow-sm border border-orange-100 hover:shadow-md transition-shadow">
+                    <div className="bg-white rounded-lg shadow-sm border border-purple-100 hover:shadow-md transition-shadow">
                         <div className="p-4 sm:p-6">
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">Aspirasi</p>
                                     <p className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.aspirasi}</p>
-                                    <p className="text-xs text-orange-600 mt-1 flex items-center">
+                                    <p className="text-xs text-purple-600 mt-1 flex items-center">
                                         <CheckCircle className="w-3 h-3 mr-1" />
                                         <span>{completionRate}%</span>
                                         <span className="hidden sm:inline ml-1">diselesaikan</span>
@@ -390,7 +350,7 @@ export default function AdminPage(): JSX.Element {
                 </div>
 
                 {/* Secondary Stats */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
                     {/* Aspirasi Detail */}
                     <div className="bg-white rounded-lg shadow-sm border border-green-100 p-4 sm:p-6">
                         <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4 flex items-center">
@@ -398,14 +358,14 @@ export default function AdminPage(): JSX.Element {
                             Status Aspirasi
                         </h3>
                         <div className="space-y-3">
-                            <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
+                            <div className="flex items-center justify-between py-6 px-4 bg-orange-50 rounded-lg">
                                 <div className="flex items-center">
                                     <Clock className="w-4 h-4 text-orange-600 mr-2" />
                                     <span className="text-sm font-medium text-gray-700">Menunggu</span>
                                 </div>
                                 <span className="text-lg font-bold text-orange-600">{stats.aspirasiPending}</span>
                             </div>
-                            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                            <div className="flex items-center justify-between py-6 px-4 bg-green-50 rounded-lg">
                                 <div className="flex items-center">
                                     <CheckCircle className="w-4 h-4 text-green-600 mr-2" />
                                     <span className="text-sm font-medium text-gray-700">Selesai</span>
@@ -415,14 +375,14 @@ export default function AdminPage(): JSX.Element {
                         </div>
                         
                         {/* Progress Bar */}
-                        <div className="mt-4">
+                        <div className="mt-6">
                             <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
                                 <span>Tingkat Penyelesaian</span>
                                 <span className="font-medium">{completionRate}%</span>
                             </div>
                             <div className="w-full bg-gray-200 rounded-full h-2">
                                 <div 
-                                    className="bg-gradient-to-r from-green-500 to-green-600 h-2 rounded-full transition-all duration-300" 
+                                    className="bg-gradient-to-r from-green-500 to-green-600 h-4 rounded-full transition-all duration-300" 
                                     style={{ width: `${completionRate}%` }}
                                 ></div>
                             </div>
@@ -436,105 +396,66 @@ export default function AdminPage(): JSX.Element {
                             Aksi Cepat
                         </h3>
                         <div className="space-y-3">
-                            <button className="w-full flex items-center p-3 text-left bg-green-50 hover:bg-green-100 rounded-lg transition-colors group">
-                                <FileText className="w-4 h-4 text-green-600 mr-3 group-hover:scale-110 transition-transform" />
-                                <span className="text-sm font-medium text-gray-700">
-                                    <span className="hidden sm:inline">Buat Berita Baru</span>
-                                    <span className="sm:hidden">Berita Baru</span>
-                                </span>
-                            </button>
-                            <button className="w-full flex items-center p-3 text-left bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors group">
-                                <Camera className="w-4 h-4 text-blue-600 mr-3 group-hover:scale-110 transition-transform" />
-                                <span className="text-sm font-medium text-gray-700">Upload Galeri</span>
-                            </button>
-                            <button className="w-full flex items-center p-3 text-left bg-yellow-50 hover:bg-yellow-100 rounded-lg transition-colors group">
-                                <Star className="w-4 h-4 text-yellow-600 mr-3 group-hover:scale-110 transition-transform" />
-                                <span className="text-sm font-medium text-gray-700">
-                                    <span className="hidden sm:inline">Tambah Produk</span>
-                                    <span className="sm:hidden">Produk</span>
-                                </span>
-                            </button>
-                            <button className="w-full flex items-center p-3 text-left bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors group">
-                                <MessageCircle className="w-4 h-4 text-purple-600 mr-3 group-hover:scale-110 transition-transform" />
-                                <span className="text-sm font-medium text-gray-700">
-                                    <span className="hidden sm:inline">Kelola Aspirasi</span>
-                                    <span className="sm:hidden">Aspirasi</span>
-                                </span>
-                            </button>
-                        </div>
-                    </div>
+                            <Link href="/admin/galeri/tambah" className="block" target="_blank">
+                                <div className="w-full flex items-center p-3 text-left bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors group cursor-pointer">
+                                    <Camera className="w-4 h-4 text-blue-600 mr-3 group-hover:scale-110 transition-transform" />
+                                    <span className="text-sm font-medium text-gray-700">
+                                        <span className="hidden sm:inline">Tambah Galeri</span>
+                                        <span className="sm:hidden">Galeri</span>
+                                    </span>
+                                </div>
+                            </Link>
 
-                    {/* System Info */}
-                    <div className="bg-white rounded-lg shadow-sm border border-green-100 p-4 sm:p-6">
-                        <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                            <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600 mr-2" />
-                            Informasi Sistem
-                        </h3>
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                                <span className="text-sm text-gray-600">Status Sistem</span>
-                                <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
-                                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                                    Online
-                                </span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                                <span className="text-sm text-gray-600">Server</span>
-                                <span className="text-sm font-medium text-gray-800">Normal</span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                                <span className="text-sm text-gray-600">Database</span>
-                                <span className="text-sm font-medium text-gray-800">Connected</span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                                <span className="text-sm text-gray-600">
-                                    <span className="hidden sm:inline">Backup Terakhir</span>
-                                    <span className="sm:hidden">Backup</span>
-                                </span>
-                                <span className="text-sm font-medium text-gray-800">Hari ini</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                            <Link href="/admin/berita-dan-pengumuman/tambah" className="block" target="_blank">
+                                <div className="w-full flex items-center p-3 text-left bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors group cursor-pointer">
+                                    <FileText className="w-4 h-4 text-orange-600 mr-3 group-hover:scale-110 transition-transform" />
+                                    <span className="text-sm font-medium text-gray-700">
+                                        <span className="hidden sm:inline">Tambah Berita</span>
+                                        <span className="sm:hidden">Berita</span>
+                                    </span>
+                                </div>
+                            </Link>
 
-                {/* Recent Activity */}
-                <div className="bg-white rounded-lg shadow-sm border border-green-100">
-                    <div className="px-4 sm:px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-green-50 to-orange-50">
-                        <h2 className="text-lg sm:text-xl font-semibold text-gray-800 flex items-center">
-                            <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 mr-2" />
-                            Aktivitas Terbaru
-                        </h2>
-                        <p className="text-xs sm:text-sm text-gray-600 mt-1">
-                            <span className="hidden sm:inline">Riwayat aktivitas sistem dalam 7 hari terakhir</span>
-                            <span className="sm:hidden">7 hari terakhir</span>
-                        </p>
-                    </div>
-                    <div className="p-4 sm:p-6">
-                        {activities.length > 0 ? (
-                            <div className="space-y-3 sm:space-y-4">
-                                {activities.map((activity) => (
-                                    <div key={activity.id} className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                                        <div className={`flex-shrink-0 p-1.5 sm:p-2 rounded-lg border ${getActivityColor(activity.status)}`}>
-                                            {getActivityIcon(activity.type)}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-medium text-gray-900 mb-1 line-clamp-2">
-                                                {activity.title}
-                                            </p>
-                                            <div className="flex items-center gap-2">
-                                                <Clock className="w-3 h-3 text-gray-400" />
-                                                <span className="text-xs text-gray-500">{activity.timestamp}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="text-center py-8">
-                                <Activity className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                                <p className="text-gray-500">Belum ada aktivitas terbaru</p>
-                            </div>
-                        )}
+                            <Link href="/admin/produk-unggulan/tambah" className="block" target="_blank">
+                                <div className="w-full flex items-center p-3 text-left bg-yellow-50 hover:bg-yellow-100 rounded-lg transition-colors group cursor-pointer">
+                                    <Star className="w-4 h-4 text-yellow-600 mr-3 group-hover:scale-110 transition-transform" />
+                                    <span className="text-sm font-medium text-gray-700">
+                                        <span className="hidden sm:inline">Tambah Produk</span>
+                                        <span className="sm:hidden">Produk</span>
+                                    </span>
+                                </div>
+                            </Link>
+
+                            <Link href="/admin/aspirasi" className="block" target="_blank">
+                                <div className="w-full flex items-center p-3 text-left bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors group cursor-pointer">
+                                    <MessageCircle className="w-4 h-4 text-purple-600 mr-3 group-hover:scale-110 transition-transform" />
+                                    <span className="text-sm font-medium text-gray-700">
+                                        <span className="hidden sm:inline">Kelola Aspirasi</span>
+                                        <span className="sm:hidden">Aspirasi</span>
+                                    </span>
+                                </div>
+                            </Link>
+
+                            <Link href="/admin/profil" className="block" target="_blank">
+                                <div className="w-full flex items-center p-3 text-left bg-green-50 hover:bg-green-100 rounded-lg transition-colors group cursor-pointer">
+                                    <Users className="w-4 h-4 text-green-600 mr-3 group-hover:scale-110 transition-transform" />
+                                    <span className="text-sm font-medium text-gray-700">
+                                        <span className="hidden sm:inline">Kelola Profil</span>
+                                        <span className="sm:hidden">Profil</span>
+                                    </span>
+                                </div>
+                            </Link>
+
+                            <Link href="/admin/kontak-desa" className="block" target="_blank">
+                                <div className="w-full flex items-center p-3 text-left bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors group cursor-pointer">
+                                    <Phone className="w-4 h-4 text-indigo-600 mr-3 group-hover:scale-110 transition-transform" />
+                                    <span className="text-sm font-medium text-gray-700">
+                                        <span className="hidden sm:inline">Kelola Kontak</span>
+                                        <span className="sm:hidden">Kontak</span>
+                                    </span>
+                                </div>
+                            </Link>
+                        </div>
                     </div>
                 </div>
 
@@ -547,11 +468,10 @@ export default function AdminPage(): JSX.Element {
                     <ul className="text-sm text-amber-700 space-y-1">
                         <li>• Periksa aspirasi yang belum ditanggapi secara berkala</li>
                         <li className="hidden sm:list-item">• Update berita dan informasi desa minimal 2 kali seminggu</li>
-                        <li>• Backup data sistem dilakukan otomatis setiap hari</li>
+                        <li>• Pastikan data profil desa selalu terkini dan akurat</li>
                         <li className="hidden sm:list-item">• Galeri foto sebaiknya diorganisir berdasarkan kegiatan atau tanggal</li>
-                        <li className="hidden sm:list-item">• Verifikasi produk unggulan sebelum dipublikasi ke masyarakat</li>
                         <li className="sm:hidden">• Update berita minimal 2x seminggu</li>
-                        <li className="sm:hidden">• Verifikasi produk sebelum publikasi</li>
+                        <li className="sm:hidden">• Pastikan profil desa selalu terkini</li>
                     </ul>
                 </div>
             </div>

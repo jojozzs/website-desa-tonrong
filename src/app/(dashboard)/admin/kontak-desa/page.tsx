@@ -265,7 +265,7 @@ export default function KontakDesaPage(): JSX.Element {
                                             handleSave(e);
                                         }}
                                         disabled={saving}
-                                        className="w-full bg-gradient-to-r from-green-600 to-orange-600 hover:from-green-700 hover:to-orange-700 text-white font-semibold py-4 px-6 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+                                        className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl cursor-pointer"
                                     >
                                         {saving ? (
                                             <span className="flex items-center justify-center gap-3">
@@ -287,7 +287,7 @@ export default function KontakDesaPage(): JSX.Element {
                     {/* Right Column - Live Preview */}
                     <div className="lg:sticky lg:top-6 lg:self-start">
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                            <div className="bg-gradient-to-r from-green-600 to-orange-600 px-6 py-4">
+                            <div className="bg-gradient-to-r from-green-400 to-orange-400 px-6 py-4">
                                 <div className="flex items-center gap-3 text-white">
                                     <Eye className="w-5 h-5" />
                                     <h3 className="font-semibold">Preview Kontak</h3>

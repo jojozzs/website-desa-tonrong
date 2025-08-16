@@ -59,6 +59,43 @@ interface BeritaDocWeb {
     konten: OutputData;
 }
 
+// Helper function to generate slug from title
+function generateSlug(title: string): string {
+    return title
+        .toLowerCase()
+        .trim()
+        .replace(/[àáâãäå]/g, 'a')
+        .replace(/[èéêë]/g, 'e')
+        .replace(/[ìíîï]/g, 'i')
+        .replace(/[òóôõöø]/g, 'o')
+        .replace(/[ùúûü]/g, 'u')
+        .replace(/[ñ]/g, 'n')
+        .replace(/[ç]/g, 'c')
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, ' ')
+        .replace(/\s/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-+|-+$/g, '');
+}
+
+async function ensureUniqueSlug(baseSlug: string, excludeId?: string): Promise<string> {
+    let slug = baseSlug;
+    let counter = 1;
+    
+    while (true) {
+        const q = adminDb.collection("berita-pengumuman").where("slug", "==", slug);
+        
+        const snapshot = await q.get();
+        
+        if (snapshot.empty || (excludeId && snapshot.docs.length === 1 && snapshot.docs[0].id === excludeId)) {
+            return slug;
+        }
+        
+        counter++;
+        slug = `${baseSlug}-${counter}`;
+    }
+}
+
 async function verifyAdmin(req: NextRequest): Promise<string> {
     const authHeader = req.headers.get("authorization") || "";
     const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
@@ -189,13 +226,12 @@ export async function POST(request: NextRequest) {
         const tanggalStr = String(formData.get("tanggal") || "");
         const penulis = String(formData.get("penulis") || "");
         const kategori = String(formData.get("kategori") || "") as BeritaPengumumanKategoriEnum;
-        const slug = String(formData.get("slug") || "");
         const gambar = formData.get("gambar") as File | null;
 
         const kontenRaw = formData.get("konten") as string;
         const konten: OutputData = JSON.parse(kontenRaw);
 
-        if (!judul || !tanggalStr || !penulis || !kategori || !slug || !gambar) {
+        if (!judul || !tanggalStr || !penulis || !kategori || !gambar) {
             return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
         }
 
@@ -208,6 +244,9 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: false, error: "Invalid 'tanggal' format" }, { status: 400 });
         }
 
+        const baseSlug = generateSlug(judul);
+        const uniqueSlug = await ensureUniqueSlug(baseSlug);
+
         const up = await uploadToCloudinary(gambar);
 
         const adminRef = adminDb.doc(`admin/${uid}`);
@@ -217,7 +256,7 @@ export async function POST(request: NextRequest) {
             tanggal,
             penulis,
             kategori,
-            slug,
+            slug: uniqueSlug,
             admin_id: adminRef,
             gambar_url: up.secure_url,
             gambar_id: up.public_id,
@@ -246,7 +285,7 @@ export async function POST(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
     try {
         await verifyAdmin(request);
-        const formData = await request.formData(); // id dari form-data (konsisten dgn galeri)
+        const formData = await request.formData();
 
         const id = String(formData.get("id") || "");
         if (!id) {
@@ -258,18 +297,25 @@ export async function PATCH(request: NextRequest) {
         const tanggalStr = (formData.get("tanggal") as string) ?? null;
         const penulis = (formData.get("penulis") as string) ?? null;
         const kategori = (formData.get("kategori") as string) as BeritaPengumumanKategoriEnum | null;
-        const slug = (formData.get("slug") as string) ?? null;
         const gambar = (formData.get("gambar") as File) ?? null;
         const kontenRaw = formData.get("konten") as string | null;
 
         const updateData: Partial<BeritaDocAdmin> & { updated_at: AdminTimestamp } = {
             updated_at: FieldValue.serverTimestamp() as unknown as AdminTimestamp,
         };
-        if (judul !== null) updateData.judul = judul;
+
+        if (judul !== null) {
+            updateData.judul = judul;
+            // Auto-generate new slug when title changes
+            const baseSlug = generateSlug(judul);
+            const uniqueSlug = await ensureUniqueSlug(baseSlug, id);
+            updateData.slug = uniqueSlug;
+        }
+        
         if (deskripsi !== null) updateData.deskripsi = deskripsi;
         if (penulis !== null) updateData.penulis = penulis;
         if (kategori !== null) updateData.kategori = kategori;
-        if (slug !== null) updateData.slug = slug;
+        
         if (tanggalStr !== null) {
             const t = new Date(tanggalStr);
             if (Number.isNaN(t.getTime())) {
