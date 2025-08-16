@@ -2,7 +2,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logoutAdmin } from "@/lib/auth";
-import { JSX, useState, useEffect } from "react";
+import { JSX, useState } from "react";
+import { X } from "lucide-react";
 
 interface NavItem {
     href: string;
@@ -77,35 +78,9 @@ const NAV_ITEMS: ReadonlyArray<NavItem> = [
     }
 ] as const;
 
-function SidebarSkeleton(): JSX.Element {
-    return (
-        <aside className="fixed left-0 top-0 z-40 w-64 h-screen bg-white shadow-lg border-r border-gray-200">
-            <div className="flex flex-col h-full">
-                {/* Logo/Header Skeleton */}
-                <div className="flex items-center justify-center h-16 py-10 px-4 border-b border-gray-200 bg-gray-100">
-                    <div className="flex items-center space-x-2">
-                        <div className="w-8 h-8 bg-gray-200 rounded-lg animate-pulse"></div>
-                        <div className="w-24 h-5 bg-gray-200 rounded animate-pulse"></div>
-                    </div>
-                </div>
-
-                {/* Navigation Skeleton */}
-                <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-                    {Array.from({ length: 7 }).map((_, index) => (
-                        <div key={index} className="flex items-center px-4 py-3 rounded-lg">
-                            <div className="w-5 h-5 mr-3 bg-gray-200 rounded animate-pulse"></div>
-                            <div className="h-4 bg-gray-200 rounded animate-pulse flex-1"></div>
-                        </div>
-                    ))}
-                </nav>
-
-                {/* Logout Button Skeleton */}
-                <div className="p-4 border-t border-gray-200">
-                    <div className="w-full h-12 bg-gray-200 rounded-lg animate-pulse"></div>
-                </div>
-            </div>
-        </aside>
-    );
+interface MobileSidebarProps {
+    isOpen: boolean;
+    onClose: () => void;
 }
 
 function LogoutModal({
@@ -116,37 +91,36 @@ function LogoutModal({
     onConfirm: () => void;
 }) {
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm">
-            <div className="bg-white rounded-2xl shadow-2xl p-8 w-[420px] space-y-6 animate-fadeIn">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+            <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm space-y-6 animate-fadeIn">
                 {/* Icon & Judul */}
                 <div className="flex flex-col items-center space-y-4">
                     <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
-                        <svg className="w-10 h-10 text-red-600" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                        <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1m0-10V5m-4 2H5a2 2 0 00-2 2v8a2 2 0 002 2h4"/>
                         </svg>
                     </div>
-                    <h2 className="text-xl font-bold text-gray-900">
+                    <h2 className="text-xl font-bold text-gray-900 text-center">
                         Konfirmasi Logout
                     </h2>
                     <p className="text-center text-gray-600 text-sm">
-                        Apakah Anda yakin ingin keluar dari Dashboard Admin? Anda harus login kembali
-                        untuk mengakses Dashboard.
+                        Apakah Anda yakin ingin keluar dari Dashboard Admin?
                     </p>
                 </div>
 
                 {/* Tombol Aksi */}
-                <div className="flex justify-end gap-4">
-                    <button 
-                        onClick={onCancel}
-                        className="px-5 py-2.5 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-all cursor-pointer"
-                    >
-                        Batal
-                    </button>
+                <div className="flex flex-col gap-3">
                     <button 
                         onClick={onConfirm}
-                        className="px-5 py-2.5 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 transition-all cursor-pointer"
+                        className="w-full px-4 py-3 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 transition-all"
                     >
                         Ya, Logout
+                    </button>
+                    <button 
+                        onClick={onCancel}
+                        className="w-full px-4 py-3 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-all"
+                    >
+                        Batal
                     </button>
                 </div>
             </div>
@@ -154,19 +128,10 @@ function LogoutModal({
     );
 }
 
-export default function Sidebar(): JSX.Element {
+export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps): JSX.Element {
     const pathname = usePathname();
     const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
     const [showLogoutModal, setShowLogoutModal] = useState<boolean>(false);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setIsLoading(false);
-        }, 1000);
-
-        return () => clearTimeout(timer);
-    }, []);
 
     async function handleLogout(): Promise<void> {
         try {
@@ -199,13 +164,98 @@ export default function Sidebar(): JSX.Element {
         return pathname.startsWith(href);
     };
 
-    if (isLoading) {
-        return <SidebarSkeleton />;
-    }
-
     return (
         <>
-            <aside className="fixed left-0 top-0 z-40 w-64 h-screen bg-white shadow-lg border-r border-green-200">
+            {/* Mobile Sidebar */}
+            <div className={`
+                lg:hidden fixed inset-y-0 left-0 z-50 w-full bg-white shadow-2xl transform transition-transform duration-300 ease-in-out
+                ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+            `}>
+                <div className="flex flex-col h-full">
+                    {/* Header with Close Button */}
+                    <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-green-500 to-orange-500 border-b border-green-200">
+                        <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-lg">
+                                <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
+                                    <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" />
+                                </svg>
+                            </div>
+                            <span className="text-lg font-bold text-white">Admin Panel</span>
+                        </div>
+                        <button
+                            onClick={onClose}
+                            className="p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors"
+                            aria-label="Close menu"
+                        >
+                            <X className="w-5 h-5 text-white" />
+                        </button>
+                    </div>
+
+                    {/* Navigation */}
+                    <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+                        {NAV_ITEMS.map((item) => (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                onClick={onClose}
+                                className={`
+                                    flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200
+                                    ${isActiveLink(item.href)
+                                        ? "bg-gradient-to-r from-green-50 to-orange-50 text-green-700 border-l-4 border-green-600 shadow-sm"
+                                        : "text-gray-600 hover:bg-gradient-to-r hover:from-green-50 hover:to-orange-50 hover:text-green-800"
+                                    }
+                                `}
+                                aria-current={isActiveLink(item.href) ? "page" : undefined}
+                            >
+                                <span className={`
+                                    mr-4 transition-colors duration-200
+                                    ${isActiveLink(item.href) ? "text-orange-600" : "text-gray-400"}
+                                `}>
+                                    {item.icon}
+                                </span>
+                                <span className="truncate">{item.label}</span>
+                            </Link>
+                        ))}
+                    </nav>
+
+                    {/* Logout Button */}
+                    <div className="p-4 border-t border-green-200 bg-gray-50">
+                        <button
+                            type="button"
+                            onClick={handleLogoutClick}
+                            disabled={isLoggingOut}
+                            className="
+                                w-full flex items-center justify-center px-4 py-3 text-sm font-medium text-white
+                                bg-gradient-to-r from-orange-600 to-orange-700 rounded-xl hover:from-orange-700 hover:to-orange-800 
+                                focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 
+                                transition-all duration-200 shadow-lg hover:shadow-xl
+                                disabled:opacity-50 disabled:cursor-not-allowed
+                            "
+                        >
+                            {isLoggingOut ? (
+                                <>
+                                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                        <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                    </svg>
+                                    Logging out...
+                                </>
+                            ) : (
+                                <>
+                                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3V6a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                    </svg>
+                                    Logout
+                                </>
+                            )}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Desktop Sidebar - Hidden on Mobile */}
+            <aside className="hidden lg:block fixed left-0 top-0 z-40 w-64 h-screen bg-white shadow-lg border-r border-green-200">
                 <div className="flex flex-col h-full">
                     {/* Logo/Header */}
                     <div className="flex items-center justify-center h-16 py-10 px-4 border-b border-green-200 bg-gradient-to-r from-green-500 to-orange-500">
@@ -257,7 +307,7 @@ export default function Sidebar(): JSX.Element {
                                 bg-gradient-to-r from-orange-600 to-orange-700 rounded-lg hover:from-orange-700 hover:to-orange-800 
                                 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 
                                 transition-all duration-200 shadow-lg hover:shadow-xl
-                                disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer
+                                disabled:opacity-50 disabled:cursor-not-allowed
                             "
                         >
                             {isLoggingOut ? (
