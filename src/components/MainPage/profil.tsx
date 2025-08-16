@@ -15,7 +15,7 @@ export default function ProfilDesa() {
               <img 
                 src="landscape.jpg" 
                 alt="Foto Desa Tonrong"
-                className="w-full h-80 lg:h-120 object-cover group-hover:scale-105 transition-transform duration-500"
+                className="w-full h-80 lg:h-100 object-cover group-hover:scale-105 transition-transform duration-500"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
             </div>
@@ -25,36 +25,23 @@ export default function ProfilDesa() {
             <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-primary-green/20 rounded-full blur-xl"></div>
           </div>
 
-          {/* Deskripsi - Kanan */}
+          {/* Deskripsi*/}
           <div className="space-y-6">
-            <div>
+            <div className="w-full lg:h-100 h-80">
               <h3 className="text-2xl lg:text-3xl font-bold text-text-primary mb-6">
-                Desa yang Kaya akan Potensi
+                Tentang Desa Tonrong Rijang
               </h3>
               
               <div className="space-y-4 text-justify">
                 <p className="text-lg text-text-secondary leading-relaxed">
-                  Desa Tonrong merupakan salah satu desa di Kecamatan Bone, Kabupaten Bone, 
-                  Sulawesi Selatan yang memiliki potensi alam dan sumber daya manusia yang luar biasa.
+                  Desa Tonrong Rijang terletak di Kecamatan Baranti, Kabupaten Sidenreng Rappang, Sulawesi Selatan. 
                 </p>
                 
                 <p className="text-lg text-text-secondary leading-relaxed">
-                  Dengan luas wilayah yang strategis dan penduduk yang ramah, desa ini terus berkembang 
-                  menuju modernisasi tanpa meninggalkan nilai-nilai tradisional yang telah mengakar 
-                  dalam kehidupan bermasyarakat.
+                  Sebagai salah satu desa maju di wilayah ini, Tonrong Rijang terus berupaya meningkatkan pelayanan, kesejahteraan, 
+                  dan partisipasi masyarakat dalam pembangunan desa.
                 </p>
                 
-                <p className="text-lg text-text-secondary leading-relaxed">
-                  Desa Tonrong terdiri dari 8 dusun dengan total penduduk 2,547 jiwa yang hidup 
-                  rukun dan penuh semangat gotong royong. Berbagai potensi ekonomi terus dikembangkan 
-                  melalui 25 UMKM aktif yang menjadi tulang punggung perekonomian desa.
-                </p>
-                
-                <p className="text-lg text-text-secondary leading-relaxed">
-                  Komitmen terhadap transparansi dan pelayanan prima menjadikan Desa Tonrong 
-                  sebagai contoh desa modern yang tetap menjunjung tinggi kearifan lokal dan 
-                  nilai-nilai budaya Sulawesi Selatan.
-                </p>
               </div>
             </div>
           </div>
