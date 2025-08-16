@@ -6,6 +6,8 @@ import { ArrowLeft,Save, Package, FileText, Store, MapPin, Phone, Image as Image
 import Image from "next/image";
 import EditorJs from "@/components/EditorJS";
 import type { OutputData } from "@editorjs/editorjs";
+import { AdminLogHelpers } from "@/lib/admin-log";
+import { useAdminData } from "@/hooks/useAdminData";
 
 type FormState = {
     judul: string;
@@ -57,6 +59,8 @@ export default function ProdukTambahPage(): JSX.Element {
     const [konten, setKonten] = useState<OutputData | undefined>();
     const slugPreview = generateSlugPreview(f.judul);
 
+    const { admin } = useAdminData();
+
     useEffect(() => {
         if (gambar) {
             const objectUrl = URL.createObjectURL(gambar);
@@ -94,6 +98,24 @@ export default function ProdukTambahPage(): JSX.Element {
                 setError("Gagal menyimpan data. Silakan periksa kembali form Anda.");
                 setSubmitting(false);
                 return;
+            }
+
+            const responseData = await r.json();
+            const createdId = responseData.id || responseData.data?.id || responseData.documentId || responseData.berita_id;
+
+            if (!admin) {
+                setError("Gagal mencatat log. Data admin tidak ditemukan.");
+                setSubmitting(false);
+                return;
+            }
+
+            if (createdId) {
+                await AdminLogHelpers.createProdukUnggulan(
+                    admin.uid,
+                    admin.nama,
+                    createdId,
+                    f.judul
+                );
             }
             
             setSuccess(true);
