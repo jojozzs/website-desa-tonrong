@@ -5,10 +5,12 @@ import { requireIdToken } from "@/lib/client-auth";
 import { ProdukUnggulan } from "@/lib/types";
 import { Plus, Search, Package, Edit3, Trash2, AlertCircle, Loader2, Store, Tag, RefreshCw, Grid3x3, List, Calendar, Filter, X, MoreVertical } from "lucide-react";
 import Image from "next/image";
+import { OutputData } from "@editorjs/editorjs/types/data-formats/output-data";
 
 type ProdukRow = Omit<ProdukUnggulan, "created_at" | "updated_at"> & {
     created_at: string | null;
     updated_at: string | null;
+    konten?: OutputData | null;
 };
 
 type ApiListResponse = {
@@ -293,6 +295,53 @@ export default function ProdukListPage(): JSX.Element {
         return text.substring(0, maxLength) + "...";
     }
 
+    function stripHtml(s: string): string {
+        if (!s) return "";
+        if (typeof window === "undefined") {
+            return s.replace(/<[^>]+>/g, ""); // fallback di SSR
+        }
+        const div = document.createElement("div");
+        div.innerHTML = s;
+        return div.textContent || div.innerText || "";
+    }
+
+    function getKontenPreview(
+        konten?: OutputData | null,
+        maxLength = 100
+    ): string {
+        if (!konten || !Array.isArray(konten.blocks)) return "";
+
+        for (const block of konten.blocks) {
+            switch (block.type) {
+                case "paragraph":
+                case "header": {
+                    const raw = (block.data as { text?: string }).text ?? "";
+                    const text = stripHtml(raw);
+                    return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
+                }
+
+                case "list": {
+                    const items = (block.data as { items?: unknown[] }).items ?? [];
+                    const first = items[0];
+                    let raw = "";
+                    if (typeof first === "string") {
+                    raw = first;
+                    } else if (
+                    typeof first === "object" &&
+                    first !== null &&
+                    "content" in first
+                    ) {
+                    raw = (first as { content?: string }).content ?? "";
+                    }
+                    const text = stripHtml(raw);
+                    return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
+                }
+            }
+        }
+
+        return "";
+    }
+
     if (loading) {
         return <ProdukSkeleton viewMode={viewMode} />;
     }
@@ -549,6 +598,7 @@ export default function ProdukListPage(): JSX.Element {
                                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                                     width={400}
                                                     height={225}
+                                                    priority
                                                 />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center">
@@ -617,11 +667,20 @@ export default function ProdukListPage(): JSX.Element {
                                             </div>
 
                                             {/* Description */}
-                                            {row.deskripsi && (
+                                            {/* {row.deskripsi && (
                                                 <p className="text-xs sm:text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed">
-                                                    {truncateText(row.deskripsi, 80)}
+                                                    {getKontenPreview(row.konten, 80) || truncateText(row.deskripsi || "", 80)}
                                                 </p>
-                                            )}
+                                                
+                                            )} */}
+                                            {(() => {
+                                                const preview = getKontenPreview(row.konten, 80) || truncateText(row.deskripsi || "", 80);
+                                                return preview ? (
+                                                    <p className="text-xs sm:text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed">
+                                                    {preview}
+                                                    </p>
+                                                ) : null;
+                                            })()}
 
                                             {/* Slug */}
                                             <div className="flex items-center text-xs text-gray-500 mb-4 pb-3 border-b border-gray-100">
@@ -694,6 +753,7 @@ export default function ProdukListPage(): JSX.Element {
                                                                             className="h-12 w-12 rounded-lg object-cover"
                                                                             width={48}
                                                                             height={48}
+                                                                            priority
                                                                         />
                                                                     ) : (
                                                                         <div className="h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center">
@@ -705,11 +765,14 @@ export default function ProdukListPage(): JSX.Element {
                                                                     <div className="text-sm font-medium text-gray-900 line-clamp-1">
                                                                         {row.judul}
                                                                     </div>
-                                                                    {row.deskripsi && (
-                                                                        <div className="text-sm text-gray-500 line-clamp-1">
-                                                                            {truncateText(row.deskripsi, 60)}
-                                                                        </div>
-                                                                    )}
+                                                                    {(() => {
+                                                                        const preview = getKontenPreview(row.konten, 120) || truncateText(row.deskripsi || "", 120);
+                                                                        return preview ? (
+                                                                            <p className="text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">
+                                                                            {preview}
+                                                                            </p>
+                                                                        ) : null;
+                                                                    })()}
                                                                 </div>
                                                             </div>
                                                         </td>
@@ -776,6 +839,7 @@ export default function ProdukListPage(): JSX.Element {
                                                             className="w-full h-full object-cover"
                                                             width={80}
                                                             height={80}
+                                                            priority
                                                         />
                                                     ) : (
                                                         <div className="w-full h-full flex items-center justify-center">
