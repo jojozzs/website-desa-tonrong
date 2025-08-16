@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useBeritaData } from '@/components/hooks/useBeritaData'
+import { useBeritaData } from '@/hooks/useBeritaData'
 import { Calendar, ArrowRight, BookOpen, User } from 'lucide-react'
 import { BeritaPengumumanKategoriEnum } from '@/lib/enums'
 
