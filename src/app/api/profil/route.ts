@@ -175,6 +175,21 @@ export async function GET(request: NextRequest) {
         const kategoriParam = searchParams.get("kategori");
         const limitOne = searchParams.get("limit") === "1";
 
+        if (searchParams.get("all") === "true") {
+            const snap = await adminDb.collection("profil").get();
+            const list = snap.docs.map((d) => {
+                const raw = d.data() as ProfilDocAdmin;
+                return {
+                    id: d.id,
+                    ...raw,
+                    created_at: typeof raw.created_at?.toDate === "function" ? raw.created_at.toDate() : null,
+                    updated_at: typeof raw.updated_at?.toDate === "function" ? raw.updated_at.toDate() : null,
+                    admin_uid: raw.admin_id?.id ?? null,
+                };
+            });
+            return NextResponse.json({ success: true, data: list });
+        }
+
         if (id) {
             const snap = await adminDb.doc(`profil/${id}`).get();
             if (!snap.exists) return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
@@ -205,6 +220,7 @@ export async function GET(request: NextRequest) {
                     admin_uid: raw.admin_id?.id ?? null,
                 };
             });
+
             return NextResponse.json({ success: true, data: list });
         }
 
@@ -293,7 +309,7 @@ export async function PATCH(request: NextRequest) {
         await verifyAdmin(request);
         const formData = await request.formData();
 
-        const id = String(formData.get("id") || "");
+        const id = request.nextUrl.searchParams.get("id");
         if (!id) return NextResponse.json({ success: false, error: "ID is required" }, { status: 400 });
 
         const judul = (formData.get("judul") as string) ?? null;
