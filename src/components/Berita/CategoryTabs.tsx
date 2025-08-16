@@ -96,7 +96,7 @@ export default function CategoryTabs({
               relative p-6 rounded-2xl transition-all duration-500 transform
               ${isActive ? `${config.activeClass} scale-[1.02]` : config.inactiveClass}
               group overflow-hidden focus:outline-none focus:ring-4 focus:ring-${config.accentColor}-200
-              hover:scale-[1.01] active:scale-[0.98]
+              hover:scale-[1.01] active:scale-[0.98] hover:cursor-pointer
             `}
           >
             {/* Background Pattern untuk active state */}
