@@ -6,6 +6,8 @@ import { ProfilKategoriEnum } from '@/lib/enums';
 import Image from 'next/image';
 import { requireIdToken } from '@/lib/client-auth';
 import { FileText, MapPin, Target, Users, Building, History, Image as ImageIcon, Save, ArrowLeft, AlertCircle,Upload, Eye,Info, Clock, RefreshCw } from 'lucide-react';
+import { AdminLogHelpers } from "@/lib/admin-log";
+import { useAdminData } from "@/hooks/useAdminData";
 
 const getKategoriIcon = (kategori: ProfilKategoriEnum) => {
     switch (kategori) {
@@ -46,7 +48,10 @@ export default function EditProfilPage() {
     const [dataTambahan, setDataTambahan] = useState<ProfilWithContent['data_tambahan']>({});
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [submitting, setSubmitting] = useState<boolean>(false);
     const [isDataLoaded, setIsDataLoaded] = useState(false);
+
+    const { admin, loading: loadingAdmin } = useAdminData();
 
     const formatDate = (dateValue: string | null | { toDate?: () => Date }): string => {
         if (!dateValue) return "-";
@@ -104,6 +109,7 @@ export default function EditProfilPage() {
         if (!profil) return;
 
         setError('');
+        setSubmitting(true);
         setLoading(true);
 
         try {
@@ -123,6 +129,25 @@ export default function EditProfilPage() {
                     Authorization: `Bearer ${token}`,
                 },
             });
+
+            if (!res.ok) {
+                setError("Gagal memperbarui galeri.");
+                setSubmitting(false);
+                return;
+            }
+
+            if (!admin) {
+                setError("Gagal mencatat log. Data admin tidak ditemukan.");
+                setSubmitting(false);
+                return;
+            }
+
+            await AdminLogHelpers.updateProfil(
+                admin.uid,
+                admin.nama,
+                id,
+                judul,
+            );
 
             if (res.ok) {
                 router.push('/admin/profil');
@@ -146,7 +171,7 @@ export default function EditProfilPage() {
         }
     };
 
-    if (!isDataLoaded && !error) {
+    if (!isDataLoaded && !error || loadingAdmin) {
         return (
             <div className="min-h-screen bg-gray-50 p-4 lg:p-6">
                 <div className="max-w-5xl mx-auto">
@@ -541,7 +566,7 @@ export default function EditProfilPage() {
                     <div className="flex items-center gap-4 pt-4">
                         <button
                             type="submit"
-                            disabled={loading}
+                            disabled={loading || submitting}
                             className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl cursor-pointer"
                         >
                             {loading ? (
