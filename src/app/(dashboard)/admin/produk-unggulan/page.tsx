@@ -3,7 +3,7 @@ import Link from "next/link";
 import { JSX, useCallback, useEffect, useState } from "react";
 import { requireIdToken } from "@/lib/client-auth";
 import { ProdukUnggulan } from "@/lib/types";
-import { Plus, Search, Package, Edit3, Trash2, AlertCircle, Loader2, Store, Tag, RefreshCw, Grid3x3, List, Calendar, Filter, X, MoreVertical } from "lucide-react";
+import { Plus, Search, Package, Edit3, Trash2, AlertCircle, Store, Tag, RefreshCw, Grid3x3, List, Calendar, Filter, X, MoreVertical } from "lucide-react";
 import Image from "next/image";
 import { OutputData } from "@editorjs/editorjs/types/data-formats/output-data";
 
@@ -198,7 +198,8 @@ export default function ProdukListPage(): JSX.Element {
     const [error, setError] = useState<string>("");
     const [searchTerm, setSearchTerm] = useState<string>("");
     const [viewMode, setViewMode] = useState<ViewMode>('grid');
-    const [deleting, setDeleting] = useState<string | null>(null);
+    const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+    const [deletingProduct, setDeletingProduct] = useState<{ id: string; judul: string } | null>(null);
     const [showMobileFilters, setShowMobileFilters] = useState<boolean>(false);
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
@@ -256,12 +257,11 @@ export default function ProdukListPage(): JSX.Element {
         return () => document.removeEventListener('click', handleClickOutside);
     }, []);
 
-    async function handleDelete(id: string, judul: string): Promise<void> {
-        const confirmed = window.confirm(`Apakah Anda yakin ingin menghapus produk "${judul}"?\n\nTindakan ini tidak dapat dibatalkan.`);
-        if (!confirmed) return;
-        
-        setDeleting(id);
+    async function handleDelete(id: string): Promise<void> {
+        setDeletingProduct(null);
+        setDeleteConfirm(null);
         setOpenMenuId(null);
+        
         try {
             const t = await requireIdToken();
             const response = await fetch(`/api/produk-unggulan?id=${encodeURIComponent(id)}`, {
@@ -276,8 +276,6 @@ export default function ProdukListPage(): JSX.Element {
             }
         } catch {
             alert("Gagal menghapus produk. Periksa koneksi internet Anda.");
-        } finally {
-            setDeleting(null);
         }
     }
 
@@ -630,15 +628,14 @@ export default function ProdukListPage(): JSX.Element {
                                                             Edit
                                                         </Link>
                                                         <button 
-                                                            onClick={() => handleDelete(row.id, row.judul)}
-                                                            disabled={deleting === row.id}
-                                                            className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left disabled:opacity-50 cursor-pointer"
+                                                            onClick={() => {
+                                                                setDeletingProduct({ id: row.id, judul: row.judul });
+                                                                setDeleteConfirm(row.id);
+                                                                setOpenMenuId(null);
+                                                            }}
+                                                            className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left cursor-pointer"
                                                         >
-                                                            {deleting === row.id ? (
-                                                                <Loader2 className="w-4 h-4 animate-spin" />
-                                                            ) : (
-                                                                <Trash2 className="w-4 h-4" />
-                                                            )}
+                                                            <Trash2 className="w-4 h-4" />
                                                             Hapus
                                                         </button>
                                                     </div>
@@ -667,12 +664,6 @@ export default function ProdukListPage(): JSX.Element {
                                             </div>
 
                                             {/* Description */}
-                                            {/* {row.deskripsi && (
-                                                <p className="text-xs sm:text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed">
-                                                    {getKontenPreview(row.konten, 80) || truncateText(row.deskripsi || "", 80)}
-                                                </p>
-                                                
-                                            )} */}
                                             {(() => {
                                                 const preview = getKontenPreview(row.konten, 80) || truncateText(row.deskripsi || "", 80);
                                                 return preview ? (
@@ -699,15 +690,13 @@ export default function ProdukListPage(): JSX.Element {
                                                 </Link>
                                                 
                                                 <button
-                                                    onClick={() => handleDelete(row.id, row.judul)}
-                                                    disabled={deleting === row.id}
-                                                    className="px-3 py-2 bg-red-50 text-red-700 text-xs font-medium rounded-lg hover:bg-red-100 transition-colors duration-200 disabled:opacity-50 cursor-pointer"
+                                                    onClick={() => {
+                                                        setDeletingProduct({ id: row.id, judul: row.judul });
+                                                        setDeleteConfirm(row.id);
+                                                    }}
+                                                    className="px-3 py-2 bg-red-50 text-red-700 text-xs font-medium rounded-lg hover:bg-red-100 transition-colors duration-200 cursor-pointer"
                                                 >
-                                                    {deleting === row.id ? (
-                                                        <Loader2 className="w-3 h-3 animate-spin" />
-                                                    ) : (
-                                                        <Trash2 className="w-3 h-3" />
-                                                    )}
+                                                    <Trash2 className="w-3 h-3" />
                                                 </button>
                                             </div>
                                         </div>
@@ -805,15 +794,13 @@ export default function ProdukListPage(): JSX.Element {
                                                                 </Link>
                                                                 
                                                                 <button
-                                                                    onClick={() => handleDelete(row.id, row.judul)}
-                                                                    disabled={deleting === row.id}
-                                                                    className="inline-flex items-center px-3 py-1.5 bg-red-50 text-red-700 text-xs font-medium rounded-md hover:bg-red-100 transition-colors duration-200 disabled:opacity-50"
+                                                                    onClick={() => {
+                                                                        setDeletingProduct({ id: row.id, judul: row.judul });
+                                                                        setDeleteConfirm(row.id);
+                                                                    }}
+                                                                    className="inline-flex items-center px-3 py-1.5 bg-red-50 text-red-700 text-xs font-medium rounded-md hover:bg-red-100 transition-colors duration-200 cursor-pointer"
                                                                 >
-                                                                    {deleting === row.id ? (
-                                                                        <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                                                                    ) : (
-                                                                        <Trash2 className="w-3 h-3 mr-1" />
-                                                                    )}
+                                                                    <Trash2 className="w-3 h-3 mr-1" />
                                                                     Hapus
                                                                 </button>
                                                             </div>
@@ -879,15 +866,14 @@ export default function ProdukListPage(): JSX.Element {
                                                                         Edit
                                                                     </Link>
                                                                     <button 
-                                                                        onClick={() => handleDelete(row.id, row.judul)}
-                                                                        disabled={deleting === row.id}
-                                                                        className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left disabled:opacity-50"
+                                                                        onClick={() => {
+                                                                            setDeletingProduct({ id: row.id, judul: row.judul });
+                                                                            setDeleteConfirm(row.id);
+                                                                            setOpenMenuId(null);
+                                                                        }}
+                                                                        className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left cursor-pointer"
                                                                     >
-                                                                        {deleting === row.id ? (
-                                                                            <Loader2 className="w-4 h-4 animate-spin" />
-                                                                        ) : (
-                                                                            <Trash2 className="w-4 h-4" />
-                                                                        )}
+                                                                        <Trash2 className="w-4 h-4" />
                                                                         Hapus
                                                                     </button>
                                                                 </div>
@@ -937,15 +923,13 @@ export default function ProdukListPage(): JSX.Element {
                                                                 Edit
                                                             </Link>
                                                             <button 
-                                                                onClick={() => handleDelete(row.id, row.judul)}
-                                                                disabled={deleting === row.id}
-                                                                className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors disabled:opacity-50"
+                                                                onClick={() => {
+                                                                    setDeletingProduct({ id: row.id, judul: row.judul });
+                                                                    setDeleteConfirm(row.id);
+                                                                }}
+                                                                className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors cursor-pointer"
                                                             >
-                                                                {deleting === row.id ? (
-                                                                    <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                                                                ) : (
-                                                                    <Trash2 className="w-3 h-3 mr-1" />
-                                                                )}
+                                                                <Trash2 className="w-3 h-3 mr-1" />
                                                                 Hapus
                                                             </button>
                                                         </div>
@@ -973,6 +957,47 @@ export default function ProdukListPage(): JSX.Element {
                             <li className="sm:hidden">• Pastikan info UMKM akurat</li>
                             <li>• Update produk secara berkala untuk menjaga relevansi</li>
                         </ul>
+                    </div>
+                )}
+
+                {/* Delete Confirmation Modal */}
+                {deleteConfirm && deletingProduct && (
+                    <div className="fixed inset-0 bg-black/90 bg-opacity-50 flex items-center justify-center p-4 z-50">
+                        <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+                            <div className="flex items-center mb-4">
+                                <AlertCircle className="w-6 h-6 text-red-600 mr-3" />
+                                <h3 className="text-lg font-semibold text-gray-900">
+                                    Konfirmasi Hapus
+                                </h3>
+                            </div>
+                            
+                            <p className="text-gray-600 mb-6">
+                                Apakah Anda yakin ingin menghapus produk <strong>&quot;{deletingProduct.judul}&quot;</strong>? 
+                                <br />
+                                <br />
+                                Tindakan ini tidak dapat dibatalkan.
+                            </p>
+
+                            <div className="flex justify-end space-x-3">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setDeleteConfirm(null);
+                                        setDeletingProduct(null);
+                                    }}
+                                    className="px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors duration-150 cursor-pointer"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => handleDelete(deleteConfirm)}
+                                    className="px-4 py-2 text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors duration-150 cursor-pointer"
+                                >
+                                    Hapus
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>
