@@ -5,6 +5,7 @@ import { useBeritaBySlug, useBeritaData } from '@/components/hooks/useBeritaData
 import { LoadingState, ErrorState } from '@/components/Berita/Shared'
 import BeritaCard from '@/components/Berita/BeritaCard'
 import Breadcrumb from '@/components/Berita/Breadcrumb'
+import EditorJSRenderer from '@/components/EditorJSRenderer'
 import Link from 'next/link'
 import { BeritaPengumumanKategoriEnum } from '@/lib/enums'
 import Image from 'next/image'
@@ -184,14 +185,9 @@ export default function BeritaDetailPage({
 
                   {/* Article Body */}
                   <div className="p-6 lg:p-8">
-                    
-                    
-
-                    {/* Main Content */}
-                    <div className="prose prose-lg max-w-none">
-                      
-                      {/* Lead/Excerpt */}
-                      {/* <div className={`border-l-4 p-4 mb-6 rounded-r-lg ${
+                    {/* Lead/Excerpt dari deskripsi */}
+                    {berita.deskripsi && (
+                      <div className={`border-l-4 p-4 mb-6 rounded-r-lg ${
                         isBerita 
                           ? 'bg-green-50 border-green-500' 
                           : 'bg-orange-50 border-orange-500'
@@ -199,10 +195,18 @@ export default function BeritaDetailPage({
                         <p className="text-lg text-gray-700 font-medium leading-relaxed m-0">
                           {berita.deskripsi}
                         </p>
-                      </div> */}
+                      </div>
+                    )}
 
-                      {/* Article Content */}
-                      <div className="text-gray-700 leading-relaxed space-y-4">
+                    {/* Main Content dari EditorJS */}
+                    {berita.konten && berita.konten.blocks && berita.konten.blocks.length > 0 ? (
+                      <EditorJSRenderer 
+                        data={berita.konten} 
+                        className="mb-6"
+                      />
+                    ) : berita.deskripsi ? (
+                      // Fallback jika tidak ada konten EditorJS, gunakan deskripsi
+                      <div className="text-gray-700 leading-relaxed space-y-4 mb-6">
                         {berita.deskripsi.split('\n').map((paragraph, index) => (
                           paragraph.trim() && (
                             <p key={index} className="text-base leading-relaxed">
@@ -210,38 +214,42 @@ export default function BeritaDetailPage({
                             </p>
                           )
                         ))}
-
                       </div>
+                    ) : (
+                      // Jika tidak ada konten sama sekali
+                      <div className="text-gray-500 italic mb-6">
+                        Konten tidak tersedia
+                      </div>
+                    )}
 
-                      {/* Info Box berdasarkan kategori */}
-                      {isBerita ? (
-                        <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg mt-6">
-                          <h3 className="font-semibold text-gray-800 mb-2 flex items-center text-sm">
-                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            Informasi Tambahan
-                          </h3>
-                          <p className="text-gray-600 text-sm">
-                            Untuk informasi lebih lanjut mengenai berita ini, Anda dapat menghubungi 
-                            Kantor Desa Tonrong Rijang atau mengunjungi langsung balai desa.
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="bg-orange-50 border border-orange-200 p-4 rounded-lg mt-6">
-                          <h3 className="font-semibold text-orange-800 mb-2 flex items-center text-sm">
-                            <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M12 2L13.09 8.26L22 9L17 14L18.18 22L12 19L5.82 22L7 14L2 9L10.91 8.26L12 2Z"/>
-                            </svg>
-                            Pengumuman Penting
-                          </h3>
-                          <p className="text-orange-700 text-sm">
-                            Pengumuman ini bersifat resmi dan berlaku untuk seluruh warga Desa Tonrong Rijang. 
-                            Pastikan untuk mengikuti instruksi yang diberikan.
-                          </p>
-                        </div>
-                      )}
-                    </div>
+                    {/* Info Box berdasarkan kategori */}
+                    {isBerita ? (
+                      <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg mt-6">
+                        <h3 className="font-semibold text-gray-800 mb-2 flex items-center text-sm">
+                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          Informasi Tambahan
+                        </h3>
+                        <p className="text-gray-600 text-sm">
+                          Untuk informasi lebih lanjut mengenai berita ini, Anda dapat menghubungi 
+                          Kantor Desa Tonrong Rijang atau mengunjungi langsung balai desa.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="bg-orange-50 border border-orange-200 p-4 rounded-lg mt-6">
+                        <h3 className="font-semibold text-orange-800 mb-2 flex items-center text-sm">
+                          <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2L13.09 8.26L22 9L17 14L18.18 22L12 19L5.82 22L7 14L2 9L10.91 8.26L12 2Z"/>
+                          </svg>
+                          Pengumuman Penting
+                        </h3>
+                        <p className="text-orange-700 text-sm">
+                          Pengumuman ini bersifat resmi dan berlaku untuk seluruh warga Desa Tonrong Rijang. 
+                          Pastikan untuk mengikuti instruksi yang diberikan.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </article>
               </div>
