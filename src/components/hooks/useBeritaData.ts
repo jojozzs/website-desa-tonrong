@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { BeritaPengumumanKategoriEnum } from '@/lib/enums'
+import type { OutputData } from '@editorjs/editorjs'
 
 export interface BeritaData {
   id: string
@@ -19,7 +20,8 @@ export interface BeritaData {
   gambar_height?: number
   created_at: Date | string
   updated_at: Date | string
-  admin_uid: string | null
+  admin_uid: string | null  
+  konten: OutputData
 }
 
 export function useBeritaData(kategori?: BeritaPengumumanKategoriEnum) {
