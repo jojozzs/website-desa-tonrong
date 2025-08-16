@@ -9,14 +9,56 @@ interface AdminLogData {
     detail?: Record<string, unknown>;
 }
 
+const kategoriToEntitasMap: Record<AdminLogKategoriEnum, string> = {
+    [AdminLogKategoriEnum.CREATE_PROFIL]: "profil",
+    [AdminLogKategoriEnum.UPDATE_PROFIL]: "profil",
+    [AdminLogKategoriEnum.DELETE_PROFIL]: "profil",
+
+    [AdminLogKategoriEnum.CREATE_BERITA_DAN_PENGUMUMAN]: "berita_dan_pengumuman",
+    [AdminLogKategoriEnum.UPDATE_BERITA_DAN_PENGUMUMAN]: "berita_dan_pengumuman",
+    [AdminLogKategoriEnum.DELETE_BERITA_DAN_PENGUMUMAN]: "berita_dan_pengumuman",
+
+    [AdminLogKategoriEnum.CREATE_GALERI]: "galeri",
+    [AdminLogKategoriEnum.UPDATE_GALERI]: "galeri",
+    [AdminLogKategoriEnum.DELETE_GALERI]: "galeri",
+
+    [AdminLogKategoriEnum.CREATE_PRODUK_UNGGULAN]: "produk_unggulan",
+    [AdminLogKategoriEnum.UPDATE_PRODUK_UNGGULAN]: "produk_unggulan",
+    [AdminLogKategoriEnum.DELETE_PRODUK_UNGGULAN]: "produk_unggulan",
+
+    [AdminLogKategoriEnum.UPDATE_KONTAK_DESA]: "kontak",
+    [AdminLogKategoriEnum.UPDATE_ASPIRASI_FORM]: "aspirasi",
+    [AdminLogKategoriEnum.DELETE_ASPIRASI_FORM]: "aspirasi",
+
+    [AdminLogKategoriEnum.UPDATE_ADMIN]: "admin",
+    [AdminLogKategoriEnum.LOGIN]: "admin",
+    [AdminLogKategoriEnum.LOGOUT]: "admin",
+};
+
+function getEntitasFromKategori(kategori: AdminLogKategoriEnum): string {
+    return kategoriToEntitasMap[kategori] || "lainnya";
+}
+
 export async function createAdminLog(data: AdminLogData) {
     try {
-        const logData = {
+        const entitas = getEntitasFromKategori(data.kategori);
+
+        const entitas_id_key = `${entitas}_id`;
+        const entitas_id = data.detail && entitas_id_key in data.detail
+            ? String(data.detail[entitas_id_key])
+            : null;
+
+        const logData: Record<string, unknown> = {
             ...data,
+            entitas,
             timestamp: serverTimestamp(),
         };
 
-        await addDoc(collection(db, 'admin_logs'), logData);
+        if (entitas_id) {
+            logData.entitas_id = entitas_id;
+        }
+
+        await addDoc(collection(db, 'admin-logs'), logData);
     } catch (error) {
         console.error('Error creating admin log:', error);
     }
@@ -134,13 +176,6 @@ export const AdminLogHelpers = {
             detail: { produk_id, judul },
         }),
 
-    createKontak: (admin_id: string, admin_name: string) => 
-        createAdminLog({
-            admin_id,
-            kategori: AdminLogKategoriEnum.CREATE_KONTAK_DESA,
-            deskripsi: `Admin ${admin_name} membuat kontak desa`,
-        }),
-
     updateKontak: (admin_id: string, admin_name: string) => 
         createAdminLog({
             admin_id,
@@ -162,5 +197,12 @@ export const AdminLogHelpers = {
             kategori: AdminLogKategoriEnum.DELETE_ASPIRASI_FORM,
             deskripsi: `Admin ${admin_name} menghapus aspirasi`,
             detail: { aspirasi_id },
+        }),
+
+    updateAdmin: (admin_id: string, admin_name: string) => 
+        createAdminLog({
+            admin_id,
+            kategori: AdminLogKategoriEnum.UPDATE_ADMIN,
+            deskripsi: `Admin ${admin_name} mengupdate admin`,
         }),
 };
