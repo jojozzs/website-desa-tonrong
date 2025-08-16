@@ -6,6 +6,7 @@ import { CloudinaryUploadResult } from "@/lib/cloudinary-types";
 import { adminAuth, adminDb } from "@/lib/firebaseAdmin";
 import { FieldValue, DocumentReference as AdminDocumentReference, Timestamp as AdminTimestamp } from "firebase-admin/firestore";
 import { BeritaPengumumanKategoriEnum } from "@/lib/enums";
+import type { OutputData } from "@editorjs/editorjs";
 
 export const runtime = "nodejs";
 
@@ -36,6 +37,7 @@ interface BeritaDocAdmin {
     gambar_height?: number;
     created_at?: AdminTimestamp;
     updated_at?: AdminTimestamp;
+    konten: OutputData;
 }
 
 interface BeritaDocWeb {
@@ -54,6 +56,7 @@ interface BeritaDocWeb {
     gambar_height?: number;
     created_at?: WebTimestamp;
     updated_at?: WebTimestamp;
+    konten: OutputData;
 }
 
 async function verifyAdmin(req: NextRequest): Promise<string> {
@@ -97,6 +100,7 @@ export async function GET(request: NextRequest) {
         const id = searchParams.get("id");
         const kategoriParam = searchParams.get("kategori");
 
+        // --- GET by id (Admin SDK) ---
         if (id) {
             const snap = await adminDb.doc(`berita-pengumuman/${id}`).get();
             if (!snap.exists) {
@@ -106,36 +110,64 @@ export async function GET(request: NextRequest) {
             const data = {
                 ...raw,
                 id: snap.id,
-                tanggal: typeof (raw.tanggal as AdminTimestamp | undefined)?.toDate === "function"
-                    ? (raw.tanggal as AdminTimestamp).toDate()
-                    : (raw.tanggal as Date | null) ?? null,
+                konten: raw.konten ?? null,
+                tanggal:
+                    typeof (raw.tanggal as AdminTimestamp | undefined)?.toDate === "function"
+                        ? (raw.tanggal as AdminTimestamp).toDate()
+                        : ((raw.tanggal as Date) ?? null),
                 created_at: typeof raw.created_at?.toDate === "function" ? raw.created_at.toDate() : null,
                 updated_at: typeof raw.updated_at?.toDate === "function" ? raw.updated_at.toDate() : null,
-                admin_uid: raw.admin_id?.id ?? null,
+                admin_uid: raw.admin_id?.id ?? null
             };
             return NextResponse.json({ success: true, data });
         }
 
+        // --- GET list (Web SDK) ---
         const ref = webCollection(db, "berita-pengumuman");
-        let q = query(ref, orderBy("tanggal", "desc"));
+
         if (isKategori(kategoriParam)) {
-            q = query(ref, where("kategori", "==", kategoriParam), orderBy("tanggal", "desc"));
+            const q = query(ref, where("kategori", "==", kategoriParam));
+            const snapshot = await getDocs(q);
+
+            const list = snapshot.docs
+                .map((d) => {
+                    const raw = d.data() as BeritaDocWeb;
+                    return {
+                        id: d.id,
+                        ...raw,
+                        tanggal: typeof raw.tanggal?.toDate === "function" ? raw.tanggal.toDate() : null,
+                        created_at: typeof raw.created_at?.toDate === "function" ? raw.created_at.toDate() : null,
+                        updated_at: typeof raw.updated_at?.toDate === "function" ? raw.updated_at.toDate() : null,
+                        admin_uid: raw.admin_id?.id ?? null
+                    };
+                })
+                .sort((a, b) => {
+                    const ta = a.tanggal ? a.tanggal.getTime() : 0;
+                    const tb = b.tanggal ? b.tanggal.getTime() : 0;
+                    return tb - ta;
+                });
+
+            return NextResponse.json({ success: true, data: list });
         }
 
-        const snapshot = await getDocs(q);
-        const list = snapshot.docs.map((d) => {
-            const raw = d.data() as BeritaDocWeb;
-            return {
-                id: d.id,
-                ...raw,
-                tanggal: typeof raw.tanggal?.toDate === "function" ? raw.tanggal.toDate() : null,
-                created_at: typeof raw.created_at?.toDate === "function" ? raw.created_at.toDate() : null,
-                updated_at: typeof raw.updated_at?.toDate === "function" ? raw.updated_at.toDate() : null,
-                admin_uid: raw.admin_id?.id ?? null,
-            };
-        });
+        {
+            const q = query(ref, orderBy("tanggal", "desc"));
+            const snapshot = await getDocs(q);
 
-        return NextResponse.json({ success: true, data: list });
+            const list = snapshot.docs.map((d) => {
+                const raw = d.data() as BeritaDocWeb;
+                return {
+                    id: d.id,
+                    ...raw,
+                    tanggal: typeof raw.tanggal?.toDate === "function" ? raw.tanggal.toDate() : null,
+                    created_at: typeof raw.created_at?.toDate === "function" ? raw.created_at.toDate() : null,
+                    updated_at: typeof raw.updated_at?.toDate === "function" ? raw.updated_at.toDate() : null,
+                    admin_uid: raw.admin_id?.id ?? null
+                };
+            });
+
+            return NextResponse.json({ success: true, data: list });
+        }
     } catch (error: unknown) {
         console.error("Error fetching berita-pengumuman:", error);
         return NextResponse.json(
@@ -158,8 +190,15 @@ export async function POST(request: NextRequest) {
         const slug = String(formData.get("slug") || "");
         const gambar = formData.get("gambar") as File | null;
 
-        if (!judul || !deskripsi || !tanggalStr || !penulis || !kategori || !slug || !gambar) {
+        const kontenRaw = formData.get("konten") as string;
+        const konten: OutputData = JSON.parse(kontenRaw);
+
+        if (!judul || !tanggalStr || !penulis || !kategori || !slug || !gambar) {
             return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
+        }
+
+        if (!konten || !Array.isArray(konten.blocks)) {
+            return NextResponse.json({ success: false, error: "Invalid konten format" }, { status: 400 });
         }
 
         const tanggal = new Date(tanggalStr);
@@ -184,6 +223,7 @@ export async function POST(request: NextRequest) {
             gambar_type: up.format,
             gambar_width: up.width,
             gambar_height: up.height,
+            konten,
             created_at: FieldValue.serverTimestamp() as unknown as AdminTimestamp,
             updated_at: FieldValue.serverTimestamp() as unknown as AdminTimestamp,
         };
@@ -218,6 +258,7 @@ export async function PATCH(request: NextRequest) {
         const kategori = (formData.get("kategori") as string) as BeritaPengumumanKategoriEnum | null;
         const slug = (formData.get("slug") as string) ?? null;
         const gambar = (formData.get("gambar") as File) ?? null;
+        const kontenRaw = formData.get("konten") as string | null;
 
         const updateData: Partial<BeritaDocAdmin> & { updated_at: AdminTimestamp } = {
             updated_at: FieldValue.serverTimestamp() as unknown as AdminTimestamp,
@@ -233,6 +274,19 @@ export async function PATCH(request: NextRequest) {
                 return NextResponse.json({ success: false, error: "Invalid 'tanggal' format" }, { status: 400 });
             }
             updateData.tanggal = t;
+        }
+
+        if (kontenRaw) {
+            try {
+                const parsed = JSON.parse(kontenRaw);
+                if (parsed && Array.isArray(parsed.blocks)) {
+                    updateData.konten = parsed;
+                } else {
+                    return NextResponse.json({ success: false, error: "Invalid konten format" }, { status: 400 });
+                }
+            } catch {
+                return NextResponse.json({ success: false, error: "Failed to parse konten" }, { status: 400 });
+            }
         }
 
         if (gambar && gambar.size > 0) {

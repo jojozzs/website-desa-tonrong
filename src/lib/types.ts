@@ -37,72 +37,80 @@ export interface Profil extends BaseImageFields {
 export interface ProfilWithContent extends Profil {
     konten?: string 
     data_tambahan?: {
-    visi?: string
-    misi?: string[]
-    
-    informasi_wilayah?: {
-      luas_wilayah?: string
-      kecamatan?: string
-      kabupaten?: string
-      provinsi?: string
-      kode_pos?: string
-    }
-    koordinat?: {
-      latitude?: string
-      longitude?: string
-      ketinggian?: string
-      topografi?: string
-    }
-    batas_wilayah?: {
-      utara?: string
-      selatan?: string
-      timur?: string
-      barat?: string
-    }
-    
-    pimpinan?: Array<{
-      nama: string
-      jabatan: string
-      foto?: string
-      periode?: string
-    }>
-    perangkat?: Array<{
-      jabatan: string
-      nama?: string
-    } | string>
-    tugas_fungsi?: Array<{
-      jabatan: string
-      deskripsi: string
-    }>
+		visi?: string
+		misi?: string[]
+		
+		informasi_wilayah?: {
+			luas_wilayah?: string
+			kecamatan?: string
+			kabupaten?: string
+			provinsi?: string
+			kode_pos?: string
+		}
 
-    demografi?: {
-      total_penduduk?: number
-      total_kk?: number
-      laki_laki?: number
-      perempuan?: number
-    }
-    mata_pencaharian?: Array<{
-      kategori: string
-      persen: number
-      jumlah?: number
-    }>
-    kelompok_umur?: Array<{
-      kelompok: string
-      jumlah: number
-      persen: number
-    }>
-    agama?: Record<string, {
-      persentase: number
-      jumlah?: number
-    }>
-    idm?: {
-      nilai: string
-      status: string
-      deskripsi?: string
-    }
-    
-    [key: string]: any
-  }
+		koordinat?: {
+			latitude?: string
+			longitude?: string
+			ketinggian?: string
+			topografi?: string
+		}
+
+		batas_wilayah?: {
+			utara?: string
+			selatan?: string
+			timur?: string
+			barat?: string
+		}
+		
+		pimpinan?: Array<{
+			nama: string
+			jabatan: string
+			foto?: string
+			periode?: string
+		}>
+
+		perangkat?: Array<{
+			jabatan: string
+			nama?: string
+		} | string>
+		
+		tugas_fungsi?: Array<{
+			jabatan: string
+			deskripsi: string
+		}>
+
+		demografi?: {
+			total_penduduk?: number
+			total_kk?: number
+			laki_laki?: number
+			perempuan?: number
+		}
+
+		mata_pencaharian?: Array<{
+			kategori: string
+			persen: number
+			jumlah?: number
+		}>
+
+		kelompok_umur?: Array<{
+		kelompok: string
+		jumlah: number
+		persen: number
+		}>
+
+		agama?: Record<string, {
+			persentase: number
+			jumlah?: number
+		}>
+
+		idm?: {
+			nilai: string
+			status: string
+			deskripsi?: string
+		}
+
+		[key: string]: unknown
+	}
 }
 
 export interface BeritaPengumuman extends BaseImageFields {
