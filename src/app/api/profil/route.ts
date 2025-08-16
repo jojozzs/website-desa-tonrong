@@ -24,7 +24,7 @@ interface ProfilDocAdmin {
     kategori: ProfilKategoriEnum;
     admin_id?: AdminDocumentReference;
     konten?: string;
-    data_tambahan?: any;
+    data_tambahan?: unknown;
     gambar_url: string;
     gambar_id: string;
     gambar_size: number;

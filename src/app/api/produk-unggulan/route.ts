@@ -5,6 +5,7 @@ import cloudinary from "@/lib/cloudinary";
 import { CloudinaryUploadResult } from "@/lib/cloudinary-types";
 import { adminAuth, adminDb } from "@/lib/firebaseAdmin";
 import { FieldValue, DocumentReference as AdminDocumentReference, Timestamp as AdminTimestamp, QuerySnapshot, DocumentData } from "firebase-admin/firestore";
+import type { OutputData } from "@editorjs/editorjs";
 
 export const runtime = "nodejs";
 
@@ -35,6 +36,7 @@ interface ProdukDocAdmin {
     gambar_height?: number;
     created_at?: AdminTimestamp;
     updated_at?: AdminTimestamp;
+    konten: OutputData;
 }
 
 interface ProdukDocWeb {
@@ -53,6 +55,7 @@ interface ProdukDocWeb {
     gambar_height?: number;
     created_at?: WebTimestamp;
     updated_at?: WebTimestamp;
+    konten: OutputData;
 }
 
 async function verifyAdmin(req: NextRequest): Promise<string> {
@@ -143,6 +146,7 @@ export async function GET(request: NextRequest) {
             const data = {
                 ...raw,
                 id: snap.id,
+                konten: raw.konten ?? null,
                 created_at: typeof raw.created_at?.toDate === "function" ? raw.created_at.toDate() : null,
                 updated_at: typeof raw.updated_at?.toDate === "function" ? raw.updated_at.toDate() : null,
                 admin_uid: raw.admin_id?.id ?? null,
@@ -158,6 +162,7 @@ export async function GET(request: NextRequest) {
             const data = {
                 ...raw,
                 id: d.id,
+                konten: raw.konten ?? null,
                 created_at: typeof raw.created_at?.toDate === "function" ? raw.created_at.toDate() : null,
                 updated_at: typeof raw.updated_at?.toDate === "function" ? raw.updated_at.toDate() : null,
                 admin_uid: raw.admin_id?.id ?? null,
@@ -174,6 +179,7 @@ export async function GET(request: NextRequest) {
             return {
                 id: d.id,
                 ...raw,
+                konten: raw.konten ?? null,
                 created_at: typeof raw.created_at?.toDate === "function" ? raw.created_at.toDate() : null,
                 updated_at: typeof raw.updated_at?.toDate === "function" ? raw.updated_at.toDate() : null,
                 admin_uid: raw.admin_id?.id ?? null,
@@ -201,15 +207,22 @@ export async function POST(request: NextRequest) {
         const nama_umkm = String(formData.get("nama_umkm") || "");
         const alamat_umkm = String(formData.get("alamat_umkm") || "");
         const kontak_umkm = String(formData.get("kontak_umkm") || "");
-        const slugRaw = (formData.get("slug") as string | null) ?? null; // ← opsional kirim slug
+        const slugRaw = (formData.get("slug") as string | null) ?? null;
         const gambar = formData.get("gambar") as File | null;
 
-        if (!judul || !deskripsi || !nama_umkm || !alamat_umkm || !kontak_umkm) {
+        const kontenRaw = formData.get("konten") as string;
+        const konten: OutputData = JSON.parse(kontenRaw);
+
+        if (!judul || !nama_umkm || !alamat_umkm || !kontak_umkm) {
             return NextResponse.json({ success: false, error: "Missing required text fields" }, { status: 400 });
         }
 
         if (!(gambar instanceof File) || gambar.size === 0) {
             return NextResponse.json({ success: false, error: "Missing or invalid image file" }, { status: 400 });
+        }
+
+        if (!konten || !Array.isArray(konten.blocks)) {
+            return NextResponse.json({ success: false, error: "Invalid konten format" }, { status: 400 });
         }
 
         const base = slugify(slugRaw && slugRaw.length > 0 ? slugRaw : judul);
@@ -232,8 +245,9 @@ export async function POST(request: NextRequest) {
             gambar_type: up.format,
             gambar_width: up.width,
             gambar_height: up.height,
+            konten,
             created_at: FieldValue.serverTimestamp() as unknown as AdminTimestamp,
-        updated_at: FieldValue.serverTimestamp() as unknown as AdminTimestamp,
+            updated_at: FieldValue.serverTimestamp() as unknown as AdminTimestamp,
         };
 
         const docRef = await adminDb.collection("produk-unggulan").add(payload);
@@ -267,6 +281,7 @@ export async function PATCH(request: NextRequest) {
         const kontak_umkm = (formData.get("kontak_umkm") as string) ?? null;
         const slugRaw = (formData.get("slug") as string) ?? null;
         const gambar = (formData.get("gambar") as File) ?? null;
+        const kontenRaw = formData.get("konten") as string | null;
 
         const existing = await adminDb.doc(`produk-unggulan/${id}`).get();
         if (!existing.exists) {
@@ -297,6 +312,19 @@ export async function PATCH(request: NextRequest) {
             updateData.gambar_type = up.format;
             updateData.gambar_width = up.width;
             updateData.gambar_height = up.height;
+        }
+
+        if (kontenRaw) {
+            try {
+                const parsed = JSON.parse(kontenRaw);
+                if (parsed && Array.isArray(parsed.blocks)) {
+                    updateData.konten = parsed;
+                } else {
+                    return NextResponse.json({ success: false, error: "Invalid konten format" }, { status: 400 });
+                }
+            } catch {
+                return NextResponse.json({ success: false, error: "Failed to parse konten" }, { status: 400 });
+            }
         }
 
         await adminDb.doc(`produk-unggulan/${id}`).update(updateData);
