@@ -59,7 +59,8 @@ async function uploadToCloudinary(file: File): Promise<CloudinaryUploadResult> {
                 folder: process.env.CLOUDINARY_BASE_FOLDER
                     ? `${process.env.CLOUDINARY_BASE_FOLDER}/profil`
                     : "profil",
-                transformation: [{ width: 1200, height: 800, crop: "fill" }],
+                // transformation: [{ width: 1200, height: 800, crop: "fill" }],
+                transformation: [{ width: 1920, height: 1080, crop: 'fill' }]
             },
             (err, out) => (err ? reject(err) : resolve(out as unknown as CloudinaryUploadResult))
         )
