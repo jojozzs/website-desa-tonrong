@@ -470,7 +470,7 @@ export default function TambahProfilPage() {
                                                             pimpinan: prev?.pimpinan?.filter((_, i) => i !== index)
                                                         }));
                                                     }}
-                                                    className="text-red-600 hover:text-red-700 p-1 rounded"
+                                                    className="text-red-600 hover:text-red-700 p-1 rounded cursor-pointer"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
                                                 </button>
@@ -482,7 +482,7 @@ export default function TambahProfilPage() {
                                                     <input
                                                         type="text"
                                                         placeholder="Nama pimpinan"
-                                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
                                                         value={pimpinan.nama || ''}
                                                         onChange={(e) => {
                                                             setDataTambahan(prev => ({
@@ -500,7 +500,7 @@ export default function TambahProfilPage() {
                                                     <input
                                                         type="text"
                                                         placeholder="Jabatan"
-                                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
                                                         value={pimpinan.jabatan || ''}
                                                         onChange={(e) => {
                                                             setDataTambahan(prev => ({
@@ -518,7 +518,7 @@ export default function TambahProfilPage() {
                                                     <input
                                                         type="text"
                                                         placeholder="contoh: 2020-2026"
-                                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
                                                         value={pimpinan.periode || ''}
                                                         onChange={(e) => {
                                                             setDataTambahan(prev => ({
@@ -536,7 +536,7 @@ export default function TambahProfilPage() {
                                                     <input
                                                         type="text"
                                                         placeholder="https://example.com/foto.jpg"
-                                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
                                                         value={pimpinan.foto || ''}
                                                         onChange={(e) => {
                                                             setDataTambahan(prev => ({
@@ -560,7 +560,7 @@ export default function TambahProfilPage() {
                                                 pimpinan: [...(prev?.pimpinan ?? []), { nama: '', jabatan: '', periode: '', foto: '' }]
                                             }));
                                         }}
-                                        className="w-full border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:border-indigo-400 hover:bg-indigo-50 transition-colors"
+                                        className="w-full border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:border-indigo-400 hover:bg-indigo-50 transition-colors cursor-pointer"
                                     >
                                         <Plus className="w-5 h-5 mx-auto mb-2 text-gray-400" />
                                         <span className="text-gray-600 font-medium">Tambah Pimpinan</span>
@@ -590,7 +590,7 @@ export default function TambahProfilPage() {
                                                             perangkat: prev?.perangkat?.filter((_, i) => i !== index)
                                                         }));
                                                     }}
-                                                    className="text-red-600 hover:text-red-700 p-1 rounded"
+                                                    className="text-red-600 hover:text-red-700 p-1 rounded cursor-pointer"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
                                                 </button>
@@ -602,7 +602,7 @@ export default function TambahProfilPage() {
                                                     <input
                                                         type="text"
                                                         placeholder="Jabatan perangkat"
-                                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
                                                         value={typeof perangkat === 'object' ? perangkat.jabatan : ''}
                                                         onChange={(e) => {
                                                             setDataTambahan(prev => ({
@@ -622,7 +622,7 @@ export default function TambahProfilPage() {
                                                     <input
                                                         type="text"
                                                         placeholder="Nama perangkat"
-                                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
                                                         value={typeof perangkat === 'object' ? (perangkat.nama || '') : ''}
                                                         onChange={(e) => {
                                                             setDataTambahan(prev => ({
@@ -648,7 +648,7 @@ export default function TambahProfilPage() {
                                                 perangkat: [...(prev?.perangkat ?? []), { jabatan: '', nama: '' }]
                                             }));
                                         }}
-                                        className="w-full border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:border-purple-400 hover:bg-purple-50 transition-colors"
+                                        className="w-full border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:border-purple-400 hover:bg-purple-50 transition-colors cursor-pointer"
                                     >
                                         <Plus className="w-5 h-5 mx-auto mb-2 text-gray-400" />
                                         <span className="text-gray-600 font-medium">Tambah Perangkat</span>
@@ -773,7 +773,7 @@ export default function TambahProfilPage() {
                                                             mata_pencaharian: prev?.mata_pencaharian?.filter((_, i) => i !== index)
                                                         }));
                                                     }}
-                                                    className="text-red-600 hover:text-red-700 p-1 rounded"
+                                                    className="text-red-600 hover:text-red-700 p-1 rounded cursor-pointer"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
                                                 </button>
@@ -877,7 +877,7 @@ export default function TambahProfilPage() {
                                                             kelompok_umur: prev?.kelompok_umur?.filter((_, i) => i !== index)
                                                         }));
                                                     }}
-                                                    className="text-red-600 hover:text-red-700 p-1 rounded"
+                                                    className="text-red-600 hover:text-red-700 p-1 rounded cursor-pointer"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
                                                 </button>
@@ -982,7 +982,7 @@ export default function TambahProfilPage() {
                                                             return {...prev, agama: newAgama};
                                                         });
                                                     }}
-                                                    className="text-red-600 hover:text-red-700 p-1 rounded"
+                                                    className="text-red-600 hover:text-red-700 p-1 rounded cursor-pointer"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
                                                 </button>
