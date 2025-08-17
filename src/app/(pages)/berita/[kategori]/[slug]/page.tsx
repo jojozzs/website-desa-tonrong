@@ -11,6 +11,7 @@ import { BeritaPengumumanKategoriEnum } from '@/lib/enums'
 import Image from 'next/image'
 import Footer from '@/components/Footer'
 import Navbar from '@/components/Navbar'
+import { ArrowLeft } from 'lucide-react'
 
 export default function BeritaDetailPage({ 
   params 
@@ -103,6 +104,20 @@ export default function BeritaDetailPage({
     <>
       <Navbar />
       <div className="min-h-screen bg-gray-50">
+        
+        {/* Header Navigation */}
+        <header className="bg-white shadow-sm border-b border-gray-200">
+          <div className="container mx-auto px-6 md:px-8 lg:px-20 xl:px-40 py-4">
+            <Link
+              href={`/berita/${berita.kategori}`}
+              className="inline-flex items-center gap-2 text-gray-600 hover:text-orange-600 transition-colors font-medium"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span>Kembali ke {isBerita ? 'Berita' : 'Pengumuman'}</span>
+            </Link>
+          </div>
+        </header>
+
         {/* Article Content */}
         <div className="container mx-auto px-6 md:px-8 lg:px-20 xl:px-40 py-8">
           <div className=" mx-auto">
@@ -142,7 +157,8 @@ export default function BeritaDetailPage({
                         ? 'bg-green-100 text-green-800' 
                         : 'bg-orange-100 text-orange-800'
                     }`}>
-                      {isBerita ? 'Berita' : 'Pengumuman'}
+                      <span className="mr-2">{isBerita ? '📰' : '📢'}</span>
+                      {isBerita ? 'Berita Desa' : 'Pengumuman Resmi'}
                     </div>
 
                     {/* Meta Info */}
@@ -186,19 +202,6 @@ export default function BeritaDetailPage({
 
                   {/* Article Body */}
                   <div className="px-6 lg:px-8 pb-6 lg:pb-8">
-                    {/* Lead/Excerpt dari deskripsi */}
-                    {berita.deskripsi && (
-                      <div className={`border-l-4 p-4 mb-6 rounded-r-lg ${
-                        isBerita 
-                          ? 'bg-green-50 border-green-500' 
-                          : 'bg-orange-50 border-orange-500'
-                      }`}>
-                        <p className="text-lg text-gray-700 font-medium leading-relaxed m-0">
-                          {berita.deskripsi}
-                        </p>
-                      </div>
-                    )}
-
                     {/* Main Content dari EditorJS */}
                     {berita.konten && berita.konten.blocks && berita.konten.blocks.length > 0 ? (
                       <EditorJSRenderer 
@@ -222,6 +225,31 @@ export default function BeritaDetailPage({
                         Konten tidak tersedia
                       </div>
                     )}
+
+                    {/* Info Box berdasarkan kategori */}
+                    {isBerita ? (
+                      <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg mt-6">
+                        <h3 className="font-semibold text-gray-800 mb-2 flex items-center text-sm">
+                          <span className="mr-2">ℹ️</span>
+                          Informasi Tambahan
+                        </h3>
+                        <p className="text-gray-600 text-sm">
+                          Untuk informasi lebih lanjut mengenai berita ini, Anda dapat menghubungi 
+                          Kantor Desa Tonrong Rijang atau mengunjungi langsung balai desa.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="bg-orange-50 border border-orange-200 p-4 rounded-lg mt-6">
+                        <h3 className="font-semibold text-orange-800 mb-2 flex items-center text-sm">
+                          <span className="mr-2">⚠️</span>
+                          Pengumuman Penting
+                        </h3>
+                        <p className="text-orange-700 text-sm">
+                          Pengumuman ini bersifat resmi dan berlaku untuk seluruh warga Desa Tonrong Rijang. 
+                          Pastikan untuk mengikuti instruksi yang diberikan.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </article>
               </div>
@@ -234,6 +262,7 @@ export default function BeritaDetailPage({
                   {filteredRelated.length > 0 && (
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                       <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                        <span className="mr-2">{isBerita ? '📰' : '📢'}</span>
                         {isBerita ? 'Berita Lainnya' : 'Pengumuman Lainnya'}
                       </h3>
                       <div className="space-y-4">
@@ -292,9 +321,7 @@ export default function BeritaDetailPage({
                     href={`/berita/${berita.kategori}`}
                     className="flex items-center text-green-600 hover:text-green-700 font-medium group"
                   >
-                    <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                    </svg>
+                    <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
                     Kembali ke {isBerita ? 'Berita' : 'Pengumuman'}
                   </Link>
                   
@@ -303,14 +330,14 @@ export default function BeritaDetailPage({
                       href={isBerita ? '/berita/pengumuman' : '/berita/berita'}
                       className="text-gray-600 hover:text-gray-800 font-medium"
                     >
-                      {isBerita ? 'Lihat Pengumuman' : 'Lihat Berita'}
+                      {isBerita ? '📢 Lihat Pengumuman' : '📰 Lihat Berita'}
                     </Link>
                     <span className="text-gray-300">|</span>
                     <Link 
                       href="/berita"
                       className="text-gray-600 hover:text-gray-800 font-medium"
                     >
-                      Semua Berita
+                      📚 Semua Berita
                     </Link>
                   </div>
                 </div>

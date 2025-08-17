@@ -86,7 +86,7 @@ const AspirasiForm: React.FC = () => {
     };
 
     return (
-        <div className="bg-white rounded-lg shadow-sm border overflow-hidden min-h-235" 
+        <div className="bg-white rounded-lg shadow-sm border overflow-hidden min-h-225" 
              style={{ borderColor: 'var(--border-light)' }}>
             {/* Header */}
             <div className="p-6 border-b" style={{ borderColor: 'var(--border-light)' }}>

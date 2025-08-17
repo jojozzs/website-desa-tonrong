@@ -48,7 +48,7 @@ export default function GaleriPage() {
     return (
       <div className="space-y-8">
         {/* Header Skeleton */}
-        <div className="relative bg-gradient-to-br from-gray-100 via-white to-gray-100 rounded-2xl p-8 mb-8 overflow-hidden animate-pulse">
+        <div className="relative bg-gradient-to-br from-gray-100 via-white to-gray-100 rounded-2xl p-8 mb-8 overflow-hidden animate-pulse lg:mih-h-100">
           <div className="text-center max-w-4xl mx-auto">
             <div className="w-16 h-16 bg-gray-200 rounded-2xl mx-auto mb-4"></div>
             <div className="h-10 bg-gray-200 rounded w-64 mx-auto mb-4"></div>
@@ -96,7 +96,7 @@ export default function GaleriPage() {
   return (
     <div className="space-y-8">
       {/* Redesigned Header */}
-      <div className="relative bg-gradient-to-br from-green-50 via-white to-green-50 rounded-2xl p-8 mb-8 overflow-hidden">
+      <div className="relative bg-gradient-to-br from-green-50 via-white to-green-50 rounded-2xl p-8 mb-8 overflow-hidden lg:min-h-100">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute top-4 left-4 w-16 h-16 border-2 border-green-400 rounded-full"></div>
@@ -123,7 +123,8 @@ export default function GaleriPage() {
 
           {/* Subtitle */}
           <p className="text-gray-600 text-lg lg:text-xl mb-6 max-w-2xl mx-auto leading-relaxed">
-            Dokumentasi kegiatan dan momen penting 
+            Dokumentasi kegiatan dan momen penting
+            <br/>  
             <span className="font-semibold text-green-700"> Desa Tonrong Rijang</span>
           </p>
 

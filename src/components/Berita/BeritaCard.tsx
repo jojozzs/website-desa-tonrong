@@ -2,11 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { Calendar, User, Clock } from "lucide-react";
 import { BeritaPengumumanKategoriEnum } from "@/lib/enums";
+import type { OutputData } from "@editorjs/editorjs";
 
 interface BeritaItem {
   id: string;
   judul: string;
   deskripsi: string;
+  konten?: OutputData;
   tanggal: Date;
   penulis: string;
   kategori: BeritaPengumumanKategoriEnum;
@@ -34,6 +36,39 @@ function timeAgo(date: Date) {
   return `${Math.ceil(diffDays / 365)} tahun lalu`
 }
 
+// Helper function untuk extract text dari EditorJS content
+function extractTextFromEditorJS(data: OutputData): string {
+  if (!data || !data.blocks) return ''
+  
+  let text = ''
+  for (const block of data.blocks) {
+    switch (block.type) {
+      case 'paragraph':
+        text += block.data.text + ' '
+        break
+      case 'header':
+        text += block.data.text + ' '
+        break
+      case 'list':
+        if (block.data.items) {
+          for (const item of block.data.items) {
+            if (typeof item === 'string') {
+              text += item + ' '
+            } else if (item.content) {
+              text += item.content + ' '
+            }
+          }
+        }
+        break
+      case 'quote':
+        text += block.data.text + ' '
+        break
+    }
+  }
+  
+  return text.trim()
+}
+
 interface BeritaCardProps {
   item: BeritaItem;
   compact?: boolean;
@@ -43,9 +78,14 @@ export default function BeritaCard({ item, compact = false }: BeritaCardProps) {
   const href = `/berita/${item.kategori}/${item.slug}`;
   const isBerita = item.kategori === BeritaPengumumanKategoriEnum.BERITA;
 
+  // Extract text preview from EditorJS content, fallback to deskripsi
+  const contentPreview = item.konten 
+    ? extractTextFromEditorJS(item.konten)
+    : item.deskripsi
+
   return (
     <Link href={href} className="block group h-full">
-      <article className="h-full bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md hover:border-gray-300 transition-all duration-300 flex flex-col">
+      <article className="h-full bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-xl hover:border-green-200 transition-all duration-300 flex flex-col transform hover:-translate-y-1">
         {/* Image - Fixed height */}
         <div className="relative h-48 overflow-hidden flex-shrink-0">
           <Image
@@ -58,14 +98,18 @@ export default function BeritaCard({ item, compact = false }: BeritaCardProps) {
           
           {/* Category Badge */}
           <div className="absolute top-3 left-3">
-            <span className={`inline-flex items-center px-2 py-1 rounded-full text-sm font-medium text-white backdrop-blur-sm ${
+            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white backdrop-blur-sm ${
               isBerita 
                 ? 'bg-green-600/90' 
                 : 'bg-orange-600/90'
             }`}>
+              <span className="mr-1">{isBerita ? '📰' : '📢'}</span>
               {isBerita ? 'Berita' : 'Pengumuman'}
             </span>
           </div>
+
+          {/* Overlay Gradient */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         </div>
 
         {/* Content - Flex grow to fill remaining space */}
@@ -83,13 +127,13 @@ export default function BeritaCard({ item, compact = false }: BeritaCardProps) {
           </div>
 
           {/* Title - Fixed height with line clamp */}
-          <h3 className="text-lg font-semibold text-gray-800 line-clamp-2 group-hover:text-green-600 transition-colors min-h-[2.5rem] flex items-start">
+          <h3 className="text-lg font-semibold text-gray-800 mb-2 line-clamp-2 group-hover:text-green-600 transition-colors min-h-[3.5rem] flex items-start">
             {item.judul}
           </h3>
 
-          {/* Description - Fixed height with line clamp */}
+          {/* Content Preview - Fixed height with line clamp */}
           <p className="text-gray-600 text-sm line-clamp-3 mb-4 leading-relaxed min-h-[4.5rem] flex-grow">
-            {item.deskripsi}
+            {contentPreview || 'Tidak ada konten preview tersedia'}
           </p>
 
           {/* Footer - Always at bottom */}
