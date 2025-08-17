@@ -2,11 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { Calendar, User, Clock } from "lucide-react";
 import { BeritaPengumumanKategoriEnum } from "@/lib/enums";
+import type { OutputData } from "@editorjs/editorjs";
 
 interface BeritaItem {
   id: string;
   judul: string;
   deskripsi: string;
+  konten?: OutputData;
   tanggal: Date;
   penulis: string;
   kategori: BeritaPengumumanKategoriEnum;
@@ -34,6 +36,39 @@ function timeAgo(date: Date) {
   return `${Math.ceil(diffDays / 365)} tahun lalu`
 }
 
+// Helper function untuk extract text dari EditorJS content
+function extractTextFromEditorJS(data: OutputData): string {
+  if (!data || !data.blocks) return ''
+  
+  let text = ''
+  for (const block of data.blocks) {
+    switch (block.type) {
+      case 'paragraph':
+        text += block.data.text + ' '
+        break
+      case 'header':
+        text += block.data.text + ' '
+        break
+      case 'list':
+        if (block.data.items) {
+          for (const item of block.data.items) {
+            if (typeof item === 'string') {
+              text += item + ' '
+            } else if (item.content) {
+              text += item.content + ' '
+            }
+          }
+        }
+        break
+      case 'quote':
+        text += block.data.text + ' '
+        break
+    }
+  }
+  
+  return text.trim()
+}
+
 interface BeritaListItemProps {
   item: BeritaItem;
 }
@@ -42,17 +77,22 @@ export default function BeritaListItem({ item }: BeritaListItemProps) {
   const href = `/berita/${item.kategori}/${item.slug}`;
   const isBerita = item.kategori === BeritaPengumumanKategoriEnum.BERITA;
 
+  // Extract text preview from EditorJS content, fallback to deskripsi
+  const contentPreview = item.konten 
+    ? extractTextFromEditorJS(item.konten)
+    : item.deskripsi
+
   return (
     <Link href={href} className="block group">
-      <article className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-md transition-all duration-200">
+      <article className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 p-4 border border-gray-100 rounded-xl hover:border-green-200 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-white">
         
         {/* Thumbnail */}
-        <div className="relative w-full sm:w-20 h-48 sm:h-20 flex-shrink-0">
+        <div className="relative w-full sm:w-20 h-48 sm:h-20 flex-shrink-0 overflow-hidden rounded-lg">
           <Image
             src={item.gambar_url}
             alt={item.judul}
             fill
-            className="object-cover rounded-lg group-hover:scale-105 transition-transform duration-200"
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
             sizes="(max-width: 640px) 100vw, 80px"
           />
           
@@ -61,12 +101,15 @@ export default function BeritaListItem({ item }: BeritaListItemProps) {
             <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white backdrop-blur-sm ${
               isBerita 
                 ? 'bg-green-600/90' 
-                : 'bg-orange-600/90'
+                : 'bg-blue-600/90'
             }`}>
               <span className="mr-1">{isBerita ? '📰' : '📢'}</span>
               {isBerita ? 'Berita' : 'Pengumuman'}
             </span>
           </div>
+
+          {/* Overlay Gradient */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"></div>
         </div>
 
         {/* Content */}
@@ -84,13 +127,13 @@ export default function BeritaListItem({ item }: BeritaListItemProps) {
           </div>
 
           {/* Title */}
-          <h3 className="text-base sm:text-lg font-semibold text-gray-800 group-hover:text-green-600 transition-colors line-clamp-2 mb-2">
+          <h3 className="text-base sm:text-lg font-bold text-gray-900 group-hover:text-green-600 transition-colors line-clamp-2 mb-2">
             {item.judul}
           </h3>
 
-          {/* Description */}
+          {/* Content Preview */}
           <p className="text-gray-600 text-sm line-clamp-2 sm:line-clamp-1 mb-3 leading-relaxed">
-            {item.deskripsi}
+            {contentPreview || 'Tidak ada konten preview tersedia'}
           </p>
 
           {/* Meta Info */}
@@ -117,21 +160,24 @@ export default function BeritaListItem({ item }: BeritaListItemProps) {
               <span className={`hidden sm:inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                 isBerita 
                   ? 'bg-green-100 text-green-800' 
-                  : 'bg-orange-100 text-orange-800'
+                  : 'bg-blue-100 text-blue-800'
               }`}>
                 <span className="mr-1">{isBerita ? '📰' : '📢'}</span>
                 {isBerita ? 'Berita' : 'Pengumuman'}
               </span>
 
               {/* Arrow */}
-              <svg 
-                className="w-5 h-5 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-1 transition-all duration-200 ml-auto sm:ml-3" 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
+              <span className="text-green-600 text-sm font-semibold group-hover:text-green-700 flex items-center whitespace-nowrap ml-auto sm:ml-3">
+                Baca Selengkapnya
+                <svg 
+                  className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-all duration-200" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </span>
             </div>
           </div>
         </div>
