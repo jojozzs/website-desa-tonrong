@@ -35,7 +35,7 @@ export default function GaleriListPage(): JSX.Element {
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
     const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
-    const { admin, loading: loadingAdmin } = useAdminData();
+    const { admin } = useAdminData();
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -126,7 +126,7 @@ export default function GaleriListPage(): JSX.Element {
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
-                <div className="max-w-7xl mx-auto">
+                <div className="custom-max-width mx-auto">
                     {/* Header skeleton */}
                     <div className="mb-6 sm:mb-8">
                         <div className="h-8 sm:h-10 bg-gray-200 rounded w-32 sm:w-48 mb-2 sm:mb-3 animate-pulse"></div>
@@ -170,7 +170,7 @@ export default function GaleriListPage(): JSX.Element {
         <div className="min-h-screen bg-gray-50">
             {/* Header */}
             <div className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
-                <div className="max-w-7xl mx-auto p-4 sm:p-6">
+                <div className="custom-max-width mx-auto p-4 sm:p-6">
                     <div className="flex flex-col gap-4">
                         <div>
                             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">Galeri</h1>
@@ -201,7 +201,7 @@ export default function GaleriListPage(): JSX.Element {
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto p-4 sm:p-6">
+            <div className="custom-max-width mx-auto p-4 sm:p-6">
                 {/* Stats */}
                 <div className="bg-white rounded-xl shadow-sm border p-4 sm:p-6 mb-4 sm:mb-6">
                     <div className="flex flex-wrap items-center gap-4 sm:gap-6">

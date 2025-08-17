@@ -17,7 +17,7 @@ export default function GaleriTambahPage(): JSX.Element {
     const [submitting, setSubmitting] = useState<boolean>(false);
     const [error, setError] = useState<string>("");
 
-    const { admin, loading: loadingAdmin } = useAdminData();
+    const { admin } = useAdminData();
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>): Promise<void> {
         e.preventDefault();
@@ -95,7 +95,7 @@ export default function GaleriTambahPage(): JSX.Element {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50 p-6">
-            <div className="max-w-2xl mx-auto">
+            <div className="custom-max-width mx-auto">
                 {/* Header */}
                 <div className="mb-8">
                     <Link 
