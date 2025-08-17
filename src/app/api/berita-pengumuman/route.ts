@@ -120,7 +120,8 @@ async function uploadToCloudinary(file: File): Promise<CloudinaryUploadResult> {
                 folder: process.env.CLOUDINARY_BASE_FOLDER
                     ? `${process.env.CLOUDINARY_BASE_FOLDER}/berita-pengumuman`
                     : "berita-pengumuman",
-                transformation: [{ width: 800, height: 600, crop: "fill" }],
+                // transformation: [{ width: 800, height: 600, crop: "fill" }],
+                transformation: [{ width: 1920, height: 1080, crop: 'fill' }]
             },
             (err, out) => (err ? reject(err) : resolve(out as unknown as CloudinaryUploadResult))
         )
