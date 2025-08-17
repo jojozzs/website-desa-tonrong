@@ -52,6 +52,9 @@
   --dropdown-hover: #fff7ed;
   --dropdown-active: #ffedd5;
   --dropdown-border: #e5e7eb;
+
+  --max-w-8xl: 96rem;
+	--min-w-8xl: 96rem;
 }
 
 @theme inline {
@@ -106,6 +109,9 @@
   --color-dropdown-hover: var(--dropdown-hover);
   --color-dropdown-active: var(--dropdown-active);
   --color-dropdown-border: var(--dropdown-border);
+
+  --max-w-8xl: var(--max-w-8xl);
+	--min-w-8xl: var(--min-w-8xl);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -136,4 +142,8 @@ body {
   10%, 80% {
     background-position: 200% center;
   }
+}
+
+.custom-max-width {
+  max-width: var(--max-w-8xl);
 }

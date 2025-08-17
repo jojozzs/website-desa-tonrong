@@ -35,7 +35,7 @@ export default function GaleriListPage(): JSX.Element {
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
     const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
-    const { admin, loading: loadingAdmin } = useAdminData();
+    const { admin } = useAdminData();
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -126,7 +126,7 @@ export default function GaleriListPage(): JSX.Element {
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
-                <div className="max-w-7xl mx-auto">
+                <div className="custom-max-width mx-auto">
                     {/* Header skeleton */}
                     <div className="mb-6 sm:mb-8">
                         <div className="h-8 sm:h-10 bg-gray-200 rounded w-32 sm:w-48 mb-2 sm:mb-3 animate-pulse"></div>
@@ -170,7 +170,7 @@ export default function GaleriListPage(): JSX.Element {
         <div className="min-h-screen bg-gray-50">
             {/* Header */}
             <div className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
-                <div className="max-w-7xl mx-auto p-4 sm:p-6">
+                <div className="custom-max-width mx-auto p-4 sm:p-6">
                     <div className="flex flex-col gap-4">
                         <div>
                             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">Galeri</h1>
@@ -201,7 +201,7 @@ export default function GaleriListPage(): JSX.Element {
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto p-4 sm:p-6">
+            <div className="custom-max-width mx-auto p-4 sm:p-6">
                 {/* Stats */}
                 <div className="bg-white rounded-xl shadow-sm border p-4 sm:p-6 mb-4 sm:mb-6">
                     <div className="flex flex-wrap items-center gap-4 sm:gap-6">
@@ -310,7 +310,7 @@ export default function GaleriListPage(): JSX.Element {
                                                 />
                                                 {/* Overlay actions for larger screens */}
                                                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 items-center justify-center gap-2 sm:flex hidden">
-                                                    <a 
+                                                    <Link 
                                                         href={row.gambar_url} 
                                                         target="_blank" 
                                                         rel="noreferrer"
@@ -318,7 +318,7 @@ export default function GaleriListPage(): JSX.Element {
                                                         title="Lihat gambar"
                                                     >
                                                         <Eye className="h-5 w-5" />
-                                                    </a>
+                                                    </Link>
                                                     <Link 
                                                         href={`/admin/galeri/edit/${row.id}`}
                                                         className="inline-flex items-center justify-center w-10 h-10 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition-colors"
@@ -359,7 +359,7 @@ export default function GaleriListPage(): JSX.Element {
                                                         {/* Dropdown menu */}
                                                         {openMenuId === row.id && (
                                                             <div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-lg shadow-lg z-50 py-1 min-w-[120px]">
-                                                                <a 
+                                                                <Link 
                                                                     href={row.gambar_url} 
                                                                     target="_blank" 
                                                                     rel="noreferrer"
@@ -368,7 +368,7 @@ export default function GaleriListPage(): JSX.Element {
                                                                 >
                                                                     <Eye className="h-4 w-4" />
                                                                     Lihat
-                                                                </a>
+                                                                </Link>
                                                                 <Link 
                                                                     href={`/admin/galeri/edit/${row.id}`}
                                                                     className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
@@ -394,15 +394,15 @@ export default function GaleriListPage(): JSX.Element {
                                                     
                                                     {/* Desktop actions */}
                                                     <div className="hidden sm:flex items-center gap-1">
-                                                        <a 
-                                                            href={row.gambar_url} 
-                                                            target="_blank" 
+                                                        <Link
+                                                            href={row.gambar_url}
+                                                            target="_blank"
                                                             rel="noreferrer"
                                                             className="inline-flex items-center justify-center w-8 h-8 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
                                                             title="Lihat gambar"
                                                         >
                                                             <Eye className="h-4 w-4" />
-                                                        </a>
+                                                        </Link>
                                                         <Link 
                                                             href={`/admin/galeri/edit/${row.id}`}
                                                             className="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"

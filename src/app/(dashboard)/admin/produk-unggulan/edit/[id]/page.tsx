@@ -200,7 +200,7 @@ export default function ProdukEditPage(): JSX.Element {
     if (loading || loadingAdmin) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50 p-6">
-                <div className="max-w-2xl mx-auto pt-20">
+                <div className="custom-max-width mx-auto pt-20">
                     <div className="bg-white rounded-lg shadow-sm border border-green-100 p-8 text-center">
                         <Loader2 className="w-16 h-16 text-orange-600 mx-auto mb-4 animate-spin" />
                         <h2 className="text-2xl font-bold text-gray-800 mb-2">Memuat Data Produk</h2>
@@ -216,7 +216,7 @@ export default function ProdukEditPage(): JSX.Element {
     if (success) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50 p-6">
-                <div className="max-w-2xl mx-auto pt-20">
+                <div className="custom-max-width mx-auto pt-20">
                     <div className="bg-white rounded-lg shadow-sm border border-green-100 p-8 text-center">
                         <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
                         <h2 className="text-2xl font-bold text-gray-800 mb-2">Berhasil Diperbarui!</h2>
@@ -234,7 +234,7 @@ export default function ProdukEditPage(): JSX.Element {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50 p-6">
-            <div className="max-w-4xl mx-auto">
+            <div className="custom-max-width mx-auto">
                 {/* Header */}
                 <div className="mb-8">
                     <button

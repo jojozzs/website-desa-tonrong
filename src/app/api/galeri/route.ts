@@ -85,7 +85,8 @@ export async function POST(request: NextRequest) {
 				{
 					resource_type: 'image',
 					folder: process.env.CLOUDINARY_BASE_FOLDER ? `${process.env.CLOUDINARY_BASE_FOLDER}/galeri` : 'galeri',
-					transformation: [{ width: 800, height: 600, crop: 'fill' }],
+					// transformation: [{ width: 800, height: 600, crop: 'fill' }],
+                    transformation: [{ width: 1920, height: 1080, crop: 'fill' }]
 				},
 				(err, res) => (err ? reject(err) : resolve(res as unknown as CloudinaryUploadResult))
 			).end(buf);
@@ -146,7 +147,8 @@ export async function PATCH(request: NextRequest) {
                         folder: process.env.CLOUDINARY_BASE_FOLDER
                             ? `${process.env.CLOUDINARY_BASE_FOLDER}/galeri`
                             : "galeri",
-                        transformation: [{ width: 800, height: 600, crop: "fill" }],
+                        // transformation: [{ width: 800, height: 600, crop: "fill" }],
+                        transformation: [{ width: 1920, height: 1080, crop: 'fill' }]
                     },
                     (err, out) => (err ? reject(err) : resolve(out as unknown as CloudinaryUploadResult))
                 )

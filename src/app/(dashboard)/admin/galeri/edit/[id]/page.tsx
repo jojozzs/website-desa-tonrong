@@ -153,7 +153,7 @@ export default function GaleriEditPage(): JSX.Element {
     if (loading || loadingAdmin) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50 p-6">
-                <div className="max-w-2xl mx-auto">
+                <div className="custom-max-width mx-auto">
                     <div className="animate-pulse">
                         <div className="h-6 bg-gray-200 rounded w-48 mb-4"></div>
                         <div className="h-8 bg-gray-200 rounded w-64 mb-2"></div>
@@ -185,7 +185,7 @@ export default function GaleriEditPage(): JSX.Element {
     if (error && !originalData) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50 p-6">
-                <div className="max-w-2xl mx-auto">
+                <div className="custom-max-width mx-auto">
                     <Link 
                         href="/admin/galeri"
                         className="inline-flex items-center text-gray-600 hover:text-gray-800 mb-4 transition-colors"
@@ -216,7 +216,7 @@ export default function GaleriEditPage(): JSX.Element {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50 p-6">
-            <div className="max-w-2xl mx-auto">
+            <div className="custom-max-width mx-auto">
                 {/* Header */}
                 <div className="mb-8">
                     <Link 

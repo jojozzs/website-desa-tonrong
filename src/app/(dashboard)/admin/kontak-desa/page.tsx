@@ -125,7 +125,7 @@ export default function KontakDesaPage(): JSX.Element {
     if (loading || loadingAdmin) {
         return (
             <div className="min-h-screen bg-gray-50 p-4 lg:p-6">
-                <div className="max-w-7xl mx-auto">
+                <div className="custom-max-width mx-auto">
                     <div className="text-center mb-8">
                         <div className="h-8 bg-gray-200 rounded-xl w-64 mx-auto mb-2"></div>
                         <div className="h-4 bg-gray-200 rounded-lg w-96 mx-auto"></div>
@@ -162,7 +162,7 @@ export default function KontakDesaPage(): JSX.Element {
 
     return (
         <div className="min-h-screen bg-gray-50 p-4 lg:p-6">
-            <div className="max-w-7xl mx-auto">
+            <div className="custom-max-width mx-auto">
                 {/* Header */}
                 <div className="text-center mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">Kontak Desa</h1>

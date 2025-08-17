@@ -79,6 +79,12 @@ const config: Config = {
                 '6xl': 'var(--radius-6xl)',
                 '9xl': 'var(--radius-9xl)',
             },
+            maxWidth: {
+                '8xl': 'var(--max-w-8xl)',
+            },
+            minWidth: {
+                '8xl': 'var(--min-w-8xl)',
+            },
         },
     },
     plugins: [],
