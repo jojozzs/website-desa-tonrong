@@ -198,7 +198,7 @@ export default function AspirasiPage(): JSX.Element {
     if (loading || loadingAdmin) {
         return (
             <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
-                <div className="max-w-7xl mx-auto">
+                <div className="custom-max-width mx-auto">
                     <div className="animate-pulse">
                         {/* Header skeleton */}
                         <div className="mb-6 sm:mb-8">
@@ -241,7 +241,7 @@ export default function AspirasiPage(): JSX.Element {
         <div className="min-h-screen bg-gray-50">
             {/* Mobile Header */}
             <div className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
-                <div className="max-w-7xl mx-auto p-4">
+                <div className="custom-max-width mx-auto p-4">
                     <div className="flex flex-col gap-4">
                         {/* Top row - Title and Filter toggle */}
                         <div className="flex items-center justify-between">
@@ -376,7 +376,7 @@ export default function AspirasiPage(): JSX.Element {
                 )}
             </div>
 
-            <div className="max-w-7xl mx-auto p-4">
+            <div className="custom-max-width mx-auto p-4">
                 {/* Error Message */}
                 {error && (
                     <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
