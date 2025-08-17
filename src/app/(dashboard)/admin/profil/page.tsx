@@ -77,7 +77,7 @@ export default function AdminProfilPage() {
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 p-4 lg:p-6">
-                <div className="max-w-7xl mx-auto">
+                <div className="custom-max-width mx-auto">
                     <div className="text-center mb-8">
                         <div className="h-8 bg-gray-200 rounded-xl w-64 mx-auto mb-2"></div>
                         <div className="h-4 bg-gray-200 rounded-lg w-96 mx-auto"></div>
@@ -103,7 +103,7 @@ export default function AdminProfilPage() {
     if (error) {
         return (
             <div className="min-h-screen bg-gray-50 p-4 lg:p-6">
-                <div className="max-w-7xl mx-auto">
+                <div className="custom-max-width mx-auto">
                     <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
                         <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <FileText className="w-8 h-8 text-red-600" />
@@ -121,7 +121,7 @@ export default function AdminProfilPage() {
 
     return (
         <div className="min-h-screen bg-gray-50 p-4 lg:p-6">
-            <div className="max-w-7xl mx-auto">
+            <div className="custom-max-width mx-auto">
                 {/* Header */}
                 <div className="text-center mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">Manajemen Profil Desa</h1>
