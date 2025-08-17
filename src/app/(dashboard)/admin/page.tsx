@@ -223,7 +223,7 @@ export default function AdminPage(): JSX.Element {
 
     return (
         <div className="min-h-screen p-4 sm:p-6">
-            <div className="max-w-7xl mx-auto">
+            <div className="custom-max-width mx-auto">
                 {/* Header */}
                 <div className="mb-6 sm:mb-8">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -375,12 +375,12 @@ export default function AdminPage(): JSX.Element {
                         </div>
                         
                         {/* Progress Bar */}
-                        <div className="mt-6">
+                        <div className="mt-6 px-4">
                             <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
                                 <span>Tingkat Penyelesaian</span>
                                 <span className="font-medium">{completionRate}%</span>
                             </div>
-                            <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div className="w-full bg-gray-200 rounded-full h-4">
                                 <div 
                                     className="bg-gradient-to-r from-green-500 to-green-600 h-4 rounded-full transition-all duration-300" 
                                     style={{ width: `${completionRate}%` }}
