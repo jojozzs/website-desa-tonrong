@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useGaleriData } from '@/components/hooks/useGaleriData'
+import { useGaleriData } from '@/hooks/useGaleriData'
 import { 
   ChevronLeftIcon, 
   ChevronRightIcon, 
