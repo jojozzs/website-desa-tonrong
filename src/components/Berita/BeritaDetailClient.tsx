@@ -114,7 +114,7 @@ export default function BeritaDetailClient({ kategori, slug }: BeritaDetailClien
           <div className="mx-auto">
             
             {/* Breadcrumb */}
-            <div className="container mx-auto px-6 md:px-8 lg:px-20 xl:px-40 py-4">
+            <div className="container mx-auto px-6 md:px-8 lg:px-20 xl:px-40 py-4 pt-8">
               <Breadcrumb
                 items={[
                   { label: "Beranda", href: "/" },
@@ -148,7 +148,6 @@ export default function BeritaDetailClient({ kategori, slug }: BeritaDetailClien
                         ? 'bg-green-100 text-green-800' 
                         : 'bg-orange-100 text-orange-800'
                     }`}>
-                      <span className="mr-2">{isBerita ? '📰' : '📢'}</span>
                       {isBerita ? 'Berita Desa' : 'Pengumuman Resmi'}
                     </div>
 
@@ -215,31 +214,6 @@ export default function BeritaDetailClient({ kategori, slug }: BeritaDetailClien
                         Konten tidak tersedia
                       </div>
                     )}
-
-                    {/* Info Box berdasarkan kategori */}
-                    {isBerita ? (
-                      <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg mt-6">
-                        <h3 className="font-semibold text-gray-800 mb-2 flex items-center text-sm">
-                          <span className="mr-2">ℹ️</span>
-                          Informasi Tambahan
-                        </h3>
-                        <p className="text-gray-600 text-sm">
-                          Untuk informasi lebih lanjut mengenai berita ini, Anda dapat menghubungi 
-                          Kantor Desa Tonrong Rijang atau mengunjungi langsung balai desa.
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="bg-orange-50 border border-orange-200 p-4 rounded-lg mt-6">
-                        <h3 className="font-semibold text-orange-800 mb-2 flex items-center text-sm">
-                          <span className="mr-2">⚠️</span>
-                          Pengumuman Penting
-                        </h3>
-                        <p className="text-orange-700 text-sm">
-                          Pengumuman ini bersifat resmi dan berlaku untuk seluruh warga Desa Tonrong Rijang. 
-                          Pastikan untuk mengikuti instruksi yang diberikan.
-                        </p>
-                      </div>
-                    )}
                   </div>
                 </article>
               </div>
@@ -252,7 +226,6 @@ export default function BeritaDetailClient({ kategori, slug }: BeritaDetailClien
                   {filteredRelated.length > 0 && (
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                       <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                        <span className="mr-2">{isBerita ? '📰' : '📢'}</span>
                         {isBerita ? 'Berita Lainnya' : 'Pengumuman Lainnya'}
                       </h3>
                       <div className="space-y-4">
@@ -322,14 +295,14 @@ export default function BeritaDetailClient({ kategori, slug }: BeritaDetailClien
                       href={isBerita ? '/berita/pengumuman' : '/berita/berita'}
                       className="text-gray-600 hover:text-gray-800 font-medium"
                     >
-                      {isBerita ? '📢 Lihat Pengumuman' : '📰 Lihat Berita'}
+                      {isBerita ? 'Lihat Pengumuman' : 'Lihat Berita'}
                     </Link>
                     <span className="text-gray-300">|</span>
                     <Link 
                       href="/berita"
                       className="text-gray-600 hover:text-gray-800 font-medium"
                     >
-                      📚 Semua Berita
+                        Semua Berita
                     </Link>
                   </div>
                 </div>
