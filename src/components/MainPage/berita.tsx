@@ -6,6 +6,32 @@ import Image from 'next/image'
 import { useBeritaData } from '@/hooks/useBeritaData'
 import { Calendar, ArrowRight, BookOpen, User } from 'lucide-react'
 import { BeritaPengumumanKategoriEnum } from '@/lib/enums'
+import type { OutputData } from '@editorjs/editorjs'
+
+// Utility function to extract text from EditorJS content
+const extractTextFromEditorJS = (content: OutputData): string => {
+    if (!content || !content.blocks || content.blocks.length === 0) {
+        return ''
+    }
+
+    return content.blocks
+        .map(block => {
+            if (block.type === 'paragraph' && block.data?.text) {
+                // Remove HTML tags
+                return block.data.text.replace(/<[^>]*>/g, '')
+            }
+            if (block.type === 'header' && block.data?.text) {
+                return block.data.text.replace(/<[^>]*>/g, '')
+            }
+            if (block.type === 'list' && block.data?.items) {
+                return block.data.items.join(' ')
+            }
+            return ''
+        })
+        .filter(text => text.length > 0)
+        .join(' ')
+        .trim()
+}
 
 export default function BeritaTerkini() {
     const { data: allBeritaData, loading, error } = useBeritaData()
@@ -56,6 +82,26 @@ export default function BeritaTerkini() {
                     bg: 'bg-gray-500'
                 }
         }
+    }
+
+    // Generate excerpt from content
+    const getExcerpt = (news: any): string => {
+        // Priority 1: Use deskripsi if available and not empty
+        if (news.deskripsi && news.deskripsi.trim().length > 0) {
+            return news.deskripsi
+        }
+        
+        // Priority 2: Extract from EditorJS content
+        if (news.konten) {
+            const extractedText = extractTextFromEditorJS(news.konten)
+            // Limit to reasonable excerpt length
+            return extractedText.length > 150 
+                ? extractedText.substring(0, 150) + '...'
+                : extractedText
+        }
+        
+        // Fallback
+        return 'Tidak ada preview tersedia...'
     }
 
     // Loading state
@@ -123,6 +169,7 @@ export default function BeritaTerkini() {
                 {displayData.map((news, idx) => {
                     const isHovered = hoveredCard === idx
                     const categoryConfig = getCategoryConfig(news.kategori)
+                    const excerpt = getExcerpt(news)
                     
                     return (
                         <Link 
@@ -168,9 +215,9 @@ export default function BeritaTerkini() {
                                             {news.judul}
                                         </h3>
                                         
-                                        {/* Excerpt */}
+                                        {/* Excerpt - now using getExcerpt function */}
                                         <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-3">
-                                            {news.deskripsi}
+                                            {excerpt}
                                         </p>
                                         
                                         {/* Meta Information */}
