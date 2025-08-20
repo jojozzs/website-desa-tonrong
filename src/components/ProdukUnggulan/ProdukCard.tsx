@@ -96,7 +96,6 @@ export default function ProdukCard({ item }: ProdukCardProps) {
           {/* Category Badge */}
           <div className="absolute top-3 left-3">
             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white backdrop-blur-sm bg-orange-600/90">
-              <span className="mr-1">🏪</span>
               Produk UMKM
             </span>
           </div>

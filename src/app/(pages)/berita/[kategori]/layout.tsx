@@ -1,69 +1,88 @@
-'use client'
-
-import { use } from 'react'
-import { usePathname } from 'next/navigation'
-import Breadcrumb from '@/components/Berita/Breadcrumb'
-import { BeritaPengumumanKategoriEnum } from '@/lib/enums'
+// app/(pages)/berita/[kategori]/layout.tsx
+import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { BeritaPengumumanKategoriEnum } from '@/lib/enums'
+import { generateSiteMetadata } from '@/lib/seo'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 
 interface KategoriLayoutProps {
   children: React.ReactNode
-  params: Promise<{ kategori: string }>
+  params: { kategori: string }
+}
+
+// Validate kategori di server component
+function validateKategori(kategori: string): kategori is BeritaPengumumanKategoriEnum {
+  return Object.values(BeritaPengumumanKategoriEnum).includes(kategori as BeritaPengumumanKategoriEnum)
+}
+
+function getCategoryInfo(kategori: BeritaPengumumanKategoriEnum) {
+  switch (kategori) {
+    case BeritaPengumumanKategoriEnum.BERITA:
+      return {
+        name: 'Berita Desa',
+        description: 'Kumpulan berita terbaru dari Desa Tonrong Rijang, informasi kegiatan, program pembangunan, dan berbagai aktivitas masyarakat desa.',
+        keywords: ['berita desa', 'informasi desa', 'kegiatan desa', 'program desa']
+      }
+    case BeritaPengumumanKategoriEnum.PENGUMUMAN:
+      return {
+        name: 'Pengumuman Resmi',
+        description: 'Pengumuman resmi dari Pemerintah Desa Tonrong Rijang terkait kebijakan, program, dan informasi penting untuk warga.',
+        keywords: ['pengumuman desa', 'pengumuman resmi', 'kebijakan desa', 'info penting']
+      }
+    default:
+      return {
+        name: 'Berita & Pengumuman',
+        description: 'Informasi berita dan pengumuman Desa Tonrong Rijang',
+        keywords: ['berita', 'pengumuman']
+      }
+  }
+}
+
+export async function generateMetadata(
+  { params }: { params: { kategori: string } }
+): Promise<Metadata> {
+  const kategori = params.kategori
+  
+  if (!validateKategori(kategori)) {
+    return generateSiteMetadata({
+      title: 'Halaman Tidak Ditemukan',
+      description: 'Halaman yang Anda cari tidak ditemukan.',
+      noIndex: true
+    })
+  }
+  
+  const categoryInfo = getCategoryInfo(kategori)
+  
+  return generateSiteMetadata({
+    title: categoryInfo.name,
+    description: categoryInfo.description,
+    url: `/berita/${kategori}`,
+    keywords: categoryInfo.keywords,
+    type: 'website'
+  })
 }
 
 export default function KategoriLayout({ children, params }: KategoriLayoutProps) {
-  const resolvedParams = use(params)
-  const pathname = usePathname()
-  const kategori = resolvedParams.kategori
-
+  const kategori = params.kategori
+  
   // Validate kategori
-  if (!Object.values(BeritaPengumumanKategoriEnum).includes(kategori as BeritaPengumumanKategoriEnum)) {
+  if (!validateKategori(kategori)) {
     notFound()
   }
-
-  const isDetailPage = pathname.split('/').length > 3 // /berita/kategori/slug
-
-  // Jika detail page, tidak perlu breadcrumb di layout (sudah ada di page)
-  if (isDetailPage) {
-    return <>{children}</>
-  }
-
-  // Untuk halaman kategori, tampilkan breadcrumb
-  const getCategoryName = (kat: string) => {
-    switch (kat) {
-      case BeritaPengumumanKategoriEnum.BERITA:
-        return 'Berita'
-      case BeritaPengumumanKategoriEnum.PENGUMUMAN:
-        return 'Pengumuman'
-      default:
-        return kat.charAt(0).toUpperCase() + kat.slice(1)
-    }
-  }
+  
+  const categoryInfo = getCategoryInfo(kategori)
 
   return (
     <>
-    <Navbar />
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-6 md:px-8 lg:px-20 xl:px-40 py-8">
-        
-        {/* Breadcrumb */}
-        <div className="mb-8">
-          <Breadcrumb
-            items={[
-              { label: "Beranda", href: "/" },
-              { label: "Berita & Pengumuman", href: "/berita" },
-              { label: getCategoryName(kategori) },
-            ]}
-          />
+      <Navbar />
+      <div className="min-h-screen bg-gray-50">
+        <div className="flex-1">
+          {/* Content */}
+          {children}
         </div>
-
-        {/* Content */}
-        {children}
       </div>
-    </div>
-    <Footer />
+      <Footer />
     </>
   )
 }

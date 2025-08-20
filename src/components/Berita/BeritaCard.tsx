@@ -103,7 +103,6 @@ export default function BeritaCard({ item, compact = false }: BeritaCardProps) {
                 ? 'bg-green-600/90' 
                 : 'bg-orange-600/90'
             }`}>
-              <span className="mr-1">{isBerita ? '📰' : '📢'}</span>
               {isBerita ? 'Berita' : 'Pengumuman'}
             </span>
           </div>

@@ -1,7 +1,10 @@
-'use client'
-
+// app/(pages)/galeri/layout.tsx
+import { Metadata } from 'next'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import { generateGaleriMetadata } from '@/lib/seo'
+
+export const metadata: Metadata = generateGaleriMetadata()
 
 interface GaleriLayoutProps {
   children: React.ReactNode

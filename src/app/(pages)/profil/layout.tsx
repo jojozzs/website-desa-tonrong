@@ -1,7 +1,26 @@
-// app/profil/layout.tsx
+// app/(pages)/profil/layout.tsx
+import { Metadata } from 'next'
 import Footer from '@/components/Footer'
 import Navbar from '@/components/Navbar'
 import ProfilSidebar from '@/components/Profil/Sidebar'
+import { generateSiteMetadata } from '@/lib/seo'
+
+export const metadata: Metadata = generateSiteMetadata({
+  title: 'Profil Desa Tonrong Rijang',
+  description: 'Profil lengkap Desa Tonrong Rijang meliputi sejarah, visi misi, struktur pemerintahan, letak geografis, dan data demografi penduduk.',
+  url: '/profil',
+  keywords: [
+    'profil desa',
+    'sejarah desa',
+    'visi misi desa',
+    'struktur pemerintahan',
+    'letak geografis',
+    'data penduduk',
+    'demografi desa',
+    'pemerintahan desa'
+  ],
+  type: 'website'
+})
 
 export default function ProfilLayout({
   children,
