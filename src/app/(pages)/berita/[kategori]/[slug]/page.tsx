@@ -3,7 +3,6 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { BeritaPengumumanKategoriEnum } from '@/lib/enums'
 import { generateArticleMetadata } from '@/lib/seo'
-import { generateAltText } from '@/lib/imageAlt'
 import BeritaDetailClient from '@/components/Berita/BeritaDetailClient'
 
 interface BeritaDetailPageProps {
@@ -13,21 +12,20 @@ interface BeritaDetailPageProps {
 // Fetch berita data untuk metadata
 async function getBeritaBySlug(slug: string) {
   try {
-    // PERBAIKAN: Pastikan menggunakan absolute URL yang benar
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.VERCEL_URL 
       ? `https://${process.env.VERCEL_URL}` 
       : 'http://localhost:3000'
     
-    console.log('Fetching berita with slug:', slug) // Debug log
+    console.log('Fetching berita with slug:', slug)
     
     const response = await fetch(`${baseUrl}/api/berita-pengumuman?slug=${encodeURIComponent(slug)}`, {
-      next: { revalidate: 3600 }, // Revalidate every hour
+      next: { revalidate: 3600 },
       headers: {
-        'User-Agent': 'NextJS-Server', // Sometimes helps with server-to-server requests
+        'User-Agent': 'NextJS-Server',
       }
     })
     
-    console.log('Response status:', response.status) // Debug log
+    console.log('Response status:', response.status)
     
     if (!response.ok) {
       console.error('Failed to fetch berita:', response.status, response.statusText)
@@ -35,7 +33,7 @@ async function getBeritaBySlug(slug: string) {
     }
     
     const result = await response.json()
-    console.log('API result:', { success: result.success, hasData: !!result.data }) // Debug log
+    console.log('API result:', { success: result.success, hasData: !!result.data })
     
     return result.success ? result.data : null
   } catch (error) {
@@ -49,11 +47,11 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const { kategori, slug } = params
   
-  console.log('generateMetadata called with:', { kategori, slug }) // Debug log
+  console.log('generateMetadata called with:', { kategori, slug })
   
   // Validate kategori
   if (!Object.values(BeritaPengumumanKategoriEnum).includes(kategori as BeritaPengumumanKategoriEnum)) {
-    console.log('Invalid kategori:', kategori) // Debug log
+    console.log('Invalid kategori:', kategori)
     return {
       title: 'Halaman Tidak Ditemukan',
       robots: { index: false, follow: false }
@@ -63,7 +61,7 @@ export async function generateMetadata(
   const berita = await getBeritaBySlug(slug)
   
   if (!berita) {
-    console.log('Berita not found for slug:', slug) // Debug log
+    console.log('Berita not found for slug:', slug)
     return {
       title: 'Berita Tidak Ditemukan',
       description: 'Berita yang Anda cari tidak ditemukan di Website Desa Tonrong Rijang.',
@@ -71,25 +69,16 @@ export async function generateMetadata(
     }
   }
 
-  console.log('Berita found:', { id: berita.id, judul: berita.judul, kategori: berita.kategori }) // Debug log
+  console.log('Berita found:', { id: berita.id, judul: berita.judul, kategori: berita.kategori })
 
   // Validate kategori matches
   if (berita.kategori !== kategori) {
-    console.log('Kategori mismatch:', { expected: kategori, actual: berita.kategori }) // Debug log
+    console.log('Kategori mismatch:', { expected: kategori, actual: berita.kategori })
     return {
       title: 'Halaman Tidak Ditemukan',
       robots: { index: false, follow: false }
     }
   }
-
-  // Generate context-aware alt text for image
-  const imageAlt = generateAltText({
-    type: berita.kategori === BeritaPengumumanKategoriEnum.BERITA ? 'berita' : 'pengumuman',
-    title: berita.judul,
-    category: berita.kategori,
-    description: berita.deskripsi,
-    date: berita.tanggal
-  })
 
   // Extract text from EditorJS content for description
   let description = berita.deskripsi
@@ -128,7 +117,6 @@ export async function generateMetadata(
 // Generate static params untuk artikel yang sering diakses
 export async function generateStaticParams() {
   try {
-    // PERBAIKAN: Gunakan absolute URL yang benar
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.VERCEL_URL 
       ? `https://${process.env.VERCEL_URL}` 
       : 'http://localhost:3000'
@@ -137,7 +125,7 @@ export async function generateStaticParams() {
     
     // Fetch semua berita untuk static generation
     const response = await fetch(`${baseUrl}/api/berita-pengumuman`, {
-      next: { revalidate: 86400 }, // Revalidate every 24 hours
+      next: { revalidate: 86400 },
       headers: {
         'User-Agent': 'NextJS-Server',
       }
@@ -183,7 +171,7 @@ export async function generateStaticParams() {
 export default function BeritaDetailPage({ params }: BeritaDetailPageProps) {
   const { kategori, slug } = params
   
-  console.log('BeritaDetailPage rendered with:', { kategori, slug }) // Debug log
+  console.log('BeritaDetailPage rendered with:', { kategori, slug })
   
   // Validate kategori
   if (!Object.values(BeritaPengumumanKategoriEnum).includes(kategori as BeritaPengumumanKategoriEnum)) {
