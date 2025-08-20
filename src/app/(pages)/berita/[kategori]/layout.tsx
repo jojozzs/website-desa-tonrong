@@ -5,7 +5,6 @@ import { BeritaPengumumanKategoriEnum } from '@/lib/enums'
 import { generateSiteMetadata } from '@/lib/seo'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
-import Breadcrumb from '@/components/Berita/Breadcrumb'
 
 interface KategoriLayoutProps {
   children: React.ReactNode
