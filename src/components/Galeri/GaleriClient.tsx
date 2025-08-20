@@ -7,7 +7,6 @@ import GaleriCard from '@/components/Galeri/GaleriCard'
 import ImageModal from '@/components/Galeri/ImageModal'
 import Pagination from '@/components/Berita/Pagination'
 import { Images } from 'lucide-react'
-import { generateAltText } from '@/lib/imageAlt'
 
 interface SelectedImage {
   id: string
