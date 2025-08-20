@@ -20,7 +20,6 @@ import {
   MessageCircle
 } from 'lucide-react'
 import EditorJSRenderer from '@/components/EditorJSRenderer'
-import { generateAltText } from '@/lib/imageAlt'
 
 interface ProdukDetailClientProps {
   slug: string
@@ -122,13 +121,8 @@ export default function ProdukDetailClient({ slug }: ProdukDetailClientProps) {
     return null
   }
 
-  // Generate context-aware alt text
-  const imageAlt = generateAltText({
-    type: 'produk',
-    title: produk.judul,
-    description: produk.deskripsi,
-    umkmName: produk.nama_umkm
-  })
+  // Manual alt text generation
+  const imageAlt = `Produk ${produk.judul} dari ${produk.nama_umkm}, Desa Tonrong Rijang`
 
   return (
     <div className="min-h-screen bg-gray-50">
