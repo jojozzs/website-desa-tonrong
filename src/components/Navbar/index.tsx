@@ -14,7 +14,7 @@ const navigation = [
     subMenu: [
       { name: 'Sejarah Desa', href: '/profil/sejarah' },
       { name: 'Letak Geografis', href: '/profil/geografis' },
-      { name: 'Visi & Misi', href: '/profil/visi-misi' },
+      { name: 'Visi & Misi', href: '/profil/visimisi' },
       { name: 'Struktur Pemerintahan', href: '/profil/struktur' },
       { name: 'Data Penduduk', href: '/profil/data-penduduk' },
     ]
@@ -91,7 +91,7 @@ export default function Navbar() {
               <span className="text-white font-bold text-xl">DT</span>
             </div>
             <div>
-              <h1 className=" font-semibold text-text-primary text-2xl">Desa Tonrong</h1>
+              <h1 className=" font-semibold text-text-primary text-2xl">Desa Tonrong Rijang</h1>
               <p className="text-text-muted hidden sm:block text-md">Sistem Informasi Desa</p>
             </div>
           </Link>

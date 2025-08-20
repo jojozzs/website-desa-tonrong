@@ -31,15 +31,12 @@ export default function SejarahDesa() {
             <h1 className="text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
               {mainData.judul}
             </h1>
-            <p className="text-xl text-gray-200 leading-relaxed">
-              {mainData.deskripsi}
-            </p>
           </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="bg-white rounded-2xl shadow-lg p-8">
+      <div className="bg-white rounded-2xl shadow-lg p-8 min-h-80">
         <div className="space-y-6">
           <h2 className="text-2xl lg:text-3xl font-bold text-gray-800">
             {mainData.judul}

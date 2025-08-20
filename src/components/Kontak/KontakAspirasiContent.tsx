@@ -61,24 +61,55 @@ const KontakAspirasiContent: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen">
-            {/* Hero Section - Clean & Simple */}
-            <div className="bg-white shadow-sm border-b" style={{ borderColor: 'var(--border-light)' }}>
-                <div className="max-w-7xl mx-auto px-6 md:px-20 lg:px-40 py-8 lg:py-12">
-                    <div className="text-center">
-                        <h1 className="text-3xl lg:text-4xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
-                            Kontak &{' '}
-                            <span style={{ color: 'var(--primary-orange)' }}>Aspirasi</span>
+        <div className="min-h-screen bg-gray-50">
+            {/* Main Content */}
+            <div className=" mx-auto px-6 md:px-20 lg:px-40 py-8 lg:py-12">
+                
+                {/* Header */}
+                <div className="relative bg-gradient-to-br from-green-50 via-white to-green-50 rounded-2xl p-8 mb-8 overflow-hidden lg:min-h-100">
+                    {/* Background Pattern */}
+                    <div className="absolute inset-0 opacity-5">
+                        <div className="absolute top-4 left-4 w-16 h-16 border-2 border-green-400 rounded-full"></div>
+                        <div className="absolute top-8 right-8 w-8 h-8 bg-green-300 rounded-full"></div>
+                        <div className="absolute bottom-6 left-12 w-12 h-12 border border-green-300 rotate-45"></div>
+                        <div className="absolute bottom-4 right-16 w-6 h-6 bg-green-400 rounded-full"></div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="relative text-center max-w-4xl mx-auto">
+                        {/* Icon and Badge */}
+                        <div className="flex justify-center mb-4">
+                            <div className="relative">
+                                <div className="bg-gradient-to-r from-green-500 to-green-600 p-4 rounded-2xl shadow-lg">
+                                    <MessageCircle className="w-8 h-8 text-white" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Title */}
+                        <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-gray-800 via-gray-900 to-gray-800 bg-clip-text text-transparent mb-4">
+                            Kontak & Aspirasi
                         </h1>
-                        <p className="text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto">
-                            Hubungi kami atau sampaikan aspirasi untuk kemajuan Desa Tonrong Rijang
+
+                        {/* Subtitle */}
+                        <p className="text-gray-600 text-lg lg:text-xl mb-6 max-w-2xl mx-auto leading-relaxed">
+                            Hubungi kami atau sampaikan aspirasi untuk kemajuan
+                            <br/>
+                            <span className="font-semibold text-green-700"> Desa Tonrong Rijang</span>
                         </p>
+
+                        {/* Decorative Line */}
+                        <div className="flex items-center justify-center space-x-4">
+                            <div className="h-px bg-gradient-to-r from-transparent via-green-300 to-transparent flex-1 max-w-32"></div>
+                            <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                            <div className="w-1 h-1 bg-green-300 rounded-full"></div>
+                            <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                            <div className="h-px bg-gradient-to-r from-transparent via-green-300 to-transparent flex-1 max-w-32"></div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Main Content */}
-            <div className="max-w-7xl mx-auto px-6 md:px-20 lg:px-40 py-8 lg:py-12">
+                {/* Content Grid */}
                 <div className="grid lg:grid-cols-3 gap-6 lg:gap-4">
                     {/* LEFT SIDE */}
                     <div className="lg:col-span-1">

@@ -1,19 +1,23 @@
-import Footer from '@/components/Footer';
-import Navbar from '@/components/Navbar';
-import React from 'react';
+// app/(pages)/kontak-aspirasi/layout.tsx
+import { Metadata } from 'next'
+import { generateKontakMetadata } from '@/lib/seo'
+import Footer from '@/components/Footer'
+import Navbar from '@/components/Navbar'
 
-export default function KontakAspirasiLayout({
-    children,
-}: {
-    children: React.ReactNode;
-}) {
-    return (
-        <>
-            <Navbar/>
-            <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-gray-light)' }}>
-                {children}
-            </div>
-            <Footer />
-        </>
-    );
+interface KontakAspirasiLayoutProps {
+  children: React.ReactNode
+}
+
+export const metadata: Metadata = generateKontakMetadata()
+
+export default function KontakAspirasiLayout({ children }: KontakAspirasiLayoutProps) {
+  return (
+    <>
+      <Navbar />
+      <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-gray-light)' }}>
+        {children}
+      </div>
+      <Footer />
+    </>
+  )
 }
