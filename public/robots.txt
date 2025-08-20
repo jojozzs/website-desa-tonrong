@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+# private
+Disallow: /login
+Disallow: /forget-password
+Disallow: /reset-password
+Disallow: /admin/
+Disallow: /api/
+Disallow: /search
+
+Sitemap: https://desa-tonrong-rijang.vercel.app/sitemap.xml
