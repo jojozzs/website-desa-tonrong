@@ -3,14 +3,12 @@
 
 import { useBeritaBySlug, useBeritaData } from '@/hooks/useBeritaData'
 import { LoadingState, ErrorState } from '@/components/Berita/Shared'
-import BeritaCard from '@/components/Berita/BeritaCard'
 import Breadcrumb from '@/components/Berita/Breadcrumb'
 import EditorJSRenderer from '@/components/EditorJSRenderer'
 import Link from 'next/link'
 import { BeritaPengumumanKategoriEnum } from '@/lib/enums'
 import Image from 'next/image'
 import { ArrowLeft } from 'lucide-react'
-import { generateAltText } from '@/lib/imageAlt'
 
 interface BeritaDetailClientProps {
   kategori: BeritaPengumumanKategoriEnum
@@ -83,14 +81,10 @@ export default function BeritaDetailClient({ kategori, slug }: BeritaDetailClien
     .filter(article => article.id !== berita.id)
     .slice(0, 3)
 
-  // Generate context-aware alt text
-  const imageAlt = generateAltText({
-    type: isBerita ? 'berita' : 'pengumuman',
-    title: berita.judul,
-    category: berita.kategori,
-    description: berita.deskripsi,
-    date: berita.tanggal
-  })
+  // Manual alt text generation
+  const imageAlt = isBerita 
+    ? `Foto berita: ${berita.judul}, Desa Tonrong Rijang`
+    : `Ilustrasi pengumuman: ${berita.judul}, Desa Tonrong Rijang`
 
   return (
     <>
@@ -114,7 +108,7 @@ export default function BeritaDetailClient({ kategori, slug }: BeritaDetailClien
           <div className="mx-auto">
             
             {/* Breadcrumb */}
-            <div className="container mx-auto px-6 md:px-8 lg:px-20 xl:px-40 py-4 pt-8">
+            <div className="container mx-auto px-6 md:px-8 lg:px-20 xl:px-40 py-4">
               <Breadcrumb
                 items={[
                   { label: "Beranda", href: "/" },
@@ -148,6 +142,7 @@ export default function BeritaDetailClient({ kategori, slug }: BeritaDetailClien
                         ? 'bg-green-100 text-green-800' 
                         : 'bg-orange-100 text-orange-800'
                     }`}>
+                      <span className="mr-2">{isBerita ? '📰' : '📢'}</span>
                       {isBerita ? 'Berita Desa' : 'Pengumuman Resmi'}
                     </div>
 
@@ -226,40 +221,44 @@ export default function BeritaDetailClient({ kategori, slug }: BeritaDetailClien
                   {filteredRelated.length > 0 && (
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                       <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                        <span className="mr-2">{isBerita ? '📰' : '📢'}</span>
                         {isBerita ? 'Berita Lainnya' : 'Pengumuman Lainnya'}
                       </h3>
                       <div className="space-y-4">
-                        {filteredRelated.map((article) => (
-                          <Link 
-                            key={article.id} 
-                            href={`/berita/${article.kategori}/${article.slug}`}
-                            className="block group"
-                          >
-                            <div className="flex space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                              <div className="relative w-16 h-16 flex-shrink-0">
-                                <Image
-                                  src={article.gambar_url}
-                                  alt={generateAltText({
-                                    type: article.kategori === BeritaPengumumanKategoriEnum.BERITA ? 'berita' : 'pengumuman',
-                                    title: article.judul,
-                                    category: article.kategori
-                                  })}
-                                  fill
-                                  className="object-cover rounded-lg"
-                                  sizes="64px"
-                                />
+                        {filteredRelated.map((article) => {
+                          // Manual alt text untuk related articles
+                          const relatedImageAlt = article.kategori === BeritaPengumumanKategoriEnum.BERITA 
+                            ? `Foto berita: ${article.judul}, Desa Tonrong Rijang`
+                            : `Ilustrasi pengumuman: ${article.judul}, Desa Tonrong Rijang`
+                          
+                          return (
+                            <Link 
+                              key={article.id} 
+                              href={`/berita/${article.kategori}/${article.slug}`}
+                              className="block group"
+                            >
+                              <div className="flex space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                                <div className="relative w-16 h-16 flex-shrink-0">
+                                  <Image
+                                    src={article.gambar_url}
+                                    alt={relatedImageAlt}
+                                    fill
+                                    className="object-cover rounded-lg"
+                                    sizes="64px"
+                                  />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="text-sm font-medium text-gray-800 group-hover:text-green-600 transition-colors line-clamp-2 mb-1">
+                                    {article.judul}
+                                  </h4>
+                                  <p className="text-xs text-gray-500">
+                                    {formatDate(typeof article.tanggal === 'string' ? new Date(article.tanggal) : article.tanggal)}
+                                  </p>
+                                </div>
                               </div>
-                              <div className="flex-1 min-w-0">
-                                <h4 className="text-sm font-medium text-gray-800 group-hover:text-green-600 transition-colors line-clamp-2 mb-1">
-                                  {article.judul}
-                                </h4>
-                                <p className="text-xs text-gray-500">
-                                  {formatDate(typeof article.tanggal === 'string' ? new Date(article.tanggal) : article.tanggal)}
-                                </p>
-                              </div>
-                            </div>
-                          </Link>
-                        ))}
+                            </Link>
+                          )
+                        })}
                       </div>
                       <div className="mt-4 pt-4 border-t border-gray-100">
                         <Link 
@@ -295,14 +294,14 @@ export default function BeritaDetailClient({ kategori, slug }: BeritaDetailClien
                       href={isBerita ? '/berita/pengumuman' : '/berita/berita'}
                       className="text-gray-600 hover:text-gray-800 font-medium"
                     >
-                      {isBerita ? 'Lihat Pengumuman' : 'Lihat Berita'}
+                      {isBerita ? '📢 Lihat Pengumuman' : '📰 Lihat Berita'}
                     </Link>
                     <span className="text-gray-300">|</span>
                     <Link 
                       href="/berita"
                       className="text-gray-600 hover:text-gray-800 font-medium"
                     >
-                        Semua Berita
+                      📚 Semua Berita
                     </Link>
                   </div>
                 </div>
