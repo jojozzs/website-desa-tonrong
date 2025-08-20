@@ -9,4 +9,4 @@ Disallow: /admin/
 Disallow: /api/
 Disallow: /search
 
-Sitemap: https://desa-tonrong.vercel.app/sitemap.xml
+Sitemap: https://desa-tonrong-rijang.vercel.app/sitemap.xml
