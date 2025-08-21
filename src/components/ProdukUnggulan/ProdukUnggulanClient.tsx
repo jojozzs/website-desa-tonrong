@@ -184,7 +184,6 @@ export default function ProdukUnggulanClient() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="w-full flex justify-center">
                 <Pagination
                   currentPage={currentPage}
                   totalPages={totalPages}
@@ -193,7 +192,6 @@ export default function ProdukUnggulanClient() {
                   onPageChange={handlePageChange}
                   showInfo={true}
                 />
-              </div>
             )}
           </>
         )}
