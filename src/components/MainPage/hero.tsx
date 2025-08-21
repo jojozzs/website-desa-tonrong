@@ -3,17 +3,115 @@
 import Link from 'next/link'
 import { ArrowRightIcon } from '@heroicons/react/24/outline'
 import { useEffect, useState } from 'react'
+import { useProfilData } from '@/hooks/useProfilData'
+import { useProdukData } from '@/hooks/useProdukData'
+import { ProfilKategoriEnum } from '@/lib/enums'
 
 export default function HeroBeranda() {
   const [isVisible, setIsVisible] = useState(false)
   const [currentTextIndex, setCurrentTextIndex] = useState(0)
   const [fade, setFade] = useState(true)
+  
+  // Counter states
+  const [pendudukCounter, setPendudukCounter] = useState(0)
+  const [produkCounter, setProdukCounter] = useState(0)
+  const [idmCounter, setIdmCounter] = useState(0)
+  const [showRealData, setShowRealData] = useState(false)
+
+  // Fetch data penduduk dan produk UMKM
+  const { data: pendudukData, loading: pendudukLoading } = useProfilData(ProfilKategoriEnum.JUMLAH_PENDUDUK_DAN_DATA_UMUM)
+  const { data: produkData, loading: produkLoading } = useProdukData()
 
   const animatedTexts = [
     "Desa Tonrong Rijang",
-    "Kabupaten Sidrap",
+    "Kabupaten Sidrap", 
     "Kecamatan Baranti"
   ]
+
+  // Ambil data dari API
+  const getJumlahPenduduk = () => {
+    if (pendudukData && pendudukData.length > 0) {
+      const mainData = pendudukData[0]
+      if (mainData.data_tambahan?.demografi?.total_penduduk) {
+        return mainData.data_tambahan.demografi.total_penduduk
+      }
+    }
+    return 1458
+  }
+
+  const getJumlahProdukUMKM = () => {
+    if (produkData && Array.isArray(produkData)) {
+      return produkData.length
+    }
+    return 25
+  }
+
+  const getIDMData = () => {
+    if (pendudukData && pendudukData.length > 0) {
+      const mainData = pendudukData[0]
+      if (mainData.data_tambahan?.idm) {
+        return {
+          nilai: mainData.data_tambahan.idm.nilai || '0,7206',
+          status: mainData.data_tambahan.idm.status || 'Desa Maju'
+        }
+      }
+    }
+    return {
+      nilai: '0,7206',
+      status: 'Desa Maju'
+    }
+  }
+
+  const pendudukCount = getJumlahPenduduk()
+  const produkCount = getJumlahProdukUMKM()
+  const idmData = getIDMData()
+  const idmValue = parseFloat(idmData.nilai.replace(',', '.'))
+
+  // Counter up animation when data is loaded
+  useEffect(() => {
+    if (!pendudukLoading && !produkLoading && !showRealData) {
+      // Start counter animation
+      const duration = 2000 // 2 seconds
+      const steps = 60 // 60 fps
+      const stepTime = duration / steps
+      
+      let step = 0
+      
+      const timer = setInterval(() => {
+        step++
+        const progress = step / steps
+        const easeProgress = 1 - Math.pow(1 - progress, 3) // easeOutCubic
+        
+        // Animate penduduk counter
+        setPendudukCounter(Math.floor(pendudukCount * easeProgress))
+        
+        // Animate produk counter
+        setProdukCounter(Math.floor(produkCount * easeProgress))
+        
+        // Animate IDM counter
+        setIdmCounter(idmValue * easeProgress)
+        
+        if (step >= steps) {
+          clearInterval(timer)
+          // Show real data after animation
+          setTimeout(() => {
+            setShowRealData(true)
+          }, 300)
+        }
+      }, stepTime)
+
+      return () => clearInterval(timer)
+    }
+  }, [pendudukLoading, produkLoading, pendudukCount, produkCount, idmValue, showRealData])
+
+  // Format numbers
+  const formatNumber = (num: number) => {
+    return num.toLocaleString('id-ID')
+  }
+
+  const formatIDM = (num: number) => {
+    return num.toFixed(4).replace('.', ',')
+  }
 
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 100)
@@ -36,15 +134,15 @@ export default function HeroBeranda() {
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <img 
-          src="/landscape.jpg" 
-          alt="Pemandangan Desa Tonrong"
+          src="/Beranda2.jpg" 
+          alt="Pemandangan Desa Tonrong Rijang, Kecamatan Baranti, Kabupaten Sidenreng Rappang"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-black/50"></div>
+        <div className="absolute inset-0 bg-black/10"></div>
       </div>
 
       {/* Content - Centered */}
-      <div className="relative z-10 text-center px-6 sm:px-6 lg:px-10 py-4 w-full max-w-5xl mx-auto">
+      <div className="relative z-10 text-center px-6 sm:px-6 lg:px-10 py-4 w-full max-w-6xl mx-auto">
 
         {/* Selamat Datang */}
         <div className={`mb-4 transform transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
@@ -70,31 +168,73 @@ export default function HeroBeranda() {
 
         {/* Deskripsi */}
         <div className={`min-h-10 mb-14 transform transition-all duration-1000 delay-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
-          <p className="text-base sm:text-lg lg:text-2xl text-gray-200 leading-relaxed max-w-3xl mx-auto animate-fade-in" style={{ animationDelay: '1.2s' }}>
-            Website resmi Desa Tonrong, Kabupaten Sidrap, Kecamatan Baranti
+          <p className="text-base sm:text-lg lg:text-2xl text-gray-200 leading-relaxed max-w-4xl mx-auto animate-fade-in" style={{ animationDelay: '1.2s' }}>
+            Website resmi Desa Tonrong Rijang, Kecamatan Baranti, Kabupaten Sidrap
           </p>
         </div>
 
-        {/* Statistik */}
+        {/* Statistik dengan tinggi yang sama */}
         <div className={`mb-14 transform transition-all duration-1000 delay-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
-          <div className="grid grid-cols-3 sm:gap-4 max-w-2xl mx-auto">
-            <div className="text-center group animate-scale-in" style={{ animationDelay: '1.4s' }}>
-              <div className="text-lg sm:text-lg lg:text-4xl font-bold text-white mb-2 group-hover:scale-110 transition-transform duration-300">
-                2,547
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 max-w-4xl mx-auto">
+            
+            {/* Jumlah Penduduk */}
+            <div className="text-center group h-20 sm:h-24 lg:h-28 flex flex-col justify-center" style={{ animationDelay: '1.4s' }}>
+              <div className="text-lg sm:text-xl lg:text-4xl font-bold text-white mb-2 group-hover:scale-110 transition-transform duration-300 min-h-[1.5em] flex items-center justify-center">
+                {pendudukLoading ? (
+                  <div className="animate-pulse bg-white/20 rounded h-6 sm:h-8 lg:h-12 w-16 sm:w-20 lg:w-24"></div>
+                ) : showRealData ? (
+                  formatNumber(pendudukCount)
+                ) : (
+                  formatNumber(pendudukCounter)
+                )}
               </div>
-              <div className="text-gray-300 font-bold text-md sm:text-sm lg:text-base">Jiwa Penduduk</div>
+              <div className="text-gray-300 font-bold text-xs sm:text-sm lg:text-base">Jiwa Penduduk</div>
             </div>
-            <div className="text-center group animate-scale-in" style={{ animationDelay: '1.6s' }}>
-              <div className="text-lg sm:text-lg lg:text-4xl font-bold text-white mb-2 group-hover:scale-110 transition-transform duration-300">
-                8
+
+            {/* Produk UMKM */}
+            <div className="text-center group h-20 sm:h-24 lg:h-28 flex flex-col justify-center" style={{ animationDelay: '1.6s' }}>
+              <div className="text-lg sm:text-xl lg:text-4xl font-bold text-white mb-2 group-hover:scale-110 transition-transform duration-300 min-h-[1.5em] flex items-center justify-center">
+                {produkLoading ? (
+                  <div className="animate-pulse bg-white/20 rounded h-6 sm:h-8 lg:h-12 w-12 sm:w-16 lg:w-20"></div>
+                ) : showRealData ? (
+                  produkCount
+                ) : (
+                  produkCounter
+                )}
               </div>
-              <div className="text-gray-300 font-bold text-md sm:text-sm lg:text-base">Dusun</div>
+              <div className="text-gray-300 font-bold text-xs sm:text-sm lg:text-base">Produk UMKM</div>
             </div>
-            <div className="text-center group animate-scale-in" style={{ animationDelay: '1.8s' }}>
-              <div className="text-lg sm:text-lg lg:text-4xl font-bold text-white mb-2 group-hover:scale-110 transition-transform duration-300">
-                25
+
+            {/* Nilai IDM */}
+            <div className="text-center group h-20 sm:h-24 lg:h-28 flex flex-col justify-center" style={{ animationDelay: '1.8s' }}>
+              <div className="text-lg sm:text-xl lg:text-4xl font-bold text-white mb-2 group-hover:scale-110 transition-transform duration-300 min-h-[1.5em] flex items-center justify-center">
+                {pendudukLoading ? (
+                  <div className="animate-pulse bg-white/20 rounded h-6 sm:h-8 lg:h-12 w-16 sm:w-20 lg:w-24"></div>
+                ) : showRealData ? (
+                  idmData.nilai
+                ) : (
+                  formatIDM(idmCounter)
+                )}
               </div>
-              <div className="text-gray-300 font-bold text-md sm:text-sm lg:text-base">UMKM Aktif</div>
+              <div className="text-gray-300 font-bold text-xs sm:text-sm lg:text-base">Nilai IDM</div>
+            </div>
+
+            {/* Status IDM */}
+            <div className="text-center group h-20 sm:h-24 lg:h-28 flex flex-col justify-center" style={{ animationDelay: '2.0s' }}>
+              <div className="text-lg sm:text-xl lg:text-4xl font-bold text-white mb-2 group-hover:scale-110 transition-transform duration-300 min-h-[1.5em] flex items-center justify-center">
+                {pendudukLoading ? (
+                  <div className="animate-pulse bg-white/20 rounded h-6 sm:h-8 lg:h-12 w-20 sm:w-24 lg:w-32"></div>
+                ) : (
+                  <div 
+                    className={`px-2 py-1 rounded-lg transition-opacity duration-500 ${
+                      showRealData ? 'opacity-100' : 'opacity-70'
+                    }`}
+                  >
+                    {idmData.status}
+                  </div>
+                )}
+              </div>
+              <div className="text-gray-300 font-bold text-xs sm:text-sm lg:text-base">Status IDM</div>
             </div>
           </div>
         </div>
@@ -108,7 +248,7 @@ export default function HeroBeranda() {
             bg-primary-orange text-white font-semibold rounded-xl 
             hover:bg-button-orange-hover hover:shadow-xl hover:scale-105 
             transition-all duration-300"
-            style={{ animationDelay: '2s' }}
+            style={{ animationDelay: '2.2s' }}
           >
             <span>Jelajahi Profil Desa</span>
             <ArrowRightIcon className="ml-2 h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 group-hover:translate-x-1 transition-transform duration-200" />
@@ -121,7 +261,7 @@ export default function HeroBeranda() {
             border-2 border-white text-white font-semibold rounded-xl 
             hover:bg-white hover:text-text-primary hover:scale-105 
             transition-all duration-300"
-            style={{ animationDelay: '2.2s' }}
+            style={{ animationDelay: '2.4s' }}
           >
             Berita Terbaru
           </Link>
