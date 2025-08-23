@@ -100,6 +100,9 @@ export interface ProfilWithContent extends Profil {
 		}>
 
 		idm?: {
+            iks?: number  // Indeks Ketahanan Sosial (0-1)
+            ike?: number  // Indeks Ketahanan Ekonomi (0-1) 
+            ikl?: number  // Indeks Ketahanan Lingkungan (0-1)
 			nilai: string
 			status: string
 			deskripsi?: string
