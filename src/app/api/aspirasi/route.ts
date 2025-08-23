@@ -10,7 +10,8 @@ type StatusType = "pending" | "done";
 interface AspirasiDoc {
     judul: string;
     nama: string;
-    email: string;
+    email?: string;
+    nomor_telepon?: string;
     isi: string;
     status: StatusType;
     admin_id?: AdminDocumentReference;
@@ -99,30 +100,42 @@ export async function POST(request: NextRequest) {
         const judul = String(form.get("judul") || "").trim();
         const nama = String(form.get("nama") || "").trim();
         const email = String(form.get("email") || "").trim();
+        const nomor_telepon = String(form.get("nomor_telepon") || "").trim();
         const isi = String(form.get("isi") || "").trim();
 
-        if (!judul || !nama || !email || !isi) {
-            return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
-        }
-        if (!isEmail(email)) {
-            return NextResponse.json({ success: false, error: "Invalid email" }, { status: 400 });
+        // Basic server-side validation (safety net)
+        if (!judul || !nama || !isi) {
+            return NextResponse.json({ 
+                success: false, 
+                error: "Data tidak lengkap" 
+            }, { status: 400 });
         }
 
         const payload: AspirasiDoc = {
             judul,
             nama,
-            email,
             isi,
             status: "pending",
             created_at: FieldValue.serverTimestamp() as unknown as AdminTimestamp,
             updated_at: FieldValue.serverTimestamp() as unknown as AdminTimestamp,
         };
 
+        // Add optional fields if provided
+        if (email) payload.email = email;
+        if (nomor_telepon) payload.nomor_telepon = nomor_telepon;
+
         const docRef = await adminDb.collection("aspirasi").add(payload);
-        return NextResponse.json({ success: true, data: { id: docRef.id } }, { status: 201 });
+        return NextResponse.json({ 
+            success: true, 
+            data: { id: docRef.id },
+            message: "Aspirasi Anda berhasil dikirim! Tim kami akan menindaklanjuti dalam 3-7 hari kerja."
+        }, { status: 201 });
     } catch (e) {
         console.error("POST aspirasi error:", e);
-        return NextResponse.json({ success: false, error: emsg(e) || "Failed to submit aspirasi" }, { status: 500 });
+        return NextResponse.json({ 
+            success: false, 
+            error: emsg(e) || "Gagal mengirim aspirasi. Silakan coba lagi." 
+        }, { status: 500 });
     }
 }
 
@@ -138,11 +151,13 @@ export async function PATCH(request: NextRequest) {
         const judul = (form.get("judul") as string) ?? null;
         const nama = (form.get("nama") as string) ?? null;
         const email = (form.get("email") as string) ?? null;
+        const nomor_telepon = (form.get("nomor_telepon") as string) ?? null;
         const isi = (form.get("isi") as string) ?? null;
 
         const update: Partial<AspirasiDoc> & { updated_at: AdminTimestamp } = {
             updated_at: FieldValue.serverTimestamp() as unknown as AdminTimestamp,
         };
+        
         if (statusVal !== null) {
             if (!isStatus(statusVal)) {
                 return NextResponse.json({ success: false, error: "Invalid status" }, { status: 400 });
@@ -153,8 +168,11 @@ export async function PATCH(request: NextRequest) {
         if (nama !== null) update.nama = nama.trim();
         if (email !== null) {
             const em = email.trim();
-            if (!isEmail(em)) return NextResponse.json({ success: false, error: "Invalid email" }, { status: 400 });
-            update.email = em;
+            if (em && !isEmail(em)) return NextResponse.json({ success: false, error: "Invalid email" }, { status: 400 });
+            update.email = em || undefined;
+        }
+        if (nomor_telepon !== null) {
+            update.nomor_telepon = nomor_telepon.trim() || undefined;
         }
         if (isi !== null) update.isi = isi.trim();
         update.admin_id = adminDb.doc(`admin/${uid}`);
