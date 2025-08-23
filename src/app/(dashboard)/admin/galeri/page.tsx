@@ -41,7 +41,8 @@ export default function GaleriListPage(): JSX.Element {
         setLoading(true);
         setError("");
         try {
-            const r = await fetch("/api/galeri", { cache: "no-store" });
+            const timestamp = new Date().getTime();
+            const r = await fetch(`/api/galeri?t=${timestamp}`, { cache: "no-store" });
             const j: ApiListResponse = await r.json();
             if (!j.success) {
                 setError("Gagal memuat galeri.");
@@ -59,6 +60,17 @@ export default function GaleriListPage(): JSX.Element {
 
     useEffect(() => {
         void load();
+    }, [load]);
+
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (!document.hidden) {
+                void load();
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
     }, [load]);
 
     async function handleDelete(id: string): Promise<void> {
@@ -108,6 +120,17 @@ export default function GaleriListPage(): JSX.Element {
             month: "short",
             year: "numeric"
         });
+    };
+
+    const getLastModifiedDate = (row: GaleriRow) => {
+        const updatedAt = row.updated_at;
+        const createdAt = row.created_at;
+        
+        if (updatedAt && updatedAt !== createdAt) {
+            return updatedAt;
+        }
+        
+        return createdAt;
     };
 
     const formatFileSize = (bytes: number) => {
@@ -426,14 +449,16 @@ export default function GaleriListPage(): JSX.Element {
                                                 </p>
                                                 
                                                 {/* Meta Info */}
-                                                <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm text-gray-500">
+                                                <div className="grid grid-cols-2 gap-y-2 gap-x-12 text-xs sm:text-sm text-gray-500">
                                                     <div className="flex items-center gap-1">
                                                         <HardDrive className="h-3 w-3 sm:h-4 sm:w-4" />
                                                         <span>{formatFileSize(row.gambar_size)}</span>
                                                     </div>
                                                     <div className="flex items-center gap-1">
                                                         <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
-                                                        <span>{formatDate(row.created_at)}</span>
+                                                        <span title={row.updated_at && row.updated_at !== row.created_at ? "Terakhir diperbarui" : "Dibuat"}>
+                                                            {formatDate(getLastModifiedDate(row))}
+                                                        </span>
                                                     </div>
                                                     {row.gambar_width && row.gambar_height && (
                                                         <div className="flex items-center gap-1 col-span-1">
