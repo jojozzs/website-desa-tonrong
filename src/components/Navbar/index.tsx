@@ -13,9 +13,9 @@ const navigation = [
     href: '#', // Tidak redirect, hanya untuk dropdown
     subMenu: [
       { name: 'Sejarah Desa', href: '/profil/sejarah' },
-      { name: 'Letak Geografis', href: '/profil/geografis' },
       { name: 'Visi & Misi', href: '/profil/visimisi' },
-      { name: 'Struktur Pemerintahan', href: '/profil/struktur' },
+      { name: 'Letak Geografis', href: '/profil/letak-geografis' },
+      { name: 'Struktur Pemerintahan', href: '/profil/struktur-pemerintahan' },
       { name: 'Data Penduduk', href: '/profil/data-penduduk' },
     ]
   },
