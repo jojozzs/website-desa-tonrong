@@ -71,8 +71,6 @@ export default function KategoriLayout({ children, params }: KategoriLayoutProps
     notFound()
   }
   
-  const categoryInfo = getCategoryInfo(kategori)
-
   return (
     <>
       <Navbar />

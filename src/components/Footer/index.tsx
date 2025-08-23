@@ -13,31 +13,47 @@ export default function Footer() {
 
   return (
     <footer className="bg-text-primary text-white">
-      <div className="container mx-auto px-6 sm:px-8 lg:px-12 pb-4 pt-12 max-w-7xl">
+      <div className="container mx-auto px-6 sm:px-8 lg:px-12 pb-4 pt-12 max-w-8xl">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           
           {/* Section 1: Brand & Desa Info */}
           <div className="lg:col-span-1">
-            <h3 className="text-lg font-semibold text-white mb-4">Tentang Desa</h3>
-            
+            <h3 className="text-2xl font-semibold text-white mb-4">Tentang Desa</h3>
+
             <div className="flex items-center space-x-4 mb-6">
-              <div>
                 <h2 className="text-3xl font-bold text-white leading-tight">
                   Desa<br />
                   Tonrong Rijang
                 </h2>
-              </div>
             </div>
-            
-            <p className="text-gray-300 leading-relaxed mb-4">
-              Portal resmi Desa Tonrong untuk transparansi informasi dan pelayanan masyarakat.
-            </p>
-            
-            <div className="text-sm text-gray-400">
-              <p className="font-medium text-primary-orange mb-1">Pemerintah Desa Tonrong</p>
-              <p>Kecamatan Baranti, Kabupaten Sidenreng Rappang</p>
-              <p>Provinsi Sulawesi Selatan</p>
+
+            {/* Redesigned Logo Section */}
+            <div className="grid grid-cols-3 gap-4 pt-2 pb-6">
+                <div className='flex items-center justify-center rounded-2xl transition-all duration-300 group'>
+                    <img
+                        src="logokkn.png" 
+                        alt="Logo KKN Universitas Hasanuddin"
+                        className="w-18 h-18 object-contain group-hover:scale-110 transition-transform duration-300"
+                    />
+                </div>
+
+                <div className='flex items-center justify-center rounded-2xl transition-all duration-300 group'>
+                    <img
+                        src="logokkntonrongrijang.png" 
+                        alt="Logo KKN Desa Tonrong Rijang Universitas Hasanuddin"
+                        className="w-18 h-18 object-contain group-hover:scale-110 transition-transform duration-300"
+                    />
+                </div>
+
+                <div className='flex items-center justify-center rounded-2xl transition-all duration-300 group'>
+                    <img
+                        src="kabupatensidrap.png" 
+                        alt="Logo Kabupaten Sidrap"
+                        className="w-18 h-18 object-contain group-hover:scale-110 transition-transform duration-300"
+                    />
+                </div>
             </div>
+
           </div>
 
           {/* Section 2: Alamat */}
@@ -83,10 +99,8 @@ export default function Footer() {
                 <p className="font-bold mb-2 ">Nomor Telepon:</p>
                 <div className="space-y-2">
                   <p>
-                    <a href="tel:+6285299772547" className="hover:text-primary-green transition-colors flex items-center text-sm">
                       <span className="mr-2">📱</span>
                       085299772547
-                    </a>
                   </p>
                 </div>
               </div>
@@ -96,10 +110,9 @@ export default function Footer() {
                   Email:
                 </p>
                 <div className="space-y-1">
-                  <p>
-                    <a href="mailto:desatonrongrijang@gmail.com" className="hover:text-primary-orange transition-colors text-sm">
-                       desatonrongrijang@gmail.com
-                    </a>
+                  <p className='flex items-center'>
+                    <EnvelopeIcon className="w-5 h-5 text-primary-green mr-2" />
+                    desatonrongrijang@gmail.com
                   </p>
                 </div>
               </div>
@@ -157,11 +170,11 @@ export default function Footer() {
         <div className="container mx-auto px-6 sm:px-8 lg:px-12 py-6">
           <div className="flex flex-col md:flex-row justify-center items-center text-center md:text-left">
             <p className="text-gray-400 text-sm mb-4 md:mb-0">
-              © {currentYear} Pemerintah Desa Tonrong. Semua hak dilindungi undang-undang.
+              © 2025 KKN Desa Tonrong Rijang Universitas Hasannuddin. Semua hak dilindungi undang-undang.
             </p>
           </div>
         </div>
       </div>
     </footer>
   )
-}   
+}

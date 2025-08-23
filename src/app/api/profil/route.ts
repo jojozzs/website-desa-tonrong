@@ -38,6 +38,25 @@ interface ProfilDocAdmin {
 const isProfilKategori = (v: string | null): v is ProfilKategoriEnum =>
     v !== null && (Object.values(ProfilKategoriEnum) as string[]).includes(v);
 
+// Fungsi untuk menghitung IDM dan menentukan status
+function calculateIDM(iks: number, ike: number, ikl: number) {
+    const idmValue = (iks + ike + ikl) / 3;
+    let status = '';
+    
+    if (idmValue < 0.4993) {
+        status = 'Tertinggal';
+    } else if (idmValue < 0.5989) {
+        status = 'Berkembang';
+    } else {
+        status = 'Maju';
+    }
+    
+    return {
+        nilai: idmValue.toFixed(4),
+        status
+    };
+}
+
 async function verifyAdmin(req: NextRequest): Promise<string> {
     const authHeader = req.headers.get("authorization") || "";
     const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
@@ -59,7 +78,6 @@ async function uploadToCloudinary(file: File): Promise<CloudinaryUploadResult> {
                 folder: process.env.CLOUDINARY_BASE_FOLDER
                     ? `${process.env.CLOUDINARY_BASE_FOLDER}/profil`
                     : "profil",
-                // transformation: [{ width: 1200, height: 800, crop: "fill" }],
                 transformation: [{ width: 1920, height: 1080, crop: 'fill' }]
             },
             (err, out) => (err ? reject(err) : resolve(out as unknown as CloudinaryUploadResult))
@@ -148,11 +166,32 @@ function validateDataTambahan(data: unknown, kategori: ProfilKategoriEnum): bool
                     typeof (item as Record<string, unknown>).jumlah === "number"
                 );
 
+            // Update IDM validation untuk include IKS, IKE, IKL
             const idmValid =
                 typeof idm === "object" &&
                 idm !== null &&
-                typeof (idm as Record<string, unknown>).nilai === "string" &&
-                typeof (idm as Record<string, unknown>).status === "string";
+                (() => {
+                    const idmObj = idm as Record<string, unknown>;
+                    
+                    // Untuk existing data (backward compatible)
+                    const existingDataValid = 
+                        typeof idmObj.nilai === "string" &&
+                        typeof idmObj.status === "string";
+                    
+                    // Untuk new data dengan 3 indeks
+                    const newDataValid = 
+                        typeof idmObj.iks === "number" &&
+                        typeof idmObj.ike === "number" &&
+                        typeof idmObj.ikl === "number" &&
+                        idmObj.iks >= 0 &&
+                        idmObj.iks <= 1 &&
+                        idmObj.ike >= 0 &&
+                        idmObj.ike <= 1 &&
+                        idmObj.ikl >= 0 &&
+                        idmObj.ikl <= 1;
+                    
+                    return existingDataValid || newDataValid;
+                })();
 
             return (
                 typeof demografi === "object" ||
@@ -206,7 +245,6 @@ export async function GET(request: NextRequest) {
         }
 
         if (isProfilKategori(kategoriParam)) {
-            // hanya kategori tertentu; TIDAK mengembalikan seluruh koleksi
             let q = adminDb.collection("profil").where("kategori", "==", kategoriParam);
             if (limitOne) q = q.limit(1);
             const snap = await q.get();
@@ -225,7 +263,6 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ success: true, data: list });
         }
 
-        // wajib salah satu: id atau kategori
         return NextResponse.json(
             { success: false, error: "Provide either 'id' or 'kategori' (enum) to fetch profil." },
             { status: 400 }
@@ -282,11 +319,23 @@ export async function POST(request: NextRequest) {
         };
 
         if (konten) payload.konten = konten;
+        
         if (data_tambahan) {
             try {
                 const parsed = JSON.parse(data_tambahan);
+                
+                // Auto-calculate IDM jika ada data IKS, IKE, IKL
+                if (parsed.idm && 
+                    typeof parsed.idm.iks === 'number' && 
+                    typeof parsed.idm.ike === 'number' && 
+                    typeof parsed.idm.ikl === 'number') {
+                    const calculatedIDM = calculateIDM(parsed.idm.iks, parsed.idm.ike, parsed.idm.ikl);
+                    parsed.idm.nilai = calculatedIDM.nilai;
+                    parsed.idm.status = calculatedIDM.status;
+                }
+                
                 if (!validateDataTambahan(parsed, kategori as ProfilKategoriEnum)) {
-                return NextResponse.json({ success: false, error: "Invalid data_tambahan structure" }, { status: 400 });
+                    return NextResponse.json({ success: false, error: "Invalid data_tambahan structure" }, { status: 400 });
                 }
                 payload.data_tambahan = parsed;
             } catch {
@@ -331,7 +380,6 @@ export async function PATCH(request: NextRequest) {
             if (!isProfilKategori(kategori)) {
                 return NextResponse.json({ success: false, error: "Invalid kategori" }, { status: 400 });
             }
-            // kalau ganti kategori, pastikan tidak ada doc lain dg kategori itu
             const snap = await adminDb
                 .collection("profil")
                 .where("kategori", "==", kategori)
@@ -357,9 +405,22 @@ export async function PATCH(request: NextRequest) {
         }
 
         if (konten !== null) updateData.konten = konten;
-            if (data_tambahan !== null) {
+        
+        if (data_tambahan !== null) {
             try {
-                updateData.data_tambahan = JSON.parse(data_tambahan);
+                const parsed = JSON.parse(data_tambahan);
+                
+                // Auto-calculate IDM jika ada data IKS, IKE, IKL
+                if (parsed.idm && 
+                    typeof parsed.idm.iks === 'number' && 
+                    typeof parsed.idm.ike === 'number' && 
+                    typeof parsed.idm.ikl === 'number') {
+                    const calculatedIDM = calculateIDM(parsed.idm.iks, parsed.idm.ike, parsed.idm.ikl);
+                    parsed.idm.nilai = calculatedIDM.nilai;
+                    parsed.idm.status = calculatedIDM.status;
+                }
+                
+                updateData.data_tambahan = parsed;
                 if (!validateDataTambahan(updateData.data_tambahan, kategori as ProfilKategoriEnum)) {
                     return NextResponse.json({ success: false, error: "Invalid data_tambahan structure" }, { status: 400 });
                 }
