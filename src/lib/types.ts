@@ -162,6 +162,7 @@ export interface AspirasiForm {
     judul: string;
     nama: string;
     email: string;
+    nomor_telepon: string;
     isi: string;
     status: 'pending' | 'done';
     created_at: Timestamp;
