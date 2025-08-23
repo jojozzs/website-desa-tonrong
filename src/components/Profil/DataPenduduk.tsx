@@ -145,19 +145,74 @@ export default function DataPenduduk() {
           {/* Status IDM */}
           {pendudukData?.idm && (
             <div>
-              <h3 className="text-xl font-bold text-gray-800 mb-6">Status Indeks Desa Membangun (IDM)</h3>
+              <h3 className="text-xl font-bold text-gray-800 mb-6">Indeks Desa Membangun (IDM)</h3>
+              
+              {/* 3 Indeks - Tampilkan hanya jika ada data */}
+              {(pendudukData.idm.iks !== undefined || pendudukData.idm.ike !== undefined || pendudukData.idm.ikl !== undefined) && (
+                <div className="grid md:grid-cols-3 gap-4 mb-6">
+                  <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-2xl p-6 border border-cyan-200 text-center">
+                    <div className="text-2xl font-bold text-cyan-600 mb-2">
+                      {pendudukData.idm.iks?.toFixed(4) || '0.0000'}
+                    </div>
+                    <div className="text-gray-700 font-medium">Indeks Ketahanan Sosial</div>
+                    <div className="text-gray-500 text-sm">(IKS)</div>
+                  </div>
+                  
+                  <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-2xl p-6 border border-emerald-200 text-center">
+                    <div className="text-2xl font-bold text-emerald-600 mb-2">
+                      {pendudukData.idm.ike?.toFixed(4) || '0.0000'}
+                    </div>
+                    <div className="text-gray-700 font-medium">Indeks Ketahanan Ekonomi</div>
+                    <div className="text-gray-500 text-sm">(IKE)</div>
+                  </div>
+                  
+                  <div className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-2xl p-6 border border-amber-200 text-center">
+                    <div className="text-2xl font-bold text-amber-600 mb-2">
+                      {pendudukData.idm.ikl?.toFixed(4) || '0.0000'}
+                    </div>
+                    <div className="text-gray-700 font-medium">Indeks Ketahanan Lingkungan</div>
+                    <div className="text-gray-500 text-sm">(IKL)</div>
+                  </div>
+                </div>
+              )}
+              
+              {/* IDM Result */}
               <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200">
                 <div className="text-center">
                   <div className="text-4xl font-bold text-blue-600 mb-2">
-                    {pendudukData.idm.nilai || '0,7206'}
+                    {pendudukData.idm.nilai || '0.0000'}
                   </div>
                   <div className="text-gray-700 font-medium mb-2">Nilai IDM</div>
-                  <div className="inline-block bg-green-100 text-green-800 px-4 py-2 rounded-full font-semibold">
-                    Status: {pendudukData.idm.status || 'Desa Maju'}
+                  
+                  {/* Tampilkan formula jika ada data 3 indeks */}
+                  {(pendudukData.idm.iks !== undefined || pendudukData.idm.ike !== undefined || pendudukData.idm.ikl !== undefined) && (
+                    <div className="text-sm text-gray-500 mb-3">
+                      (IKS + IKE + IKL) ÷ 3
+                    </div>
+                  )}
+                  
+                  <div className={`inline-block px-4 py-2 rounded-full font-semibold ${
+                    parseFloat(pendudukData.idm.nilai || '0') >= 0.5989 
+                      ? 'bg-green-100 text-green-800'
+                      : parseFloat(pendudukData.idm.nilai || '0') >= 0.4993
+                      ? 'bg-yellow-100 text-yellow-800' 
+                      : 'bg-red-100 text-red-800'
+                  }`}>
+                    Status: Desa {pendudukData.idm.status || 'Maju'}
                   </div>
-                  <div className="text-gray-500 mt-4">
-                    {pendudukData.idm.deskripsi || 'Desa Tonrong Rijang termasuk dalam kategori Desa Maju berdasarkan Indeks Desa Membangun'}
-                  </div>
+                  
+                  {pendudukData.idm.deskripsi && (
+                    <div className="text-gray-500 mt-4">
+                      {pendudukData.idm.deskripsi}
+                    </div>
+                  )}
+                  
+                  {/* Default description jika tidak ada */}
+                  {!pendudukData.idm.deskripsi && (
+                    <div className="text-gray-500 mt-4">
+                      Desa Tonrong Rijang termasuk dalam kategori Desa {pendudukData.idm.status || 'Maju'} berdasarkan Indeks Desa Membangun
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
