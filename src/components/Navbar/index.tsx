@@ -86,15 +86,17 @@ export default function Navbar() {
       <nav className="w-full mx-auto px-4 sm:px-2 lg:px-2 h-full flex items-center justify-between relative" ref={mobileMenuRef}>
         <div className="flex justify-between items-center h-16 w-full px-8 ">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
-            <div className="w-12 h-12 bg-gradient-to-r from-primary-orange to-primary-green rounded-lg flex items-center justify-center shadow-sm">
-              <span className="text-white font-bold text-xl">DT</span>
-            </div>
+          <div className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
+            <img 
+                src="/kabupatensidrap.png" 
+                alt="Logo Kabupaten Sidrap"
+                className="w-16 h-18 rounded-lg flex items-center justify-center "
+            />
             <div>
               <h1 className=" font-semibold text-text-primary text-2xl">Desa Tonrong Rijang</h1>
               <p className="text-text-muted hidden sm:block text-md">Sistem Informasi Desa</p>
             </div>
-          </Link>
+          </div>
           
           {/* Desktop Navigation */}
           <div className="hidden lg:flex space-x-6 text-md" ref={dropdownRef}>
