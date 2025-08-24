@@ -6,33 +6,80 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Bars3Icon, XMarkIcon, ChevronDownIcon } from '@heroicons/react/24/outline'
 
-const navigation = [
-  { name: 'Beranda', href: '/' },
-  { 
-    name: 'Profil', 
-    href: '#', // Tidak redirect, hanya untuk dropdown
-    subMenu: [
-      { name: 'Sejarah Desa', href: '/profil/sejarah' },
-      { name: 'Visi & Misi', href: '/profil/visimisi' },
-      { name: 'Letak Geografis', href: '/profil/letak-geografis' },
-      { name: 'Struktur Pemerintahan', href: '/profil/struktur-pemerintahan' },
-      { name: 'Data Penduduk', href: '/profil/data-penduduk' },
-    ]
-  },
-  { name: 'Berita', href: '/berita' },
-  { name: 'Galeri', href: '/galeri' },
-  { name: 'UMKM', href: '/produk-unggulan' },
-  { name: 'Kontak', href: '/kontak-aspirasi' },
-  { name: 'Website Kabupaten', href:'https://youtube.com'}
-]
+interface LinkWebData {
+  link: string
+  nama: string
+}
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   const [mobileDropdownOpen, setMobileDropdownOpen] = useState<string | null>(null)
+  const [linkWebData, setLinkWebData] = useState<LinkWebData | null>(null)
+  const [loading, setLoading] = useState(true)
   const pathname = usePathname()
   const dropdownRef = useRef<HTMLDivElement>(null)
   const mobileMenuRef = useRef<HTMLDivElement>(null)
+
+  // Fetch link web data from Firebase
+  useEffect(() => {
+    const fetchLinkWebData = async () => {
+      try {
+        const response = await fetch('/api/link-web')
+        const result = await response.json()
+        
+        if (result.success && result.data) {
+          setLinkWebData({
+            link: result.data.link,
+            nama: result.data.nama
+          })
+        } else {
+          // Default fallback if no data
+          setLinkWebData({
+            link: 'https://sidrap.go.id',
+            nama: 'Website Kabupaten'
+          })
+        }
+      } catch (error) {
+        console.error('Error fetching link web data:', error)
+        // Default fallback on error
+        setLinkWebData({
+          link: 'https://sidrap.go.id',
+          nama: 'Website Kabupaten'
+        })
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchLinkWebData()
+  }, [])
+
+  // Create navigation array with dynamic link
+  const getNavigation = () => [
+    { name: 'Beranda', href: '/' },
+    { 
+      name: 'Profil', 
+      href: '#', // Tidak redirect, hanya untuk dropdown
+      subMenu: [
+        { name: 'Sejarah Desa', href: '/profil/sejarah' },
+        { name: 'Visi & Misi', href: '/profil/visimisi' },
+        { name: 'Letak Geografis', href: '/profil/letak-geografis' },
+        { name: 'Struktur Pemerintahan', href: '/profil/struktur-pemerintahan' },
+        { name: 'Data Penduduk', href: '/profil/data-penduduk' },
+      ]
+    },
+    { name: 'Berita', href: '/berita' },
+    { name: 'Galeri', href: '/galeri' },
+    { name: 'UMKM', href: '/produk-unggulan' },
+    { name: 'Kontak', href: '/kontak-aspirasi' },
+    { 
+      name: linkWebData?.nama || 'Website Kabupaten', 
+      href: linkWebData?.link || 'https://sidrap.go.id'
+    }
+  ]
+
+  const navigation = getNavigation()
 
   const isActive = (path: string) => {
     if (path === '/') {

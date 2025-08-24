@@ -4,33 +4,41 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useBeritaData } from '@/hooks/useBeritaData'
-import { Calendar, ArrowRight, BookOpen, User } from 'lucide-react'
+import { Calendar, ArrowRight, BookOpen, User, Clock } from 'lucide-react'
 import { BeritaPengumumanKategoriEnum } from '@/lib/enums'
 import type { OutputData } from '@editorjs/editorjs'
 
-// Utility function to extract text from EditorJS content
-const extractTextFromEditorJS = (content: OutputData): string => {
-    if (!content || !content.blocks || content.blocks.length === 0) {
-        return ''
+// Helper function untuk extract text dari EditorJS content (same as BeritaCard)
+const extractTextFromEditorJS = (data: OutputData): string => {
+    if (!data || !data.blocks) return ''
+    
+    let text = ''
+    for (const block of data.blocks) {
+        switch (block.type) {
+            case 'paragraph':
+                text += block.data.text + ' '
+                break
+            case 'header':
+                text += block.data.text + ' '
+                break
+            case 'list':
+                if (block.data.items) {
+                    for (const item of block.data.items) {
+                        if (typeof item === 'string') {
+                            text += item + ' '
+                        } else if (item.content) {
+                            text += item.content + ' '
+                        }
+                    }
+                }
+                break
+            case 'quote':
+                text += block.data.text + ' '
+                break
+        }
     }
-
-    return content.blocks
-        .map(block => {
-            if (block.type === 'paragraph' && block.data?.text) {
-                // Remove HTML tags
-                return block.data.text.replace(/<[^>]*>/g, '')
-            }
-            if (block.type === 'header' && block.data?.text) {
-                return block.data.text.replace(/<[^>]*>/g, '')
-            }
-            if (block.type === 'list' && block.data?.items) {
-                return block.data.items.join(' ')
-            }
-            return ''
-        })
-        .filter(text => text.length > 0)
-        .join(' ')
-        .trim()
+    
+    return text.trim()
 }
 
 export default function BeritaTerkini() {
@@ -49,6 +57,15 @@ export default function BeritaTerkini() {
         })
     }
 
+    const formatIDDate = (date: Date | string) => {
+        const d = typeof date === 'string' ? new Date(date) : date
+        return d.toLocaleDateString("id-ID", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+        });
+    }
+
     const formatTimeAgo = (date: Date | string) => {
         const d = typeof date === 'string' ? new Date(date) : date
         const now = new Date()
@@ -58,7 +75,8 @@ export default function BeritaTerkini() {
         if (diffDays === 1) return '1 hari lalu'
         if (diffDays < 7) return `${diffDays} hari lalu`
         if (diffDays < 30) return `${Math.ceil(diffDays / 7)} minggu lalu`
-        return formatDate(date)
+        if (diffDays < 365) return `${Math.ceil(diffDays / 30)} bulan lalu`
+        return `${Math.ceil(diffDays / 365)} tahun lalu`
     }
 
     const getCategoryConfig = (kategori: BeritaPengumumanKategoriEnum) => {
@@ -67,41 +85,34 @@ export default function BeritaTerkini() {
                 return {
                     label: 'Berita',
                     color: 'from-green-500 to-green-600',
-                    bg: 'bg-green-500'
+                    bg: 'bg-green-500',
+                    hoverColor: 'group-hover:text-green-600'
                 }
             case BeritaPengumumanKategoriEnum.PENGUMUMAN:
                 return {
                     label: 'Pengumuman',
                     color: 'from-orange-500 to-orange-600',
-                    bg: 'bg-orange-500'
+                    bg: 'bg-orange-500',
+                    hoverColor: 'group-hover:text-orange-600'
                 }
             default:
                 return {
                     label: 'Lainnya',
                     color: 'from-gray-500 to-gray-600',
-                    bg: 'bg-gray-500'
+                    bg: 'bg-gray-500',
+                    hoverColor: 'group-hover:text-gray-600'
                 }
         }
     }
 
-    // Generate excerpt from content
+    // Generate excerpt from content (same logic as BeritaCard)
     const getExcerpt = (news: any): string => {
-        // Priority 1: Use deskripsi if available and not empty
-        if (news.deskripsi && news.deskripsi.trim().length > 0) {
-            return news.deskripsi
-        }
+        // Extract text preview from EditorJS content, fallback to deskripsi
+        const contentPreview = news.konten 
+            ? extractTextFromEditorJS(news.konten)
+            : news.deskripsi
         
-        // Priority 2: Extract from EditorJS content
-        if (news.konten) {
-            const extractedText = extractTextFromEditorJS(news.konten)
-            // Limit to reasonable excerpt length
-            return extractedText.length > 150 
-                ? extractedText.substring(0, 150) + '...'
-                : extractedText
-        }
-        
-        // Fallback
-        return 'Tidak ada preview tersedia...'
+        return contentPreview || 'Tidak ada konten preview tersedia'
     }
 
     // Loading state
@@ -184,9 +195,9 @@ export default function BeritaTerkini() {
                                     isHovered ? 'scale-105 -translate-y-2' : 'scale-100'
                                 }`}
                             >
-                                <div className="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100">
+                                <div className="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 h-140 flex flex-col">
                                     {/* Image Section */}
-                                    <div className="relative overflow-hidden">
+                                    <div className="relative overflow-hidden flex-shrink-0">
                                         <div className="w-full aspect-[16/10] relative">
                                             <Image
                                                 src={news.gambar_url}
@@ -209,27 +220,33 @@ export default function BeritaTerkini() {
                                     </div>
 
                                     {/* Content Section */}
-                                    <div className="flex flex-col p-6 gap-1">
+                                    <div className="flex flex-col p-6 gap-1 flex-grow">
                                         {/* Title */}
-                                        <h3 className="text-xl font-bold text-gray-900 mb-3 leading-tight line-clamp-2 group-hover:text-green-600 transition-colors duration-300">
+                                        <h3 className={`text-xl font-bold text-gray-900 mb-3 leading-tight line-clamp-2 ${categoryConfig.hoverColor} transition-colors duration-300`}>
                                             {news.judul}
                                         </h3>
                                         
-                                        {/* Excerpt - now using getExcerpt function */}
-                                        <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-3">
+                                        {/* Excerpt - now using same logic as BeritaCard */}
+                                        <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-2 flex-grow">
                                             {excerpt}
                                         </p>
                                         
                                         {/* Meta Information */}
-                                        <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
+                                        <div className="flex items-center justify-between text-xs text-gray-500 mb-2 mt-auto">
                                             <div className="flex items-center gap-1">
                                                 <Calendar className="w-4 h-4" />
-                                                <span>{formatTimeAgo(news.created_at)}</span>
+                                                <span>{formatIDDate(news.created_at || news.tanggal)}</span>
                                             </div>
                                             <div className="flex items-center gap-1">
-                                                <User className="w-4 h-4" />
-                                                <span>{news.penulis}</span>
+                                                <Clock className="w-4 h-4" />
+                                                <span>{formatTimeAgo(news.created_at || news.tanggal)}</span>
                                             </div>
+                                        </div>
+
+                                        {/* Author */}
+                                        <div className="flex items-center text-xs text-gray-500 mb-4">
+                                            <User className="w-4 h-4 mr-1" />
+                                            <span>{news.penulis}</span>
                                         </div>
                                     </div>
                                     

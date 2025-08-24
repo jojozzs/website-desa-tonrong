@@ -1,8 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Calendar, User, Clock } from "lucide-react";
+import { Calendar, User, Clock, ArrowRight } from "lucide-react";
 import { BeritaPengumumanKategoriEnum } from "@/lib/enums";
 import type { OutputData } from "@editorjs/editorjs";
+import { useState } from "react";
 
 interface BeritaItem {
   id: string;
@@ -75,6 +76,7 @@ interface BeritaCardProps {
 }
 
 export default function BeritaCard({ item, compact = false }: BeritaCardProps) {
+  const [isHovered, setIsHovered] = useState(false);
   const href = `/berita/${item.kategori}/${item.slug}`;
   const isBerita = item.kategori === BeritaPengumumanKategoriEnum.BERITA;
 
@@ -84,69 +86,87 @@ export default function BeritaCard({ item, compact = false }: BeritaCardProps) {
     : item.deskripsi
 
   return (
-    <Link href={href} className="block group h-full">
-      <article className="h-full bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-xl hover:border-green-200 transition-all duration-300 flex flex-col transform hover:-translate-y-1">
-        {/* Image - Fixed height */}
-        <div className="relative h-48 overflow-hidden flex-shrink-0">
-          <Image
-            src={item.gambar_url}
-            alt={item.judul}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          />
-          
-          {/* Category Badge */}
-          <div className="absolute top-3 left-3">
-            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white backdrop-blur-sm ${
+    <Link href={href} className="block">
+      <article 
+        onMouseEnter={() => setIsHovered(true)} 
+        onMouseLeave={() => setIsHovered(false)}
+        className={`group cursor-pointer transition-all duration-500 transform h-full ${
+          isHovered ? 'scale-105 -translate-y-2' : 'scale-100'
+        }`}
+      >
+        <div className="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 h-full flex flex-col">
+          {/* Image Section */}
+          <div className="relative overflow-hidden flex-shrink-0">
+            <div className="w-full aspect-[16/10] relative">
+              <Image
+                src={item.gambar_url}
+                alt={item.judul}
+                fill
+                className="object-cover transition-transform duration-700 group-hover:scale-110"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              />
+              
+              {/* Overlay on hover */}
+              <div className={`absolute inset-0 bg-black/20 transition-opacity duration-300 ${
+                isHovered ? 'opacity-100' : 'opacity-0'
+              }`}></div>
+            </div>
+            
+            {/* Category Badge */}
+            <div className={`absolute top-4 left-4 text-white text-xs font-semibold px-3 py-2 rounded-full shadow-lg ${
               isBerita 
-                ? 'bg-green-600/90' 
-                : 'bg-orange-600/90'
+                ? 'bg-green-500' 
+                : 'bg-orange-500'
             }`}>
               {isBerita ? 'Berita' : 'Pengumuman'}
-            </span>
+            </div>
           </div>
 
-          {/* Overlay Gradient */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-        </div>
+          {/* Content Section */}
+          <div className="flex flex-col p-6 gap-1 flex-grow">
+            {/* Title */}
+            <h3 className={`text-xl font-bold text-gray-900 mb-3 leading-tight line-clamp-2 transition-colors duration-300 ${
+              isBerita ? 'group-hover:text-green-600' : 'group-hover:text-orange-600'
+            }`}>
+              {item.judul}
+            </h3>
+            
+            {/* Content Preview */}
+            <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-3 flex-grow">
+              {contentPreview || 'Tidak ada konten preview tersedia'}
+            </p>
+            
+            {/* Meta Information */}
+            <div className="flex items-center justify-between text-xs text-gray-500 mb-2 mt-auto">
+              <div className="flex items-center gap-1">
+                <Calendar className="w-4 h-4" />
+                <span>{formatIDDate(item.tanggal)}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Clock className="w-4 h-4" />
+                <span>{timeAgo(item.tanggal)}</span>
+              </div>
+            </div>
 
-        {/* Content - Flex grow to fill remaining space */}
-        <div className="p-4 flex flex-col flex-grow">
-          {/* Date and Time Ago - Fixed height */}
-          <div className="flex items-center justify-between mb-3 text-xs text-gray-500 h-4">
-            <span className="flex items-center">
-              <Calendar className="w-3 h-3 mr-1 flex-shrink-0" />
-              {formatIDDate(item.tanggal)}
-            </span>
-            <span className="flex items-center">
-              <Clock className="w-3 h-3 mr-1 flex-shrink-0" />
-              {timeAgo(item.tanggal)}
-            </span>
+            {/* Author */}
+            <div className="flex items-center text-xs text-gray-500 mb-4">
+              <User className="w-4 h-4 mr-1" />
+              <span>{item.penulis}</span>
+            </div>
           </div>
-
-          {/* Title - Fixed height with line clamp */}
-          <h3 className="text-lg font-semibold text-gray-800 mb-2 line-clamp-2 group-hover:text-green-600 transition-colors min-h-[3.5rem] flex items-start">
-            {item.judul}
-          </h3>
-
-          {/* Content Preview - Fixed height with line clamp */}
-          <p className="text-gray-600 text-sm line-clamp-3 mb-4 leading-relaxed min-h-[4.5rem] flex-grow">
-            {contentPreview || 'Tidak ada konten preview tersedia'}
-          </p>
-
-          {/* Footer - Always at bottom */}
-          <div className="flex items-center justify-between pt-3 border-t border-gray-100 mt-auto">
-            <span className="flex items-center text-xs text-gray-500 truncate mr-2">
-              <User className="w-3 h-3 mr-1 flex-shrink-0" />
-              <span className="truncate">{item.penulis}</span>
-            </span>
-            <span className="text-green-600 text-xs font-medium group-hover:text-green-700 flex items-center whitespace-nowrap">
-              Baca Selengkapnya 
-              <svg className="w-3 h-3 ml-1 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </span>
+          
+          {/* Read More Button */}
+          <div className={`px-6 pb-6 transition-all duration-300 ${
+            isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
+          }`}>
+            <div className={`w-full text-white py-3 px-4 rounded-2xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 shadow-lg ${
+              isBerita 
+                ? 'bg-gradient-to-r from-green-500 to-green-600' 
+                : 'bg-gradient-to-r from-orange-500 to-orange-600'
+            }`}>
+              Baca Selengkapnya
+              <ArrowRight className="w-4 h-4" />
+            </div>
           </div>
         </div>
       </article>

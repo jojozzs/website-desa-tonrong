@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Calendar, User, Clock } from "lucide-react";
+import { Calendar, User, Clock, Tag } from "lucide-react";
 import { BeritaPengumumanKategoriEnum } from "@/lib/enums";
 import type { OutputData } from "@editorjs/editorjs";
 
@@ -95,18 +95,6 @@ export default function BeritaListItem({ item }: BeritaListItemProps) {
             className="object-cover group-hover:scale-105 transition-transform duration-500"
             sizes="(max-width: 640px) 100vw, 80px"
           />
-          
-          {/* Category Badge untuk mobile */}
-          <div className="absolute top-2 left-2 sm:hidden">
-            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white backdrop-blur-sm ${
-              isBerita 
-                ? 'bg-green-600/90' 
-                : 'bg-blue-600/90'
-            }`}>
-              <span className="mr-1">{isBerita ? '📰' : '📢'}</span>
-              {isBerita ? 'Berita' : 'Pengumuman'}
-            </span>
-          </div>
 
           {/* Overlay Gradient */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"></div>
@@ -152,33 +140,30 @@ export default function BeritaListItem({ item }: BeritaListItemProps) {
                 <Clock className="w-3 h-3 mr-1" />
                 {timeAgo(item.tanggal)}
               </span>
-            </div>
-
-            {/* Category Badge & Arrow untuk desktop */}
-            <div className="flex items-center justify-between">
-              {/* Category Badge untuk desktop */}
-              <span className={`hidden sm:inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                isBerita 
-                  ? 'bg-green-100 text-green-800' 
-                  : 'bg-blue-100 text-blue-800'
-              }`}>
-                <span className="mr-1">{isBerita ? '📰' : '📢'}</span>
-                {isBerita ? 'Berita' : 'Pengumuman'}
-              </span>
-
-              {/* Arrow */}
-              <span className="text-green-600 text-sm font-semibold group-hover:text-green-700 flex items-center whitespace-nowrap ml-auto sm:ml-3">
-                Baca Selengkapnya
-                <svg 
-                  className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-all duration-200" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+              {/* Category Badge di meta info */}
+              <span className="flex items-center">
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  isBerita 
+                    ? 'bg-green-100 text-green-800' 
+                    : 'bg-blue-100 text-blue-800'
+                }`}>
+                  {isBerita ? 'Berita' : 'Pengumuman'}
+                </span>
               </span>
             </div>
+
+            {/* Arrow */}
+            <span className="text-green-600 text-sm font-semibold group-hover:text-green-700 flex items-center whitespace-nowrap ml-auto">
+              Baca Selengkapnya
+              <svg 
+                className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-all duration-200" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </span>
           </div>
         </div>
       </article>

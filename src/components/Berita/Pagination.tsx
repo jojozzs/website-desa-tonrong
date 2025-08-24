@@ -72,7 +72,7 @@ export default function Pagination({
         {/* Info Text */}
         {showInfo && (
           <div className="text-sm text-gray-600 order-2 sm:order-1">
-            Menampilkan <span className="font-medium">{startIndex}-{endIndex}</span> dari{' '}
+            Menampilkan <span className="font-medium">{startIndex} - {endIndex}</span> dari{' '}
             <span className="font-medium">{totalItems}</span> hasil
           </div>
         )}

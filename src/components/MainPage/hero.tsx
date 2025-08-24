@@ -17,6 +17,7 @@ export default function HeroBeranda() {
   const [produkCounter, setProdukCounter] = useState(0)
   const [idmCounter, setIdmCounter] = useState(0)
   const [showRealData, setShowRealData] = useState(false)
+  const [counterStarted, setCounterStarted] = useState(false)
 
   // Fetch data penduduk dan produk UMKM
   const { data: pendudukData, loading: pendudukLoading } = useProfilData(ProfilKategoriEnum.JUMLAH_PENDUDUK_DAN_DATA_UMUM)
@@ -52,13 +53,13 @@ export default function HeroBeranda() {
       if (mainData.data_tambahan?.idm) {
         return {
           nilai: mainData.data_tambahan.idm.nilai || '0,7206',
-          status: mainData.data_tambahan.idm.status || 'Desa Maju'
+          status: mainData.data_tambahan.idm.status || 'Maju'
         }
       }
     }
     return {
       nilai: '0,7206',
-      status: 'Desa Maju'
+      status: 'Maju'
     }
   }
 
@@ -67,42 +68,83 @@ export default function HeroBeranda() {
   const idmData = getIDMData()
   const idmValue = parseFloat(idmData.nilai.replace(',', '.'))
 
-  // Counter up animation when data is loaded
+  // Start counter animation after page load (tidak menunggu data loading)
   useEffect(() => {
-    if (!pendudukLoading && !produkLoading && !showRealData) {
-      // Start counter animation
-      const duration = 2000 // 2 seconds
-      const steps = 60 // 60 fps
-      const stepTime = duration / steps
-      
-      let step = 0
-      
-      const timer = setInterval(() => {
-        step++
-        const progress = step / steps
-        const easeProgress = 1 - Math.pow(1 - progress, 3) // easeOutCubic
+    const startTimer = setTimeout(() => {
+      if (!counterStarted) {
+        setCounterStarted(true)
         
-        // Animate penduduk counter
-        setPendudukCounter(Math.floor(pendudukCount * easeProgress))
+        // Start counter animation
+        const duration = 2000 // 2 seconds
+        const steps = 60 // 60 fps
+        const stepTime = duration / steps
         
-        // Animate produk counter
-        setProdukCounter(Math.floor(produkCount * easeProgress))
+        let step = 0
         
-        // Animate IDM counter
-        setIdmCounter(idmValue * easeProgress)
-        
-        if (step >= steps) {
-          clearInterval(timer)
-          // Show real data after animation
-          setTimeout(() => {
-            setShowRealData(true)
-          }, 300)
-        }
-      }, stepTime)
+        const timer = setInterval(() => {
+          step++
+          const progress = step / steps
+          const easeProgress = 1 - Math.pow(1 - progress, 3) // easeOutCubic
+          
+          // Animate penduduk counter
+          setPendudukCounter(Math.floor(pendudukCount * easeProgress))
+          
+          // Animate produk counter
+          setProdukCounter(Math.floor(produkCount * easeProgress))
+          
+          // Animate IDM counter
+          setIdmCounter(idmValue * easeProgress)
+          
+          if (step >= steps) {
+            clearInterval(timer)
+            // Show real data after animation
+            setTimeout(() => {
+              setShowRealData(true)
+            }, 300)
+          }
+        }, stepTime)
+      }
+    }, 1400) // Start after hero animation
 
-      return () => clearInterval(timer)
+    return () => clearTimeout(startTimer)
+  }, [pendudukCount, produkCount, idmValue, counterStarted])
+
+  // Update counters when real data loads (if data changes)
+  useEffect(() => {
+    if (!pendudukLoading && !produkLoading && showRealData) {
+      // If real data is different from fallback, update smoothly
+      const newPendudukCount = getJumlahPenduduk()
+      const newProdukCount = getJumlahProdukUMKM()
+      const newIdmValue = parseFloat(getIDMData().nilai.replace(',', '.'))
+      
+      if (newPendudukCount !== pendudukCount || newProdukCount !== produkCount || newIdmValue !== idmValue) {
+        // Animate to new values
+        const duration = 1000
+        const steps = 30
+        const stepTime = duration / steps
+        
+        const startPenduduk = pendudukCounter
+        const startProduk = produkCounter
+        const startIdm = idmCounter
+        
+        let step = 0
+        
+        const updateTimer = setInterval(() => {
+          step++
+          const progress = step / steps
+          const easeProgress = 1 - Math.pow(1 - progress, 3)
+          
+          setPendudukCounter(Math.floor(startPenduduk + (newPendudukCount - startPenduduk) * easeProgress))
+          setProdukCounter(Math.floor(startProduk + (newProdukCount - startProduk) * easeProgress))
+          setIdmCounter(startIdm + (newIdmValue - startIdm) * easeProgress)
+          
+          if (step >= steps) {
+            clearInterval(updateTimer)
+          }
+        }, stepTime)
+      }
     }
-  }, [pendudukLoading, produkLoading, pendudukCount, produkCount, idmValue, showRealData])
+  }, [pendudukLoading, produkLoading, pendudukData, produkData])
 
   // Format numbers
   const formatNumber = (num: number) => {
@@ -180,9 +222,7 @@ export default function HeroBeranda() {
             {/* Jumlah Penduduk */}
             <div className="text-center group h-20 sm:h-24 lg:h-28 flex flex-col justify-center" style={{ animationDelay: '1.4s' }}>
               <div className="text-lg sm:text-xl lg:text-4xl font-bold text-white mb-2 group-hover:scale-110 transition-transform duration-300 min-h-[1.5em] flex items-center justify-center">
-                {pendudukLoading ? (
-                  <div className="animate-pulse bg-white/20 rounded h-6 sm:h-8 lg:h-12 w-16 sm:w-20 lg:w-24"></div>
-                ) : showRealData ? (
+                {showRealData ? (
                   formatNumber(pendudukCount)
                 ) : (
                   formatNumber(pendudukCounter)
@@ -194,9 +234,7 @@ export default function HeroBeranda() {
             {/* Produk UMKM */}
             <div className="text-center group h-20 sm:h-24 lg:h-28 flex flex-col justify-center" style={{ animationDelay: '1.6s' }}>
               <div className="text-lg sm:text-xl lg:text-4xl font-bold text-white mb-2 group-hover:scale-110 transition-transform duration-300 min-h-[1.5em] flex items-center justify-center">
-                {produkLoading ? (
-                  <div className="animate-pulse bg-white/20 rounded h-6 sm:h-8 lg:h-12 w-12 sm:w-16 lg:w-20"></div>
-                ) : showRealData ? (
+                {showRealData ? (
                   produkCount
                 ) : (
                   produkCounter
@@ -208,9 +246,7 @@ export default function HeroBeranda() {
             {/* Nilai IDM */}
             <div className="text-center group h-20 sm:h-24 lg:h-28 flex flex-col justify-center" style={{ animationDelay: '1.8s' }}>
               <div className="text-lg sm:text-xl lg:text-4xl font-bold text-white mb-2 group-hover:scale-110 transition-transform duration-300 min-h-[1.5em] flex items-center justify-center">
-                {pendudukLoading ? (
-                  <div className="animate-pulse bg-white/20 rounded h-6 sm:h-8 lg:h-12 w-16 sm:w-20 lg:w-24"></div>
-                ) : showRealData ? (
+                {showRealData ? (
                   idmData.nilai
                 ) : (
                   formatIDM(idmCounter)
@@ -222,17 +258,13 @@ export default function HeroBeranda() {
             {/* Status IDM */}
             <div className="text-center group h-20 sm:h-24 lg:h-28 flex flex-col justify-center" style={{ animationDelay: '2.0s' }}>
               <div className="text-lg sm:text-xl lg:text-4xl font-bold text-white mb-2 group-hover:scale-110 transition-transform duration-300 min-h-[1.5em] flex items-center justify-center">
-                {pendudukLoading ? (
-                  <div className="animate-pulse bg-white/20 rounded h-6 sm:h-8 lg:h-12 w-20 sm:w-24 lg:w-32"></div>
-                ) : (
-                  <div 
-                    className={`px-2 py-1 rounded-lg transition-opacity duration-500 ${
-                      showRealData ? 'opacity-100' : 'opacity-70'
-                    }`}
-                  >
-                    {idmData.status}
-                  </div>
-                )}
+                <div 
+                  className={`px-2 py-1 rounded-lg transition-all duration-500 ${
+                    counterStarted ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+                  }`}
+                >
+                  {idmData.status}
+                </div>
               </div>
               <div className="text-gray-300 font-bold text-xs sm:text-sm lg:text-base">Status IDM</div>
             </div>

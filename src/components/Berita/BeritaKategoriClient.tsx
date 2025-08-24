@@ -68,7 +68,6 @@ export default function BeritaKategoriClient({ kategori }: BeritaKategoriClientP
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-800 mb-2 flex items-center">
-              <span className="mr-3">{isBerita ? '📰' : '📢'}</span>
               {isBerita ? 'Berita Desa' : 'Pengumuman Resmi'}
             </h1>
             <p className="text-gray-600 flex items-center gap-2">
@@ -195,15 +194,15 @@ function LoadingCardsOnly({ viewMode }: { viewMode: ViewMode }) {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="rounded-lg overflow-hidden border border-gray-200">
-                <div className="h-48 bg-gray-200 animate-pulse"></div>
+                <div className="h-48 bg-gray-200"></div>
                 <div className="p-4">
                   <div className="flex items-center justify-between mb-3">
-                    <div className="h-5 bg-gray-200 rounded-full animate-pulse w-16"></div>
-                    <div className="h-4 bg-gray-200 rounded animate-pulse w-20"></div>
+                    <div className="h-5 bg-gray-200 rounded-full w-16"></div>
+                    <div className="h-4 bg-gray-200 rounded w-20"></div>
                   </div>
-                  <div className="h-6 bg-gray-200 rounded animate-pulse mb-2 w-full"></div>
-                  <div className="h-4 bg-gray-200 rounded animate-pulse mb-2 w-3/4"></div>
-                  <div className="h-4 bg-gray-200 rounded animate-pulse w-1/2"></div>
+                  <div className="h-6 bg-gray-200 rounded mb-2 w-full"></div>
+                  <div className="h-4 bg-gray-200 rounded mb-2 w-3/4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
                 </div>
               </div>
             ))}
@@ -212,12 +211,12 @@ function LoadingCardsOnly({ viewMode }: { viewMode: ViewMode }) {
           <div className="space-y-4">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg">
-                <div className="w-16 h-16 bg-gray-200 rounded-lg animate-pulse"></div>
+                <div className="w-16 h-16 bg-gray-200 rounded-lg"></div>
                 <div className="flex-1">
-                  <div className="h-5 bg-gray-200 rounded animate-pulse mb-2 w-3/4"></div>
-                  <div className="h-4 bg-gray-200 rounded animate-pulse w-1/2"></div>
+                  <div className="h-5 bg-gray-200 rounded mb-2 w-3/4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
                 </div>
-                <div className="h-6 bg-gray-200 rounded-full animate-pulse w-20"></div>
+                <div className="h-6 bg-gray-200 rounded-full w-20"></div>
               </div>
             ))}
           </div>
@@ -264,7 +263,6 @@ function EmptyStateCards({
   
   return (
     <div className="text-center py-16">
-      <div className="text-6xl mb-6">{isBerita ? '📰' : '📢'}</div>
       <h3 className="text-2xl font-bold text-gray-800 mb-4">
         Belum Ada {isBerita ? 'Berita' : 'Pengumuman'}
       </h3>
@@ -289,14 +287,14 @@ function EmptyStateCards({
             href={`/berita/${otherCategory}`}
             className="bg-green-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors"
           >
-            {isBerita ? '📢 Lihat Pengumuman' : '📰 Lihat Berita'} ({otherCategoryCount})
+            {isBerita ? 'Lihat Pengumuman' : 'Lihat Berita'} ({otherCategoryCount})
           </Link>
         )}
         <Link 
           href="/"
           className="border border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-medium hover:border-gray-400 transition-colors"
         >
-          🏠 Kembali ke Beranda
+          Kembali ke Beranda
         </Link>
       </div>
     </div>

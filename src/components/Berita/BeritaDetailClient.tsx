@@ -142,7 +142,6 @@ export default function BeritaDetailClient({ kategori, slug }: BeritaDetailClien
                         ? 'bg-green-100 text-green-800' 
                         : 'bg-orange-100 text-orange-800'
                     }`}>
-                      <span className="mr-2">{isBerita ? '📰' : '📢'}</span>
                       {isBerita ? 'Berita Desa' : 'Pengumuman Resmi'}
                     </div>
 
@@ -221,7 +220,6 @@ export default function BeritaDetailClient({ kategori, slug }: BeritaDetailClien
                   {filteredRelated.length > 0 && (
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                       <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                        <span className="mr-2">{isBerita ? '📰' : '📢'}</span>
                         {isBerita ? 'Berita Lainnya' : 'Pengumuman Lainnya'}
                       </h3>
                       <div className="space-y-4">
@@ -294,7 +292,7 @@ export default function BeritaDetailClient({ kategori, slug }: BeritaDetailClien
                       href={isBerita ? '/berita/pengumuman' : '/berita/berita'}
                       className="text-gray-600 hover:text-gray-800 font-medium"
                     >
-                      {isBerita ? '📢 Lihat Pengumuman' : '📰 Lihat Berita'}
+                      {isBerita ? 'Lihat Pengumuman' : 'Lihat Berita'}
                     </Link>
                     <span className="text-gray-300">|</span>
                     <Link 
