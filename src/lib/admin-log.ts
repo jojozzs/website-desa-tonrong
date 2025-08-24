@@ -31,7 +31,13 @@ const kategoriToEntitasMap: Record<AdminLogKategoriEnum, string> = {
     [AdminLogKategoriEnum.UPDATE_ASPIRASI_FORM]: "aspirasi",
     [AdminLogKategoriEnum.DELETE_ASPIRASI_FORM]: "aspirasi",
 
+    [AdminLogKategoriEnum.CREATE_LINK_WEB]: "link_web",
+    [AdminLogKategoriEnum.UPDATE_LINK_WEB]: "link_web",
+    [AdminLogKategoriEnum.DELETE_LINK_WEB]: "link_web",
+    
     [AdminLogKategoriEnum.UPDATE_ADMIN]: "admin",
+    [AdminLogKategoriEnum.CREATE_ADMIN]: "admin",
+    [AdminLogKategoriEnum.DELETE_ADMIN]: "admin",
     [AdminLogKategoriEnum.LOGIN]: "admin",
     [AdminLogKategoriEnum.LOGOUT]: "admin",
 };
@@ -65,7 +71,6 @@ export async function createAdminLog(data: AdminLogData) {
     }
 }
 
-// Helper functions for common log entries
 export const AdminLogHelpers = {
     login: (admin_id: string, admin_name: string) => 
         createAdminLog({
@@ -197,6 +202,33 @@ export const AdminLogHelpers = {
             admin_nama: admin_name,
             kategori: AdminLogKategoriEnum.UPDATE_KONTAK_DESA,
             deskripsi: `${admin_name} mengupdate kontak desa`,
+        }),
+
+    updateLinkWeb: (admin_id: string, admin_name: string, nama: string, link: string) => 
+        createAdminLog({
+            admin_id,
+            admin_nama: admin_name,
+            kategori: AdminLogKategoriEnum.UPDATE_LINK_WEB,
+            deskripsi: `${admin_name} mengupdate link web: ${nama}`,
+            detail: { nama, link },
+        }),
+
+    createLinkWeb: (admin_id: string, admin_name: string, nama_web: string, url: string) => 
+        createAdminLog({
+            admin_id,
+            admin_nama: admin_name,
+            kategori: AdminLogKategoriEnum.CREATE_LINK_WEB,
+            deskripsi: `${admin_name} menambahkan link web: ${nama_web}`,
+            detail: { nama_web, url },
+        }),
+
+    deleteLinkWeb: (admin_id: string, admin_name: string, nama_web: string) => 
+        createAdminLog({
+            admin_id,
+            admin_nama: admin_name,
+            kategori: AdminLogKategoriEnum.DELETE_LINK_WEB,
+            deskripsi: `${admin_name} menghapus link web: ${nama_web}`,
+            detail: { nama_web },
         }),
 
     updateAspirasi: (admin_id: string, admin_name: string, aspirasi_id: string, status: string) => 
