@@ -2,6 +2,7 @@ import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { auth, db } from "./firebase";
 import { doc, getDoc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { Admin } from "./types";
+import { AdminLogHelpers } from "./admin-log";
 
 export async function loginAdmin(email: string, password: string) {
     try {
@@ -21,6 +22,8 @@ export async function loginAdmin(email: string, password: string) {
             throw new Error("Bukan admin.");
         }
         await updateDoc(ref, { last_access: serverTimestamp() });
+
+        await AdminLogHelpers.login(uid, admin.nama);
         
         return {
             uid,
@@ -42,5 +45,23 @@ export async function loginAdmin(email: string, password: string) {
 }
 
 export async function logoutAdmin() {
+    const currentUser = auth.currentUser;
+
+    if (currentUser) {
+        const uid = currentUser.uid;
+
+        try {
+            const ref = doc(db, "admin", uid);
+            const snap = await getDoc(ref);
+            const admin = snap.data() as Admin | undefined;
+
+            if (admin) {
+                await AdminLogHelpers.logout(uid, admin.nama);
+            }
+        } catch (err) {
+            console.error("Gagal mencatat logout:", err);
+        }
+    }
+
     await signOut(auth);
 }
