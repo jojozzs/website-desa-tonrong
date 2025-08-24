@@ -249,11 +249,29 @@ export const AdminLogHelpers = {
             detail: { aspirasi_id },
         }),
 
+    createAdmin: (admin_id: string, admin_name: string, new_admin_id: string, new_admin_name: string) => 
+        createAdminLog({
+            admin_id,
+            admin_nama: admin_name,
+            kategori: AdminLogKategoriEnum.CREATE_ADMIN,
+            deskripsi: `${admin_name} membuat akun admin baru: ${new_admin_name}`,
+            detail: { admin_id: new_admin_id, nama: new_admin_name },
+        }),
+
     updateAdmin: (admin_id: string, admin_name: string) => 
         createAdminLog({
             admin_id,
             admin_nama: admin_name,
             kategori: AdminLogKategoriEnum.UPDATE_ADMIN,
             deskripsi: `${admin_name} mengupdate admin`,
+        }),
+
+    deleteAdmin: (admin_id: string, admin_name: string, deleted_admin_id: string, deleted_admin_name: string) => 
+        createAdminLog({
+            admin_id,
+            admin_nama: admin_name,
+            kategori: AdminLogKategoriEnum.DELETE_ADMIN,
+            deskripsi: `${admin_name} menghapus akun admin: ${deleted_admin_name}`,
+            detail: { admin_id: deleted_admin_id, nama: deleted_admin_name },
         }),
 };
