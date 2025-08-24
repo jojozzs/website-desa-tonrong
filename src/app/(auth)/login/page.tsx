@@ -47,6 +47,19 @@ export default function LoginPage(): JSX.Element {
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-200 via-white to-orange-200 flex items-center justify-center p-4">
             <div className="relative w-full max-w-md">
+                {/* Back to Home Button */}
+                <div className="mb-6 text-center">
+                    <button
+                        onClick={() => router.push("/")}
+                        className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 transform hover:scale-105 active:scale-95 cursor-pointer"
+                    >
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        Kembali ke Beranda
+                    </button>
+                </div>
+
                 {/* Login Card */}
                 <div className="bg-white rounded-2xl shadow-2xl border border-green-100 overflow-hidden">
                     {/* Header with Logo */}

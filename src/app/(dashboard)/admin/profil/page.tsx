@@ -1,7 +1,7 @@
 'use client';
 import { useSemuaProfilData } from '@/hooks/useSemuaProfilData';
 import { ProfilKategoriEnum } from '@/lib/enums';
-import { FileText, Plus, Edit3, Check, Clock, Users, Building, MapPin, Target, History, Eye } from 'lucide-react';
+import { FileText, Plus, Edit3, Clock, Users, Building, MapPin, Target, History, Eye } from 'lucide-react';
 import Link from 'next/link';
 
 const kategoriList = Object.values(ProfilKategoriEnum);
@@ -20,6 +20,23 @@ const getKategoriIcon = (kategori: ProfilKategoriEnum) => {
             return Building;
         default:
             return FileText;
+    }
+};
+
+const getPreviewSlug = (kategori: ProfilKategoriEnum): string => {
+    switch (kategori) {
+        case ProfilKategoriEnum.SEJARAH:
+            return 'sejarah';
+        case ProfilKategoriEnum.VISI_DAN_MISI:
+            return 'visimisi';
+        case ProfilKategoriEnum.STRUKTUR_PEMERINTAHAN_DESA:
+            return 'struktur-pemerintahan';
+        case ProfilKategoriEnum.LETAK_GEOGRAFIS_DAN_PETA_DESA:
+            return 'letak-geografis';
+        case ProfilKategoriEnum.JUMLAH_PENDUDUK_DAN_DATA_UMUM:
+            return 'data-penduduk';
+        default:
+            return '';
     }
 };
 
@@ -116,9 +133,6 @@ export default function AdminProfilPage() {
         );
     }
 
-    const existingCount = kategoriList.filter(kategori => getProfilByKategori(kategori)).length;
-    const totalCount = kategoriList.length;
-
     return (
         <div className="min-h-screen bg-gray-50 p-4 lg:p-6">
             <div className="custom-max-width mx-auto">
@@ -126,45 +140,6 @@ export default function AdminProfilPage() {
                 <div className="text-center mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">Manajemen Profil Desa</h1>
                     <p className="text-gray-600">Kelola semua informasi profil desa berdasarkan kategori</p>
-                </div>
-
-                {/* Stats Overview */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-gray-600 text-sm font-medium">Total Kategori</p>
-                                <p className="text-2xl font-bold text-gray-900">{totalCount}</p>
-                            </div>
-                            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                                <FileText className="w-6 h-6 text-blue-600" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-gray-600 text-sm font-medium">Sudah Dibuat</p>
-                                <p className="text-2xl font-bold text-green-600">{existingCount}</p>
-                            </div>
-                            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                                <Check className="w-6 h-6 text-green-600" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-gray-600 text-sm font-medium">Belum Dibuat</p>
-                                <p className="text-2xl font-bold text-orange-600">{totalCount - existingCount}</p>
-                            </div>
-                            <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
-                                <Plus className="w-6 h-6 text-orange-600" />
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 {/* Profil Cards Grid */}
@@ -176,25 +151,6 @@ export default function AdminProfilPage() {
                         
                         return (
                             <div key={kategori} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 min-h-[300px] flex flex-col">
-                                {/* Status Banner */}
-                                {existing ? (
-                                    <div className="bg-green-50 border-b border-green-100 px-6 py-3">
-                                        <div className="flex items-center gap-2 text-green-700">
-                                            <Check className="w-4 h-4" />
-                                            <span className="text-sm font-medium">Profil Sudah Ada</span>
-                                            <div className="w-2 h-2 bg-green-500 rounded-full ml-auto"></div>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="bg-orange-50 border-b border-orange-100 px-6 py-3">
-                                        <div className="flex items-center gap-2 text-orange-700">
-                                            <Plus className="w-4 h-4" />
-                                            <span className="text-sm font-medium">Belum Dibuat</span>
-                                            <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse ml-auto"></div>
-                                        </div>
-                                    </div>
-                                )}
-
                                 <div className="p-6 flex-1 flex flex-col">
                                     {/* Icon & Title */}
                                     <div className="flex items-start gap-4 mb-4">
@@ -213,7 +169,7 @@ export default function AdminProfilPage() {
 
                                     {/* Metadata - Only for existing profiles */}
                                     {existing && (
-                                        <div className="bg-gray-50 rounded-xl p-4 mb-4">
+                                        <div className="bg-gray-50 rounded-xl py-3 px-4 mb-3">
                                             <div className="flex items-center gap-2 text-gray-600 text-sm mb-2">
                                                 <Clock className="w-4 h-4" />
                                                 <span>Terakhir diperbarui</span>
@@ -232,7 +188,7 @@ export default function AdminProfilPage() {
                                         {existing ? (
                                             <div className="space-y-2">
                                                 <Link href={`/admin/profil/edit/${existing.id}`} className="block">
-                                                    <button className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer">
+                                                    <button className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer">
                                                         <span className="flex items-center justify-center gap-2">
                                                             <Edit3 className="w-4 h-4" />
                                                             Edit Profil
@@ -241,12 +197,14 @@ export default function AdminProfilPage() {
                                                 </Link>
                                                 
                                                 {/* Preview Button */}
-                                                <button className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200">
-                                                    <span className="flex items-center justify-center gap-2 cursor-pointer">
-                                                        <Eye className="w-4 h-4" />
-                                                        Preview
-                                                    </span>
-                                                </button>
+                                                <Link href={`/profil/${getPreviewSlug(kategori)}`} target="_blank">
+                                                    <button className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200 cursor-pointer">
+                                                        <span className="flex items-center justify-center gap-2 cursor-pointer">
+                                                            <Eye className="w-4 h-4" />
+                                                            Preview
+                                                        </span>
+                                                    </button>
+                                                </Link>
                                             </div>
                                         ) : (
                                             <Link href={`/admin/profil/tambah?kategori=${kategori}`} className="block">

@@ -339,21 +339,6 @@ export default function EditProfilPage() {
                                 />
                             </div>
 
-                            {/* Konten */}
-                            <div className="space-y-3">
-                                <label className="flex items-center gap-2 text-sm font-semibold text-gray-800">
-                                    <FileText className="w-4 h-4 text-green-600" />
-                                    Konten Detail (Opsional)
-                                </label>
-                                <textarea
-                                    placeholder="Masukkan konten detail profil (opsional)..."
-                                    rows={6}
-                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 resize-none text-gray-800 placeholder-gray-400"
-                                    value={konten}
-                                    onChange={(e) => setKonten(e.target.value)}
-                                />
-                            </div>
-
                             {/* Current Image Preview */}
                             {preview && (
                                 <div className="space-y-3">
@@ -1217,22 +1202,45 @@ export default function EditProfilPage() {
                                 </div>
 
                                 <div className="p-6">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="bg-blue-50 rounded-lg p-4 mb-6">
+                                        <div className="flex items-start gap-3">
+                                            <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                                            <div className="text-sm text-blue-800">
+                                                <p className="font-medium mb-1">Cara Menghitung IDM:</p>
+                                                <p>IDM = (IKS + IKE + IKL) ÷ 3</p>
+                                                <p className="mt-2 text-blue-700">
+                                                    Masukkan nilai IKS, IKE, dan IKL (0.0000 - 1.0000). 
+                                                    Nilai IDM dan status akan dihitung otomatis.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                         <div>
-                                            <label className="text-sm font-medium text-gray-700 mb-2 block">Nilai IDM</label>
+                                            <label className="text-sm font-medium text-gray-700 mb-2 block">
+                                                Indeks Ketahanan Sosial (IKS)
+                                            </label>
                                             <input
-                                                type="text"
-                                                placeholder="contoh: 0.75"
+                                                type="number"
+                                                step="0.0001"
+                                                min="0"
+                                                max="1"
+                                                placeholder="0.0000"
                                                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                                                value={dataTambahan?.idm?.nilai || ''}
+                                                value={dataTambahan?.idm?.iks ?? ''}
                                                 onChange={(e) => {
+                                                    const value = e.target.value === '' ? undefined : parseFloat(e.target.value);
                                                     setDataTambahan(prev => ({
                                                         ...prev,
                                                         idm: {
                                                             ...prev?.idm,
-                                                            nilai: e.target.value,
-                                                            status: prev?.idm?.status || '',
-                                                            deskripsi: prev?.idm?.deskripsi
+                                                            iks: value,
+                                                            ike: prev?.idm?.ike ?? undefined,
+                                                            ikl: prev?.idm?.ikl ?? undefined,
+                                                            deskripsi: prev?.idm?.deskripsi ?? '',
+                                                            nilai: prev?.idm?.nilai ?? '',
+                                                            status: prev?.idm?.status ?? ''
                                                         }
                                                     }));
                                                 }}
@@ -1240,34 +1248,176 @@ export default function EditProfilPage() {
                                         </div>
                                         
                                         <div>
-                                            <label className="text-sm font-medium text-gray-700 mb-2 block">Status IDM</label>
-                                            <select
+                                            <label className="text-sm font-medium text-gray-700 mb-2 block">
+                                                Indeks Ketahanan Ekonomi (IKE)
+                                            </label>
+                                            <input
+                                                type="number"
+                                                step="0.0001"
+                                                min="0"
+                                                max="1"
+                                                placeholder="0.0000"
                                                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                                                value={dataTambahan?.idm?.status || ''}
+                                                value={dataTambahan?.idm?.ike ?? ''}
                                                 onChange={(e) => {
+                                                    const value = e.target.value === '' ? undefined : parseFloat(e.target.value);
                                                     setDataTambahan(prev => ({
                                                         ...prev,
                                                         idm: {
                                                             ...prev?.idm,
-                                                            nilai: prev?.idm?.nilai || '',
-                                                            status: e.target.value,
-                                                            deskripsi: prev?.idm?.deskripsi
+                                                            ike: value,
+                                                            // Pertahankan nilai yang sudah ada
+                                                            iks: prev?.idm?.iks ?? undefined,
+                                                            ikl: prev?.idm?.ikl ?? undefined,
+                                                            deskripsi: prev?.idm?.deskripsi ?? '',
+                                                            nilai: prev?.idm?.nilai ?? '',
+                                                            status: prev?.idm?.status ?? ''
                                                         }
                                                     }));
                                                 }}
-                                            >
-                                                <option value="">Pilih Status IDM</option>
-                                                <option value="Sangat Tertinggal">Sangat Tertinggal</option>
-                                                <option value="Tertinggal">Tertinggal</option>
-                                                <option value="Berkembang">Berkembang</option>
-                                                <option value="Maju">Maju</option>
-                                                <option value="Mandiri">Mandiri</option>
-                                            </select>
+                                            />
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="text-sm font-medium text-gray-700 mb-2 block">
+                                                Indeks Ketahanan Lingkungan (IKL)
+                                            </label>
+                                            <input
+                                                type="number"
+                                                step="0.0001"
+                                                min="0"
+                                                max="1"
+                                                placeholder="0.0000"
+                                                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                                                value={dataTambahan?.idm?.ikl ?? ''}
+                                                onChange={(e) => {
+                                                    const value = e.target.value === '' ? undefined : parseFloat(e.target.value);
+                                                    setDataTambahan(prev => ({
+                                                        ...prev,
+                                                        idm: {
+                                                            ...prev?.idm,
+                                                            ikl: value,
+                                                            // Pertahankan nilai yang sudah ada
+                                                            iks: prev?.idm?.iks ?? undefined,
+                                                            ike: prev?.idm?.ike ?? undefined,
+                                                            deskripsi: prev?.idm?.deskripsi ?? '',
+                                                            nilai: prev?.idm?.nilai ?? '',
+                                                            status: prev?.idm?.status ?? ''
+                                                        }
+                                                    }));
+                                                }}
+                                            />
                                         </div>
                                     </div>
+
+                                    {/* Preview IDM Calculation - Perbaiki juga bagian ini */}
+                                    {(dataTambahan?.idm?.iks !== null && dataTambahan?.idm?.iks !== undefined) || 
+                                    (dataTambahan?.idm?.ike !== null && dataTambahan?.idm?.ike !== undefined) || 
+                                    (dataTambahan?.idm?.ikl !== null && dataTambahan?.idm?.ikl !== undefined) ? (
+                                        <div className="mt-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+                                            <div className="text-center">
+                                                <h4 className="text-lg font-semibold text-gray-800 mb-4">Preview Perhitungan IDM</h4>
+                                                
+                                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                                                    <div className="bg-white rounded-lg p-3 border">
+                                                        <div className="text-sm text-gray-600">IKS</div>
+                                                        <div className="text-lg font-semibold text-emerald-600">
+                                                            {(typeof dataTambahan?.idm?.iks === 'number' ? dataTambahan.idm.iks : 0).toFixed(4)}
+                                                        </div>
+                                                    </div>
+                                                    <div className="bg-white rounded-lg p-3 border">
+                                                        <div className="text-sm text-gray-600">IKE</div>
+                                                        <div className="text-lg font-semibold text-emerald-600">
+                                                            {(typeof dataTambahan?.idm?.ike === 'number' ? dataTambahan.idm.ike : 0).toFixed(4)}
+                                                        </div>
+                                                    </div>
+                                                    <div className="bg-white rounded-lg p-3 border">
+                                                        <div className="text-sm text-gray-600">IKL</div>
+                                                        <div className="text-lg font-semibold text-emerald-600">
+                                                            {(typeof dataTambahan?.idm?.ikl === 'number' ? dataTambahan.idm.ikl : 0).toFixed(4)}
+                                                        </div>
+                                                    </div>
+                                                    <div className="bg-white rounded-lg p-3 border border-blue-300">
+                                                        <div className="text-sm text-gray-600">IDM</div>
+                                                        <div className="text-xl font-bold text-blue-600">
+                                                            {(() => {
+                                                                const iks = typeof dataTambahan?.idm?.iks === 'number' ? dataTambahan.idm.iks : 0;
+                                                                const ike = typeof dataTambahan?.idm?.ike === 'number' ? dataTambahan.idm.ike : 0;
+                                                                const ikl = typeof dataTambahan?.idm?.ikl === 'number' ? dataTambahan.idm.ikl : 0;
+                                                                return ((iks + ike + ikl) / 3).toFixed(4);
+                                                            })()}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="text-sm text-gray-500 mb-3">
+                                                    {(() => {
+                                                        const iks = typeof dataTambahan?.idm?.iks === 'number' ? dataTambahan.idm.iks : 0;
+                                                        const ike = typeof dataTambahan?.idm?.ike === 'number' ? dataTambahan.idm.ike : 0;
+                                                        const ikl = typeof dataTambahan?.idm?.ikl === 'number' ? dataTambahan.idm.ikl : 0;
+                                                        return `(${iks.toFixed(4)} + ${ike.toFixed(4)} + ${ikl.toFixed(4)}) ÷ 3`;
+                                                    })()}
+                                                </div>
+                                                
+                                                <div className={`inline-block px-4 py-2 rounded-full font-semibold ${(() => {
+                                                    const iks = typeof dataTambahan?.idm?.iks === 'number' ? dataTambahan.idm.iks : 0;
+                                                    const ike = typeof dataTambahan?.idm?.ike === 'number' ? dataTambahan.idm.ike : 0;
+                                                    const ikl = typeof dataTambahan?.idm?.ikl === 'number' ? dataTambahan.idm.ikl : 0;
+                                                    const idm = (iks + ike + ikl) / 3;
+                                                    return idm >= 0.5989 
+                                                        ? 'bg-green-100 text-green-800'
+                                                        : idm >= 0.4993
+                                                        ? 'bg-yellow-100 text-yellow-800' 
+                                                        : 'bg-red-100 text-red-800';
+                                                })()}`}>
+                                                    Status: Desa {(() => {
+                                                        const iks = typeof dataTambahan?.idm?.iks === 'number' ? dataTambahan.idm.iks : 0;
+                                                        const ike = typeof dataTambahan?.idm?.ike === 'number' ? dataTambahan.idm.ike : 0;
+                                                        const ikl = typeof dataTambahan?.idm?.ikl === 'number' ? dataTambahan.idm.ikl : 0;
+                                                        const idm = (iks + ike + ikl) / 3;
+                                                        return idm >= 0.5989 
+                                                            ? 'Maju'
+                                                            : idm >= 0.4993
+                                                            ? 'Berkembang' 
+                                                            : 'Tertinggal';
+                                                    })()}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ) : null}
+
+                                    {((dataTambahan?.idm?.iks === null || dataTambahan?.idm?.iks === undefined) && 
+                                    (dataTambahan?.idm?.ike === null || dataTambahan?.idm?.ike === undefined) && 
+                                    (dataTambahan?.idm?.ikl === null || dataTambahan?.idm?.ikl === undefined)) && 
+                                    (dataTambahan?.idm?.nilai || dataTambahan?.idm?.status) && (
+                                        <div className="mt-6 bg-yellow-50 rounded-xl p-6 border border-yellow-200">
+                                            <div className="text-center">
+                                                <h4 className="text-lg font-semibold text-gray-800 mb-4">Data IDM Existing</h4>
+                                                <div className="text-2xl font-bold text-blue-600 mb-2">
+                                                    {dataTambahan?.idm?.nilai || '0.0000'}
+                                                </div>
+                                                <div className="text-gray-700 font-medium mb-2">Nilai IDM</div>
+                                                <div className={`inline-block px-4 py-2 rounded-full font-semibold ${
+                                                    parseFloat(dataTambahan?.idm?.nilai || '0') >= 0.5989 
+                                                        ? 'bg-green-100 text-green-800'
+                                                        : parseFloat(dataTambahan?.idm?.nilai || '0') >= 0.4993
+                                                        ? 'bg-yellow-100 text-yellow-800' 
+                                                        : 'bg-red-100 text-red-800'
+                                                }`}>
+                                                    Status: Desa {dataTambahan?.idm?.status || 'Maju'}
+                                                </div>
+                                                <p className="text-sm text-yellow-700 mt-4">
+                                                    <strong>Info:</strong> Data existing menggunakan format lama. 
+                                                    Masukkan nilai IKS, IKE, dan IKL di atas untuk menggunakan format baru.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
                                     
                                     <div className="mt-6">
-                                        <label className="text-sm font-medium text-gray-700 mb-2 block">Deskripsi IDM (Opsional)</label>
+                                        <label className="text-sm font-medium text-gray-700 mb-2 block">
+                                            Deskripsi IDM (Opsional)
+                                        </label>
                                         <textarea
                                             placeholder="Deskripsi tambahan tentang status IDM..."
                                             rows={4}
@@ -1278,9 +1428,12 @@ export default function EditProfilPage() {
                                                     ...prev,
                                                     idm: {
                                                         ...prev?.idm,
-                                                        nilai: prev?.idm?.nilai || '',
-                                                        status: prev?.idm?.status || '',
-                                                        deskripsi: e.target.value
+                                                        deskripsi: e.target.value,
+                                                        iks: prev?.idm?.iks ?? undefined,
+                                                        ike: prev?.idm?.ike ?? undefined,
+                                                        ikl: prev?.idm?.ikl ?? undefined,
+                                                        nilai: prev?.idm?.nilai ?? '',
+                                                        status: prev?.idm?.status ?? ''
                                                     }
                                                 }));
                                             }}

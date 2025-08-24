@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { collection, query, orderBy, limit, getDocs, where, startAfter, DocumentData, QueryDocumentSnapshot, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { AdminLogKategoriEnum } from '@/lib/enums';
@@ -8,6 +8,7 @@ import { Search, Filter, Calendar, User, Activity, Eye, RefreshCw, X, ChevronDow
 interface AdminLog {
     id: string;
     admin_id: string;
+    admin_nama: string; // Sekarang ini adalah field yang wajib dari database
     kategori: AdminLogKategoriEnum;
     deskripsi: string;
     entitas: string;
@@ -19,7 +20,7 @@ interface AdminLog {
 interface FilterState {
     kategori: AdminLogKategoriEnum | 'ALL';
     entitas: string;
-    admin_id: string;
+    admin_nama: string; // Ganti dari admin_id ke admin_nama
     dateFrom: string;
     dateTo: string;
     search: string;
@@ -39,7 +40,7 @@ export default function AdminLogsPage() {
     const [filters, setFilters] = useState<FilterState>({
         kategori: 'ALL',
         entitas: '',
-        admin_id: '',
+        admin_nama: '',
         dateFrom: '',
         dateTo: '',
         search: ''
@@ -69,7 +70,7 @@ export default function AdminLogsPage() {
         return colorMap[kategori] || 'bg-gray-100 text-gray-800';
     };
 
-    const fetchLogs = async (isLoadMore = false) => {
+    const fetchLogs = useCallback(async (isLoadMore = false) => {
         try {
             setLoading(true);
             
@@ -86,8 +87,8 @@ export default function AdminLogsPage() {
                 q = query(q, where('entitas', '==', filters.entitas));
             }
             
-            if (filters.admin_id) {
-                q = query(q, where('admin_id', '==', filters.admin_id));
+            if (filters.admin_nama) {
+                q = query(q, where('admin_nama', '==', filters.admin_nama));
             }
 
             if (filters.dateFrom) {
@@ -111,10 +112,11 @@ export default function AdminLogsPage() {
             const logsData: AdminLog[] = [];
             
             querySnapshot.forEach((doc) => {
+                const logData = doc.data() as AdminLog;
                 logsData.push({
+                    ...logData,
                     id: doc.id,
-                    ...doc.data()
-                } as AdminLog);
+                });
             });
 
             if (isLoadMore) {
@@ -131,76 +133,13 @@ export default function AdminLogsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [filters.kategori, filters.entitas, filters.admin_nama, filters.dateFrom, filters.dateTo, lastDoc]);
 
     useEffect(() => {
-        let isSubscribed = true;
-        
-        const fetchLogsInternal = async () => {
-            try {
-                setLoading(true);
-                
-                let q = query(
-                    collection(db, 'admin-logs'),
-                    orderBy('timestamp', 'desc')
-                );
+        fetchLogs(false);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [filters.kategori, filters.entitas, filters.admin_nama, filters.dateFrom, filters.dateTo]);
 
-                if (filters.kategori !== 'ALL') {
-                    q = query(q, where('kategori', '==', filters.kategori));
-                }
-                
-                if (filters.entitas) {
-                    q = query(q, where('entitas', '==', filters.entitas));
-                }
-                
-                if (filters.admin_id) {
-                    q = query(q, where('admin_id', '==', filters.admin_id));
-                }
-
-                if (filters.dateFrom) {
-                    const fromDate = new Date(filters.dateFrom);
-                    q = query(q, where('timestamp', '>=', fromDate));
-                }
-                
-                if (filters.dateTo) {
-                    const toDate = new Date(filters.dateTo);
-                    toDate.setHours(23, 59, 59, 999);
-                    q = query(q, where('timestamp', '<=', toDate));
-                }
-
-                q = query(q, limit(ITEMS_PER_PAGE));
-
-                const querySnapshot = await getDocs(q);
-                const logsData: AdminLog[] = [];
-                
-                querySnapshot.forEach((doc) => {
-                    logsData.push({
-                        id: doc.id,
-                        ...doc.data()
-                    } as AdminLog);
-                });
-
-                if (isSubscribed) {
-                    setLogs(logsData);
-                    setLastDoc(querySnapshot.docs[querySnapshot.docs.length - 1] || null);
-                    setHasMore(querySnapshot.docs.length === ITEMS_PER_PAGE);
-                }
-
-            } catch (error) {
-                console.error('Error fetching admin logs:', error);
-            } finally {
-                if (isSubscribed) {
-                    setLoading(false);
-                }
-            }
-        };
-        
-        fetchLogsInternal();
-        
-        return () => {
-            isSubscribed = false;
-        };
-    }, [filters.kategori, filters.entitas, filters.admin_id, filters.dateFrom, filters.dateTo]);
 
     useEffect(() => {
         if (filters.search.trim() === '') {
@@ -208,7 +147,7 @@ export default function AdminLogsPage() {
         } else {
             const filtered = logs.filter(log =>
                 log.deskripsi.toLowerCase().includes(filters.search.toLowerCase()) ||
-                log.admin_id.toLowerCase().includes(filters.search.toLowerCase()) ||
+                log.admin_nama.toLowerCase().includes(filters.search.toLowerCase()) ||
                 log.entitas.toLowerCase().includes(filters.search.toLowerCase())
             );
             setSearchResults(filtered);
@@ -229,7 +168,7 @@ export default function AdminLogsPage() {
         setFilters({
             kategori: 'ALL',
             entitas: '',
-            admin_id: '',
+            admin_nama: '',
             dateFrom: '',
             dateTo: '',
             search: ''
@@ -293,7 +232,7 @@ export default function AdminLogsPage() {
     ).length + (filters.search ? 1 : 0);
 
     const totalLogs = logs.length;
-    const uniqueAdmins = new Set(logs.map(log => log.admin_id)).size;
+    const uniqueAdmins = new Set(logs.map(log => log.admin_nama)).size;
     const todayLogs = logs.filter(log => {
         if (!log.timestamp) return false;
         try {
@@ -314,6 +253,9 @@ export default function AdminLogsPage() {
         }
     }).length;
 
+    // Get unique admin names untuk filter dropdown
+    const uniqueAdminsList = Array.from(new Set(logs.map(log => log.admin_nama))).sort();
+
     return (
         <div className="min-h-screen bg-gray-50 text-gray-700">
             {/* Header */}
@@ -331,10 +273,6 @@ export default function AdminLogsPage() {
                                 </p>
                             </div>
                             <div className="flex space-x-3">
-                                {/* <button className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                    <Download className="mr-2 h-4 w-4" />
-                                    Export
-                                </button> */}
                                 <button 
                                     onClick={refreshData}
                                     disabled={loading}
@@ -360,7 +298,7 @@ export default function AdminLogsPage() {
                                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                                     <input
                                         type="text"
-                                        placeholder="Cari berdasarkan deskripsi, admin ID, atau entitas..."
+                                        placeholder="Cari berdasarkan deskripsi, nama admin, atau entitas..."
                                         value={filters.search}
                                         onChange={(e) => handleFilterChange('search', e.target.value)}
                                         className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none text-sm text-gray-700"
@@ -441,15 +379,20 @@ export default function AdminLogsPage() {
 
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Admin ID
+                                            Admin
                                         </label>
-                                        <input
-                                            type="text"
-                                            value={filters.admin_id}
-                                            onChange={(e) => handleFilterChange('admin_id', e.target.value)}
-                                            placeholder="ID Admin"
+                                        <select
+                                            value={filters.admin_nama}
+                                            onChange={(e) => handleFilterChange('admin_nama', e.target.value)}
                                             className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
-                                        />
+                                        >
+                                            <option value="">Semua Admin</option>
+                                            {uniqueAdminsList.map(adminName => (
+                                                <option key={adminName} value={adminName}>
+                                                    {adminName}
+                                                </option>
+                                            ))}
+                                        </select>
                                     </div>
 
                                     <div>
@@ -570,11 +513,8 @@ export default function AdminLogsPage() {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
-                                                {/* <div className="h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center">
-                                                    <User className="h-4 w-4 text-gray-600" />
-                                                </div> */}
-                                                <div className="ml-3">
-                                                    <div className="text-sm font-medium text-gray-900">{log.admin_id}</div>
+                                                <div className="text-sm font-medium text-gray-900">
+                                                    {log.admin_nama}
                                                 </div>
                                             </div>
                                         </td>
@@ -644,7 +584,7 @@ export default function AdminLogsPage() {
                             <button
                                 onClick={loadMore}
                                 disabled={loading}
-                                className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                             >
                                 {loading ? 'Memuat...' : 'Muat Lebih Banyak'}
                             </button>
@@ -683,7 +623,14 @@ export default function AdminLogsPage() {
                                 </div>
                                 <div>
                                     <dt className="text-sm font-medium text-gray-500">Admin</dt>
-                                    <dd className="mt-1 text-sm text-gray-900">{selectedLog.admin_id}</dd>
+                                    <dd className="mt-1 text-sm text-gray-900">
+                                        <div className="flex items-center">
+                                            <div className="h-6 w-6 bg-gradient-to-br from-green-500 to-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold mr-2">
+                                                {selectedLog.admin_nama ? selectedLog.admin_nama.charAt(0).toUpperCase() : "?"}
+                                            </div>
+                                            <div className="font-medium">{selectedLog.admin_nama}</div>
+                                        </div>
+                                    </dd>
                                 </div>
                                 <div>
                                     <dt className="text-sm font-medium text-gray-500">Kategori</dt>

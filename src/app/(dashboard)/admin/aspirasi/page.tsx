@@ -1,7 +1,7 @@
 "use client";
 import { JSX, useCallback, useEffect, useState } from "react";
 import { requireIdToken } from "@/lib/client-auth";
-import { MessageSquare, Filter, Clock, CheckCircle, AlertCircle, Trash2, RefreshCw, Mail, User, Calendar, FileText, Search, X, MoreVertical } from "lucide-react";
+import { MessageSquare, Filter, Clock, CheckCircle, AlertCircle, Trash2, RefreshCw, Mail, User, Calendar, FileText, Search, X, MoreVertical, Phone } from "lucide-react";
 import { AdminLogHelpers } from "@/lib/admin-log";
 import { useAdminData } from "@/hooks/useAdminData";
 
@@ -12,6 +12,7 @@ type AspirasiRow = {
     judul: string;
     nama: string;
     email: string;
+    nomor_telepon: string;
     isi: string;
     status: StatusType;
     created_at: string | null;
@@ -95,7 +96,6 @@ export default function AspirasiPage(): JSX.Element {
 
             if (!admin) {
                 setError("Gagal mencatat log. Data admin tidak ditemukan.");
-                // setSubmitting(false);
                 return;
             }
 
@@ -189,6 +189,7 @@ export default function AspirasiPage(): JSX.Element {
         row.judul.toLowerCase().includes(searchTerm.toLowerCase()) ||
         row.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
         row.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        row.nomor_telepon.toLowerCase().includes(searchTerm.toLowerCase()) ||
         row.isi.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
@@ -537,6 +538,10 @@ export default function AspirasiPage(): JSX.Element {
                                         <div className="flex items-center gap-1">
                                             <Mail className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
                                             <span className="truncate">{row.email}</span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <Phone className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                                            <span className="truncate">{row.nomor_telepon || "-"}</span>
                                         </div>
                                         <div className="flex items-center gap-1">
                                             <Calendar className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
