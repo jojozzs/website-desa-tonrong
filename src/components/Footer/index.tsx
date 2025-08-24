@@ -31,7 +31,7 @@ export default function Footer() {
             <div className="grid grid-cols-3 gap-4 pt-2 pb-6">
                 <div className='flex items-center justify-center rounded-2xl transition-all duration-300 group'>
                     <img
-                        src="logokkn.png" 
+                        src="/logokkn.png" 
                         alt="Logo KKN Universitas Hasanuddin"
                         className="w-18 h-18 object-contain group-hover:scale-110 transition-transform duration-300"
                     />
@@ -39,7 +39,7 @@ export default function Footer() {
 
                 <div className='flex items-center justify-center rounded-2xl transition-all duration-300 group'>
                     <img
-                        src="logokkntonrongrijang.png" 
+                        src="/logokkntonrongrijang.png" 
                         alt="Logo KKN Desa Tonrong Rijang Universitas Hasanuddin"
                         className="w-18 h-18 object-contain group-hover:scale-110 transition-transform duration-300"
                     />
@@ -47,7 +47,7 @@ export default function Footer() {
 
                 <div className='flex items-center justify-center rounded-2xl transition-all duration-300 group'>
                     <img
-                        src="kabupatensidrap.png" 
+                        src="/kabupatensidrap.png" 
                         alt="Logo Kabupaten Sidrap"
                         className="w-18 h-18 object-contain group-hover:scale-110 transition-transform duration-300"
                     />

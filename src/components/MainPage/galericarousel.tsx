@@ -152,11 +152,6 @@ export default function GaleriCarousel() {
             {/* Content Overlay */}
             <div className="absolute bottom-0 left-0 right-0 p-8 lg:p-12">
               <div className="max-w-2xl">
-                {/* Category Badge */}
-                <div className="inline-flex items-center px-4 py-2 bg-orange-500/90 backdrop-blur-sm text-white text-sm font-semibold rounded-full mb-4">
-                  <CameraIcon className="h-4 w-4 mr-2" />
-                    Dokumentasi
-                </div>
                 
                 {/* Title & Description */}
                 <h3 className="text-2xl lg:text-3xl font-bold text-white mb-3 leading-tight">
@@ -192,11 +187,6 @@ export default function GaleriCarousel() {
                 </button>
               </>
             )}
-
-            {/* Autoplay Indicator */}
-            <div className="absolute top-6 right-6">
-              <div className={`w-3 h-3 rounded-full ${isAutoplay ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`}></div>
-            </div>
           </div>
 
           {/* Dots Indicator */}
