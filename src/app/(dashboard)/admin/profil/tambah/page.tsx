@@ -40,7 +40,7 @@ export default function TambahProfilPage() {
 
     const [judul, setJudul] = useState('');
     const [deskripsi, setDeskripsi] = useState('');
-    const [konten, setKonten] = useState<string>('');
+    const [konten] = useState<string>('');
     const [gambar, setGambar] = useState<File | null>(null);
     const [dataTambahan, setDataTambahan] = useState<ProfilWithContent['data_tambahan']>({
         visi: undefined,
@@ -226,21 +226,6 @@ export default function TambahProfilPage() {
                                     value={deskripsi}
                                     onChange={(e) => setDeskripsi(e.target.value)}
                                     required
-                                />
-                            </div>
-
-                            {/* Konten */}
-                            <div className="space-y-3">
-                                <label className="flex items-center gap-2 text-sm font-semibold text-gray-800">
-                                    <FileText className="w-4 h-4 text-green-600" />
-                                    Konten Detail (Opsional)
-                                </label>
-                                <textarea
-                                    placeholder="Masukkan konten detail profil (opsional)..."
-                                    rows={6}
-                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 resize-none text-gray-800 placeholder-gray-400"
-                                    value={konten}
-                                    onChange={(e) => setKonten(e.target.value)}
                                 />
                             </div>
 
@@ -1089,22 +1074,45 @@ export default function TambahProfilPage() {
                                 </div>
 
                                 <div className="p-6">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="bg-blue-50 rounded-lg p-4 mb-6">
+                                        <div className="flex items-start gap-3">
+                                            <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                                            <div className="text-sm text-blue-800">
+                                                <p className="font-medium mb-1">Cara Menghitung IDM:</p>
+                                                <p>IDM = (IKS + IKE + IKL) ÷ 3</p>
+                                                <p className="mt-2 text-blue-700">
+                                                    Masukkan nilai IKS, IKE, dan IKL (0.0000 - 1.0000). 
+                                                    Nilai IDM dan status akan dihitung otomatis.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                         <div>
-                                            <label className="text-sm font-medium text-gray-700 mb-2 block">Nilai IDM</label>
+                                            <label className="text-sm font-medium text-gray-700 mb-2 block">
+                                                Indeks Ketahanan Sosial (IKS)
+                                            </label>
                                             <input
-                                                type="text"
-                                                placeholder="contoh: 0.75"
+                                                type="number"
+                                                step="0.0001"
+                                                min="0"
+                                                max="1"
+                                                placeholder="0.0000"
                                                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                                                value={dataTambahan?.idm?.nilai || ''}
+                                                value={dataTambahan?.idm?.iks || ''}
                                                 onChange={(e) => {
+                                                    const value = parseFloat(e.target.value) || 0;
                                                     setDataTambahan(prev => ({
                                                         ...prev,
                                                         idm: {
                                                             ...prev?.idm,
+                                                            iks: value,
+                                                            ike: prev?.idm?.ike || 0,
+                                                            ikl: prev?.idm?.ikl || 0,
+                                                            deskripsi: prev?.idm?.deskripsi || '',
                                                             nilai: prev?.idm?.nilai || '',
-                                                            status: e.target.value,
-                                                            deskripsi: prev?.idm?.deskripsi
+                                                            status: prev?.idm?.status || ''
                                                         }
                                                     }));
                                                 }}
@@ -1112,34 +1120,126 @@ export default function TambahProfilPage() {
                                         </div>
                                         
                                         <div>
-                                            <label className="text-sm font-medium text-gray-700 mb-2 block">Status IDM</label>
-                                            <select
+                                            <label className="text-sm font-medium text-gray-700 mb-2 block">
+                                                Indeks Ketahanan Ekonomi (IKE)
+                                            </label>
+                                            <input
+                                                type="number"
+                                                step="0.0001"
+                                                min="0"
+                                                max="1"
+                                                placeholder="0.0000"
                                                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                                                value={dataTambahan?.idm?.status || ''}
+                                                value={dataTambahan?.idm?.ike || ''}
                                                 onChange={(e) => {
+                                                    const value = parseFloat(e.target.value) || 0;
                                                     setDataTambahan(prev => ({
                                                         ...prev,
                                                         idm: {
                                                             ...prev?.idm,
+                                                            iks: prev?.idm?.iks || 0,
+                                                            ike: value,
+                                                            ikl: prev?.idm?.ikl || 0,
+                                                            deskripsi: prev?.idm?.deskripsi || '',
                                                             nilai: prev?.idm?.nilai || '',
-                                                            status: e.target.value,
-                                                            deskripsi: prev?.idm?.deskripsi
+                                                            status: prev?.idm?.status || ''
                                                         }
                                                     }));
                                                 }}
-                                            >
-                                                <option value="">Pilih Status IDM</option>
-                                                <option value="Sangat Tertinggal">Sangat Tertinggal</option>
-                                                <option value="Tertinggal">Tertinggal</option>
-                                                <option value="Berkembang">Berkembang</option>
-                                                <option value="Maju">Maju</option>
-                                                <option value="Mandiri">Mandiri</option>
-                                            </select>
+                                            />
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="text-sm font-medium text-gray-700 mb-2 block">
+                                                Indeks Ketahanan Lingkungan (IKL)
+                                            </label>
+                                            <input
+                                                type="number"
+                                                step="0.0001"
+                                                min="0"
+                                                max="1"
+                                                placeholder="0.0000"
+                                                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                                                value={dataTambahan?.idm?.ikl || ''}
+                                                onChange={(e) => {
+                                                    const value = parseFloat(e.target.value) || 0;
+                                                    setDataTambahan(prev => ({
+                                                        ...prev,
+                                                        idm: {
+                                                            ...prev?.idm,
+                                                            iks: prev?.idm?.iks || 0,
+                                                            ike: prev?.idm?.ike || 0,
+                                                            ikl: value,
+                                                            deskripsi: prev?.idm?.deskripsi || '',
+                                                            nilai: prev?.idm?.nilai || '',
+                                                            status: prev?.idm?.status || ''
+                                                        }
+                                                    }));
+                                                }}
+                                            />
                                         </div>
                                     </div>
+
+                                    {/* Preview IDM Calculation */}
+                                    {(dataTambahan?.idm?.iks || dataTambahan?.idm?.ike || dataTambahan?.idm?.ikl) && (
+                                        <div className="mt-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+                                            <div className="text-center">
+                                                <h4 className="text-lg font-semibold text-gray-800 mb-4">Preview Perhitungan IDM</h4>
+                                                
+                                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                                                    <div className="bg-white rounded-lg p-3 border">
+                                                        <div className="text-sm text-gray-600">IKS</div>
+                                                        <div className="text-lg font-semibold text-emerald-600">
+                                                            {(dataTambahan?.idm?.iks || 0).toFixed(4)}
+                                                        </div>
+                                                    </div>
+                                                    <div className="bg-white rounded-lg p-3 border">
+                                                        <div className="text-sm text-gray-600">IKE</div>
+                                                        <div className="text-lg font-semibold text-emerald-600">
+                                                            {(dataTambahan?.idm?.ike || 0).toFixed(4)}
+                                                        </div>
+                                                    </div>
+                                                    <div className="bg-white rounded-lg p-3 border">
+                                                        <div className="text-sm text-gray-600">IKL</div>
+                                                        <div className="text-lg font-semibold text-emerald-600">
+                                                            {(dataTambahan?.idm?.ikl || 0).toFixed(4)}
+                                                        </div>
+                                                    </div>
+                                                    <div className="bg-white rounded-lg p-3 border border-blue-300">
+                                                        <div className="text-sm text-gray-600">IDM</div>
+                                                        <div className="text-xl font-bold text-blue-600">
+                                                            {(((dataTambahan?.idm?.iks || 0) + (dataTambahan?.idm?.ike || 0) + (dataTambahan?.idm?.ikl || 0)) / 3).toFixed(4)}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="text-sm text-gray-500 mb-3">
+                                                    ({(dataTambahan?.idm?.iks || 0).toFixed(4)} + {(dataTambahan?.idm?.ike || 0).toFixed(4)} + {(dataTambahan?.idm?.ikl || 0).toFixed(4)}) ÷ 3
+                                                </div>
+                                                
+                                                <div className={`inline-block px-4 py-2 rounded-full font-semibold ${
+                                                    (((dataTambahan?.idm?.iks || 0) + (dataTambahan?.idm?.ike || 0) + (dataTambahan?.idm?.ikl || 0)) / 3) >= 0.5989 
+                                                        ? 'bg-green-100 text-green-800'
+                                                        : (((dataTambahan?.idm?.iks || 0) + (dataTambahan?.idm?.ike || 0) + (dataTambahan?.idm?.ikl || 0)) / 3) >= 0.4993
+                                                        ? 'bg-yellow-100 text-yellow-800' 
+                                                        : 'bg-red-100 text-red-800'
+                                                }`}>
+                                                    Status: Desa {
+                                                        (((dataTambahan?.idm?.iks || 0) + (dataTambahan?.idm?.ike || 0) + (dataTambahan?.idm?.ikl || 0)) / 3) >= 0.5989 
+                                                            ? 'Maju'
+                                                            : (((dataTambahan?.idm?.iks || 0) + (dataTambahan?.idm?.ike || 0) + (dataTambahan?.idm?.ikl || 0)) / 3) >= 0.4993
+                                                            ? 'Berkembang' 
+                                                            : 'Tertinggal'
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                     
                                     <div className="mt-6">
-                                        <label className="text-sm font-medium text-gray-700 mb-2 block">Deskripsi IDM (Opsional)</label>
+                                        <label className="text-sm font-medium text-gray-700 mb-2 block">
+                                            Deskripsi IDM (Opsional)
+                                        </label>
                                         <textarea
                                             placeholder="Deskripsi tambahan tentang status IDM..."
                                             rows={4}
@@ -1150,9 +1250,12 @@ export default function TambahProfilPage() {
                                                     ...prev,
                                                     idm: {
                                                         ...prev?.idm,
+                                                        iks: prev?.idm?.iks || 0,
+                                                        ike: prev?.idm?.ike || 0,
+                                                        ikl: prev?.idm?.ikl || 0,
+                                                        deskripsi: e.target.value,
                                                         nilai: prev?.idm?.nilai || '',
-                                                        status: prev?.idm?.status || '',
-                                                        deskripsi: e.target.value
+                                                        status: prev?.idm?.status || ''
                                                     }
                                                 }));
                                             }}
