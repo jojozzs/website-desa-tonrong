@@ -93,6 +93,15 @@ const NAV_ITEMS: ReadonlyArray<NavItem> = [
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
         )
+    },
+    { 
+        href: "/admin/link-web", 
+        label: "Link Website",
+        icon: (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m0-16a8 8 0 100 16 8 8 0 000-16zm0 0c2.21 0 4 3.58 4 8s-1.79 8-4 8-4-3.58-4-8 1.79-8 4-8z" />
+            </svg>
+        )
     }
 ] as const;
 
@@ -130,13 +139,13 @@ function LogoutModal({
                 <div className="flex flex-col gap-3">
                     <button 
                         onClick={onConfirm}
-                        className="w-full px-4 py-3 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 transition-all"
+                        className="w-full px-4 py-3 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 transition-all cursor-pointer"
                     >
                         Ya, Logout
                     </button>
                     <button 
                         onClick={onCancel}
-                        className="w-full px-4 py-3 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-all"
+                        className="w-full px-4 py-3 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-all cursor-pointer"
                     >
                         Batal
                     </button>
@@ -325,7 +334,7 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps): 
                                 bg-gradient-to-r from-orange-600 to-orange-700 rounded-lg hover:from-orange-700 hover:to-orange-800 
                                 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 
                                 transition-all duration-200 shadow-lg hover:shadow-xl
-                                disabled:opacity-50 disabled:cursor-not-allowed
+                                disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer
                             "
                         >
                             {isLoggingOut ? (
