@@ -26,6 +26,7 @@ const AdminManagement = () => {
     const [isCreating, setIsCreating] = useState(false);
     const [editingAdmin, setEditingAdmin] = useState<AdminListItem | null>(null);
     const [changingPasswordFor, setChangingPasswordFor] = useState<AdminListItem | null>(null);
+    const [deleteConfirm, setDeleteConfirm] = useState<AdminListItem | null>(null);
     const [showPassword, setShowPassword] = useState(false);
     const [showOldPassword, setShowOldPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
@@ -172,7 +173,6 @@ const AdminManagement = () => {
         try {
             setActionLoading(true);
             
-            // Verifikasi password lama di client-side dengan re-authentication
             const { signInWithEmailAndPassword } = await import('firebase/auth');
             const { auth } = await import('@/lib/firebase');
             
@@ -183,7 +183,6 @@ const AdminManagement = () => {
                 return;
             }
             
-            // Jika verifikasi berhasil, lanjutkan update password
             await updatePassword(changingPasswordFor.uid, passwordForm.oldPassword, passwordForm.newPassword);
             setMessage({ type: 'success', text: 'Password berhasil diubah' });
             setChangingPasswordFor(null);
@@ -200,14 +199,11 @@ const AdminManagement = () => {
     };
 
     const handleDeleteAdmin = async (adminToDelete: AdminListItem) => {
-        if (!confirm(`Apakah Anda yakin ingin menghapus admin "${adminToDelete.nama}"? Aksi ini tidak dapat dibatalkan.`)) {
-            return;
-        }
-
         try {
             setActionLoading(true);
             await deleteAdmin(adminToDelete.uid);
             setMessage({ type: 'success', text: 'Admin berhasil dihapus' });
+            setDeleteConfirm(null);
             setTimeout(() => setMessage(null), 3000);
         } catch (error) {
             setMessage({ 
@@ -635,7 +631,7 @@ const AdminManagement = () => {
                                                     Ubah Password
                                                 </button>
                                                 <button
-                                                    onClick={() => handleDeleteAdmin(admin)}
+                                                    onClick={() => setDeleteConfirm(admin)}
                                                     disabled={actionLoading}
                                                     className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-all duration-200 disabled:opacity-50 flex items-center gap-2 text-sm font-medium cursor-pointer"
                                                 >
@@ -667,6 +663,63 @@ const AdminManagement = () => {
                         )}
                     </div>
                 </div>
+
+                {/* Delete Confirmation Modal */}
+                {deleteConfirm && (
+                    <div className="h-screen fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-100">
+                        <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl max-w-md w-full p-6 border border-white/20">
+                            <div className="flex items-center mb-4">
+                                <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center mr-3">
+                                    <AlertCircle className="w-5 h-5 text-red-600" />
+                                </div>
+                                <h3 className="text-xl font-bold text-gray-900">
+                                    Konfirmasi Hapus Admin
+                                </h3>
+                            </div>
+                            
+                            <div className="bg-red-50/50 backdrop-blur-sm rounded-xl p-4 mb-6 border border-red-100/50">
+                                <p className="text-red-800 text-sm mb-2 font-medium">
+                                    ⚠️ Peringatan: Tindakan ini tidak dapat dibatalkan!
+                                </p>
+                                <p className="text-red-700 text-sm">
+                                    Anda akan menghapus admin <strong>&quot;{deleteConfirm.nama}&quot;</strong> dengan email <strong>{deleteConfirm.email}</strong>
+                                </p>
+                            </div>
+
+                            <p className="text-gray-600 mb-6">
+                                Semua data terkait admin ini akan dihapus secara permanen dari sistem. 
+                                Pastikan Anda yakin dengan keputusan ini.
+                            </p>
+
+                            <div className="flex justify-end gap-3">
+                                <button
+                                    onClick={() => setDeleteConfirm(null)}
+                                    disabled={actionLoading}
+                                    className="px-6 py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all duration-200 font-medium disabled:opacity-50 cursor-pointer"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    onClick={() => handleDeleteAdmin(deleteConfirm)}
+                                    disabled={actionLoading}
+                                    className="px-6 py-3 text-white bg-red-600 hover:bg-red-700 rounded-xl transition-all duration-200 font-medium disabled:opacity-50 shadow-lg cursor-pointer"
+                                >
+                                    {actionLoading ? (
+                                        <>
+                                            <RefreshCw className="w-4 h-4 mr-2 inline animate-spin" />
+                                            Menghapus...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Trash2 className="w-4 h-4 mr-2 inline" />
+                                            Hapus Admin
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Info Card */}
                 <div className="bg-gradient-to-r from-green-50/50 to-indigo-50/50 backdrop-blur-sm rounded-2xl p-6 border border-green-100/50">
