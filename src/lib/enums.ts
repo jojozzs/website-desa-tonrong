@@ -34,5 +34,10 @@ export enum AdminLogKategoriEnum {
 	DELETE_ASPIRASI_FORM = "DELETE_ASPIRASI_FORM",
 	UPDATE_ADMIN = "UPDATE_ADMIN",
 	LOGIN = "LOGIN",
-	LOGOUT = "LOGOUT"
+	LOGOUT = "LOGOUT",
+    CREATE_LINK_WEB = 'create_link_web',
+    UPDATE_LINK_WEB = 'update_link_web',
+    DELETE_LINK_WEB = 'delete_link_web',
+    CREATE_ADMIN = "CREATE_ADMIN",
+    DELETE_ADMIN = "DELETE_ADMIN",
 }
