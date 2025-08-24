@@ -108,7 +108,6 @@ export default function CategoryTabs({
                 {/* Floating shapes */}
                 <div className="absolute top-4 right-4 w-16 h-16 bg-white/10 rounded-full blur-xl"></div>
                 <div className="absolute bottom-8 left-8 w-8 h-8 bg-white/15 rounded-full"></div>
-                <div className="absolute top-1/2 right-8 w-4 h-4 bg-white/10 rounded-full animate-ping"></div>
               </div>
             )}
             
